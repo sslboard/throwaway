@@ -3,11 +3,113 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>throwaway — disposable email detector</title>
+		<title>Disposable Email Checker &amp; API — throwaway</title>
+		<meta
+			name="description"
+			content="Free disposable email detection API. Check if an email domain is temporary or spammy. 122K+ domains, instant responses, no signup required."
+		/>
+		<meta
+			name="keywords"
+			content="disposable email, temporary email, throwaway email, email validation, email checker, spam detection, bloom filter, API, Cloudflare Workers"
+		/>
+		<meta name="author" content="SSLBoard" />
+		<meta name="robots" content="index, follow" />
+		<link rel="canonical" href="https://throwaway.sslboard.com/" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="Disposable Email Checker & API — throwaway" />
+		<meta
+			property="og:description"
+			content="Free disposable email detection API. Check if an email domain is temporary or spammy. 122K+ domains, instant responses, no signup required."
+		/>
+		<meta property="og:url" content="https://throwaway.sslboard.com/" />
+		<meta property="og:image" content="https://throwaway.sslboard.com/throwaway.jpg" />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content="throwaway — disposable email detector" />
+		<meta property="og:site_name" content="throwaway" />
+		<meta property="og:locale" content="en_US" />
+
+		<!-- Twitter Card -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:image" content="https://throwaway.sslboard.com/throwaway.jpg" />
+		<meta name="twitter:image:alt" content="throwaway — disposable email detector" />
+		<meta name="twitter:title" content="Disposable Email Checker & API — throwaway" />
+		<meta
+			name="twitter:description"
+			content="Free disposable email detection API. Check if an email domain is temporary or spammy. 122K+ domains, instant responses, no signup required."
+		/>
+
 		<link
 			rel="icon"
 			href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⊘</text></svg>"
 		/>
+
+		<!-- JSON-LD: WebApplication -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "WebApplication",
+				"name": "throwaway",
+				"url": "https://throwaway.sslboard.com",
+				"description": "Free API to detect disposable and temporary email domains. 122K+ domains in a fast bloom filter — no external calls, pure edge compute.",
+				"applicationCategory": "DeveloperApplication",
+				"operatingSystem": "Any",
+				"offers": {
+					"@type": "Offer",
+					"price": "0",
+					"priceCurrency": "USD"
+				},
+				"author": {
+					"@type": "Organization",
+					"name": "SSLBoard",
+					"url": "https://sslboard.com"
+				},
+				"featureList": [
+					"Detect 122K+ disposable email domains",
+					"Validate ICANN-recognized TLDs",
+					"Batch email checking API",
+					"Microsecond response times",
+					"No external API calls",
+					"CORS-enabled REST API"
+				]
+			}
+		</script>
+
+		<!-- JSON-LD: WebSite with SearchAction -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "WebSite",
+				"name": "throwaway",
+				"url": "https://throwaway.sslboard.com",
+				"potentialAction": {
+					"@type": "SearchAction",
+					"target": "https://throwaway.sslboard.com/check?email={search_term_string}",
+					"query-input": "required name=search_term_string"
+				}
+			}
+		</script>
+
+		<!-- JSON-LD: SoftwareSourceCode / API -->
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "SoftwareSourceCode",
+				"name": "throwaway",
+				"description": "Disposable email detection API running on Cloudflare Workers with a bloom filter containing 122K+ domains.",
+				"url": "https://throwaway.sslboard.com",
+				"codeRepository": "https://github.com/sslboard/throwaway",
+				"programmingLanguage": "TypeScript",
+				"license": "https://opensource.org/licenses/MIT",
+				"author": {
+					"@type": "Organization",
+					"name": "SSLBoard",
+					"url": "https://sslboard.com"
+				}
+			}
+		</script>
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
@@ -101,6 +203,12 @@
 				line-height: 1;
 				margin-bottom: 0.4em;
 				color: var(--fg);
+			}
+
+			.logo {
+				width: 56px;
+				height: 56px;
+				margin-bottom: 1rem;
 			}
 
 			.tagline {
@@ -386,7 +494,7 @@
 
 			.api-section-label::before,
 			.api-section-label::after {
-				content: '';
+				content: "";
 				flex: 1;
 				height: 1px;
 				background: var(--border);
@@ -403,10 +511,16 @@
 				}
 			}
 		</style>
+		<script
+			src="https://analytics.ahrefs.com/analytics.js"
+			data-key="iKSPyIW1H/x3AOIdo1gNTQ"
+			async
+		></script>
 	</head>
 	<body>
 		<main>
 			<div class="header">
+				<img class="logo" src="/throwaway.svg" alt="throwaway logo" width="56" height="56" />
 				<h1>throwaway</h1>
 				<p class="tagline">disposable email detector</p>
 			</div>
@@ -437,7 +551,9 @@
 			</div>
 
 			<footer>
-				<a href="https://sslboard.com" target="_blank" rel="noopener">by the people at SSLBoard.com</a>
+				<a href="https://sslboard.com" target="_blank" rel="noopener"
+					>by the people at SSLBoard.com</a
+				>
 			</footer>
 
 			<div class="api-section-label">REST API</div>

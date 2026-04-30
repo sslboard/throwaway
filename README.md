@@ -2,6 +2,8 @@
 
 A Cloudflare Worker that detects disposable/temporary email domains and invalid TLDs, exposed as a fast JSON API. Ships 122K+ domains in a ~291KB binary bloom filter — one runtime dependency ([tldts](https://github.com/nicolo-ribaudo/tldts)), no external calls, pure edge compute. Includes a clean web UI at `/` for quick checks and `/llms.txt` for AI agent discovery.
 
+**Live deployment:** [throwaway.sslboard.com](https://throwaway.sslboard.com)
+
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/sslboard/throwaway)
 
 ## How It Works

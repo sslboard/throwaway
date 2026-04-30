@@ -4,6 +4,8 @@ import { BIT_COUNT, HASH_COUNT, ITEM_COUNT } from "./generated/filter-meta";
 import filterData from "./generated/filter.bin";
 import indexHtml from "./index.html";
 import llmsTxt from "./llms.txt";
+import ogImage from "./throwaway.jpg";
+import logoSvg from "./throwaway.svg";
 
 const filter = new BloomFilter(BIT_COUNT, HASH_COUNT, new Uint8Array(filterData));
 
@@ -23,10 +25,53 @@ function isValidTld(domain: string): boolean {
 	return result.isIcann === true && result.domain !== null;
 }
 
+const ROBOTS_TXT = `User-agent: *
+Allow: /
+Allow: /check
+Allow: /stats
+Allow: /llms.txt
+
+Sitemap: https://throwaway.sslboard.com/sitemap.xml
+`;
+
+const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://throwaway.sslboard.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+`;
+
 const CORS_HEADERS: Record<string, string> = {
 	"Access-Control-Allow-Origin": "*",
 	"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 	"Access-Control-Allow-Headers": "Content-Type",
+};
+
+/** Common security headers applied to all responses. */
+const SECURITY_HEADERS: Record<string, string> = {
+	"X-Content-Type-Options": "nosniff",
+	"Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+	"X-Frame-Options": "DENY",
+	"Referrer-Policy": "strict-origin-when-cross-origin",
+	"Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+};
+
+/** CSP for the HTML page — allows Ahrefs analytics + Google Fonts. */
+const CSP_HEADER: Record<string, string> = {
+	"Content-Security-Policy": [
+		"default-src 'self'",
+		"script-src 'self' 'unsafe-inline' https://analytics.ahrefs.com",
+		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+		"font-src 'self' https://fonts.gstatic.com",
+		"img-src 'self' data: https://analytics.ahrefs.com",
+		"connect-src 'self' https://analytics.ahrefs.com",
+		"frame-ancestors 'none'",
+		"base-uri 'self'",
+		"form-action 'self'",
+	].join("; "),
 };
 
 const MAX_BODY_SIZE = 100_000; // 100 KB
@@ -37,8 +82,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 		status,
 		headers: {
 			"Content-Type": "application/json",
-			"X-Content-Type-Options": "nosniff",
-			"Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+			...SECURITY_HEADERS,
 			...CORS_HEADERS,
 		},
 	});
@@ -170,9 +214,48 @@ export default {
 			return new Response(llmsTxt, {
 				headers: {
 					"Content-Type": "text/plain; charset=utf-8",
-					"X-Content-Type-Options": "nosniff",
-					"Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+					...SECURITY_HEADERS,
 					...CORS_HEADERS,
+				},
+			});
+		}
+
+		if (path === "/robots.txt") {
+			return new Response(ROBOTS_TXT, {
+				headers: {
+					"Content-Type": "text/plain; charset=utf-8",
+					"Cache-Control": "public, max-age=86400",
+					...SECURITY_HEADERS,
+				},
+			});
+		}
+
+		if (path === "/sitemap.xml") {
+			return new Response(SITEMAP_XML, {
+				headers: {
+					"Content-Type": "application/xml; charset=utf-8",
+					"Cache-Control": "public, max-age=86400",
+					...SECURITY_HEADERS,
+				},
+			});
+		}
+
+		if (path === "/throwaway.jpg") {
+			return new Response(ogImage, {
+				headers: {
+					"Content-Type": "image/jpeg",
+					"Cache-Control": "public, max-age=604800, immutable",
+					...SECURITY_HEADERS,
+				},
+			});
+		}
+
+		if (path === "/throwaway.svg") {
+			return new Response(logoSvg, {
+				headers: {
+					"Content-Type": "image/svg+xml; charset=utf-8",
+					"Cache-Control": "public, max-age=604800, immutable",
+					...SECURITY_HEADERS,
 				},
 			});
 		}
@@ -181,8 +264,8 @@ export default {
 			return new Response(indexHtml, {
 				headers: {
 					"Content-Type": "text/html;charset=UTF-8",
-					"X-Content-Type-Options": "nosniff",
-					"Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+					...SECURITY_HEADERS,
+					...CSP_HEADER,
 					...CORS_HEADERS,
 				},
 			});

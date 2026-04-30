@@ -4,10 +4,16 @@
 	"compatibility_date": "2025-04-01",
 	"workers_dev": false,
 	"preview_urls": false,
-	"routes": [{ "pattern": "throwaway.sslboard.com", "custom_domain": true }],
+	"routes": [
+		{ "pattern": "throwaway.sslboard.com", "custom_domain": true },
+		{ "pattern": "throwaway.happysouls.app", "custom_domain": true },
+		{ "pattern": "throwaway.chris-hartwig.com", "custom_domain": true }
+	],
 	"rules": [
 		{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": true },
 		{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true },
 		{ "type": "Text", "globs": ["**/*.txt"], "fallthrough": true },
+		{ "type": "Data", "globs": ["**/*.jpg"], "fallthrough": true },
+		{ "type": "Text", "globs": ["**/*.svg"], "fallthrough": true },
 	],
 }

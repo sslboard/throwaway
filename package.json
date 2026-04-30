@@ -17,7 +17,6 @@
 	},
 	"devDependencies": {
 		"@cloudflare/vitest-pool-workers": "^0.15.1",
-		"@cloudflare/workers-types": "^4.20250401.0",
 		"disposable-email-domains": "^1.0.62",
 		"prettier": "^3.8.3",
 		"tsx": "^4.19.0",

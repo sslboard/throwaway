@@ -56,11 +56,11 @@ Returns:
 
 ```json
 {
-  "results": [
-    { "email": "user@mailinator.com", "domain": "mailinator.com", "disposable": true },
-    { "email": "john@gmail.com", "domain": "gmail.com", "disposable": false },
-    { "email": "test@guerrillamail.com", "domain": "guerrillamail.com", "disposable": true }
-  ]
+	"results": [
+		{ "email": "user@mailinator.com", "domain": "mailinator.com", "disposable": true },
+		{ "email": "john@gmail.com", "domain": "gmail.com", "disposable": false },
+		{ "email": "test@guerrillamail.com", "domain": "guerrillamail.com", "disposable": true }
+	]
 }
 ```
 
@@ -84,11 +84,11 @@ Returns:
 
 ```json
 {
-  "results": [
-    { "domain": "mailinator.com", "disposable": true },
-    { "domain": "gmail.com", "disposable": false },
-    { "domain": "guerrillamail.com", "disposable": true }
-  ]
+	"results": [
+		{ "domain": "mailinator.com", "disposable": true },
+		{ "domain": "gmail.com", "disposable": false },
+		{ "domain": "guerrillamail.com", "disposable": true }
+	]
 }
 ```
 
@@ -97,7 +97,13 @@ Returns:
 Filter metadata. Returns:
 
 ```json
-{ "itemCount": 184903, "bitCount": 2640000, "hashCount": 10, "byteSize": 330000, "falsePositiveRate": 0.001 }
+{
+	"itemCount": 184903,
+	"bitCount": 2640000,
+	"hashCount": 10,
+	"byteSize": 330000,
+	"falsePositiveRate": 0.001
+}
 ```
 
 **Error handling:**
@@ -126,12 +132,10 @@ Filter metadata. Returns:
 
 ```jsonc
 {
-  "name": "throwaway-worker",
-  "main": "src/index.ts",
-  "compatibility_date": "2025-04-01",
-  "rules": [
-    { "type": "Data", "globs": ["**/*.bin"] }
-  ]
+	"name": "throwaway-worker",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-04-01",
+	"rules": [{ "type": "Data", "globs": ["**/*.bin"] }],
 }
 ```
 
@@ -161,12 +165,14 @@ The Data rule is what makes `import filterData from './generated/filter.bin'` re
 Use `vitest` with `@cloudflare/vitest-pool-workers`. Test cases should cover:
 
 **Unit tests:**
+
 - Known disposable domains return `true` (test a sample of ~10 from the list).
 - Known legitimate domains return `false` (`gmail.com`, `yahoo.com`, `icloud.com`, `proton.me`, etc.).
 - Domain extraction handles edge cases: uppercase, leading/trailing whitespace, multiple `@` signs, empty string, missing domain.
 - The bloom filter `.bin` file loads and produces a valid `ArrayBuffer` of the expected byte length.
 
 **Integration tests (fetch handler):**
+
 - `GET /check?email=user@mailinator.com` → `{ disposable: true }`.
 - `GET /check?domain=gmail.com` → `{ disposable: false }`.
 - `POST /check` with `{ "emails": [...] }` → batch results.
@@ -179,6 +185,7 @@ Use `vitest` with `@cloudflare/vitest-pool-workers`. Test cases should cover:
 ### README
 
 Include:
+
 - One-line description.
 - Deploy your own instructions.
 - API documentation (all endpoints with request/response examples).

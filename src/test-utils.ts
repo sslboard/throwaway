@@ -3,7 +3,7 @@
  * so unit tests can use it without importing the worker entrypoint.
  */
 export function extractDomain(email: string): string | null {
-	const atIndex = email.lastIndexOf('@');
+	const atIndex = email.lastIndexOf("@");
 	if (atIndex === -1 || atIndex === email.length - 1) return null;
 	return email
 		.slice(atIndex + 1)

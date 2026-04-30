@@ -1,4 +1,4 @@
-import { hashPair } from './hash';
+import { hashPair } from "./hash";
 
 /**
  * Bloom filter — supports both building (codegen) and querying (runtime).
@@ -16,9 +16,7 @@ export class BloomFilter {
 	static fromItems(items: string[], targetFpRate: number): BloomFilter {
 		const n = items.length;
 		// Optimal bit count: m = -(n * ln(p)) / (ln2)^2
-		const bitCount = Math.ceil(
-			(-n * Math.log(targetFpRate)) / (Math.LN2 * Math.LN2),
-		);
+		const bitCount = Math.ceil((-n * Math.log(targetFpRate)) / (Math.LN2 * Math.LN2));
 		// Optimal hash count: k = (m/n) * ln2
 		const hashCount = Math.max(1, Math.ceil((bitCount / n) * Math.LN2));
 		const byteSize = Math.ceil(bitCount / 8);

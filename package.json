@@ -1,28 +1,31 @@
 {
-  "name": "throwaway-worker",
-  "version": "1.0.2",
-  "description": "Detect disposable email domains via a bloom filter — Cloudflare Worker JSON API",
-  "type": "module",
-  "private": true,
-  "author": "chris@sslboard.com",
-  "license": "MIT",
-  "scripts": {
-    "build:filter": "tsx scripts/build-filter.ts",
-    "build": "npm run build:filter && tsc --noEmit",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "test": "vitest run"
-  },
-  "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.8.0",
-    "@cloudflare/workers-types": "^4.20250401.0",
-    "disposable-email-domains": "^1.0.62",
-    "tsx": "^4.19.0",
-    "typescript": "^5.8.0",
-    "vitest": "^3.1.0",
-    "wrangler": "^4.0.0"
-  },
-  "dependencies": {
-    "tldts": "^7.0.29"
-  }
+	"name": "throwaway-worker",
+	"version": "1.0.2",
+	"description": "Detect disposable email domains via a bloom filter — Cloudflare Worker JSON API",
+	"type": "module",
+	"private": true,
+	"author": "chris@sslboard.com",
+	"license": "MIT",
+	"scripts": {
+		"build:filter": "tsx scripts/build-filter.ts",
+		"build": "npm run build:filter && tsc --noEmit",
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"test": "vitest run",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.15.1",
+		"@cloudflare/workers-types": "^4.20250401.0",
+		"disposable-email-domains": "^1.0.62",
+		"prettier": "^3.8.3",
+		"tsx": "^4.19.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.5",
+		"wrangler": "^4.86.0"
+	},
+	"dependencies": {
+		"tldts": "^7.0.29"
+	}
 }

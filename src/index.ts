@@ -5,11 +5,7 @@ import filterData from "./generated/filter.bin";
 import indexHtml from "./index.html";
 import llmsTxt from "./llms.txt";
 
-const filter = new BloomFilter(
-	BIT_COUNT,
-	HASH_COUNT,
-	new Uint8Array(filterData),
-);
+const filter = new BloomFilter(BIT_COUNT, HASH_COUNT, new Uint8Array(filterData));
 
 /** Extract the domain from an email address (everything after last @, lowercased). */
 function extractDomain(email: string): string | null {
@@ -27,10 +23,24 @@ function isValidTld(domain: string): boolean {
 	return result.isIcann === true && result.domain !== null;
 }
 
+const CORS_HEADERS: Record<string, string> = {
+	"Access-Control-Allow-Origin": "*",
+	"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+	"Access-Control-Allow-Headers": "Content-Type",
+};
+
+const MAX_BODY_SIZE = 100_000; // 100 KB
+const MAX_BATCH_SIZE = 1000;
+
 function jsonResponse(body: unknown, status = 200): Response {
 	return new Response(JSON.stringify(body), {
 		status,
-		headers: { "Content-Type": "application/json" },
+		headers: {
+			"Content-Type": "application/json",
+			"X-Content-Type-Options": "nosniff",
+			"Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+			...CORS_HEADERS,
+		},
 	});
 }
 
@@ -67,14 +77,16 @@ async function handleCheck(request: Request): Promise<Response> {
 			});
 		}
 
-		return errorResponse(
-			'Missing required query parameter: "email" or "domain"',
-			400,
-		);
+		return errorResponse('Missing required query parameter: "email" or "domain"', 400);
 	}
 
 	// POST
 	const rawBody = await request.text();
+
+	if (rawBody.length > MAX_BODY_SIZE) {
+		return errorResponse("Request body too large", 413);
+	}
+
 	let parsed: unknown;
 	try {
 		parsed = JSON.parse(rawBody);
@@ -89,6 +101,9 @@ async function handleCheck(request: Request): Promise<Response> {
 	const obj = parsed as Record<string, unknown>;
 
 	if (Array.isArray(obj.emails)) {
+		if (obj.emails.length > MAX_BATCH_SIZE) {
+			return errorResponse(`Batch size exceeds ${MAX_BATCH_SIZE}`, 413);
+		}
 		const results = (obj.emails as string[]).map((email) => {
 			const extracted = extractDomain(email);
 			return {
@@ -102,6 +117,9 @@ async function handleCheck(request: Request): Promise<Response> {
 	}
 
 	if (Array.isArray(obj.domains)) {
+		if (obj.domains.length > MAX_BATCH_SIZE) {
+			return errorResponse(`Batch size exceeds ${MAX_BATCH_SIZE}`, 413);
+		}
 		const results = (obj.domains as string[]).map((domain) => {
 			const normalized = domain.toLowerCase().trim();
 			return {
@@ -113,10 +131,7 @@ async function handleCheck(request: Request): Promise<Response> {
 		return jsonResponse({ results });
 	}
 
-	return errorResponse(
-		'Request body must contain "emails" or "domains" array',
-		400,
-	);
+	return errorResponse('Request body must contain "emails" or "domains" array', 400);
 }
 
 function handleStats(): Response {
@@ -153,13 +168,31 @@ export default {
 				return errorResponse("Method not allowed", 405);
 			}
 			return new Response(llmsTxt, {
-				headers: { "Content-Type": "text/plain; charset=utf-8" },
+				headers: {
+					"Content-Type": "text/plain; charset=utf-8",
+					"X-Content-Type-Options": "nosniff",
+					"Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+					...CORS_HEADERS,
+				},
 			});
 		}
 
 		if (path === "/") {
 			return new Response(indexHtml, {
-				headers: { "Content-Type": "text/html;charset=UTF-8" },
+				headers: {
+					"Content-Type": "text/html;charset=UTF-8",
+					"X-Content-Type-Options": "nosniff",
+					"Strict-Transport-Security": "max-age=63072000; includeSubDomains",
+					...CORS_HEADERS,
+				},
+			});
+		}
+
+		// Preflight
+		if (request.method === "OPTIONS") {
+			return new Response(null, {
+				status: 204,
+				headers: CORS_HEADERS,
 			});
 		}
 

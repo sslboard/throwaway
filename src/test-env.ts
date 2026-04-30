@@ -1,3 +1,3 @@
-import { SELF } from 'cloudflare:test';
+import { exports } from "cloudflare:workers";
 
-export default SELF;
+export default exports.default;

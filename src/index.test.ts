@@ -1,13 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import env from './test-env';
+import { describe, it, expect } from "vitest";
+import env from "./test-env";
 
 // Integration tests — these use SELF.fetch via the vitest pool workers
 
-describe('GET /check?email=...', () => {
-	it('detects a disposable email', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/check?email=user@mailinator.com'),
-		);
+describe("GET /check?email=...", () => {
+	it("detects a disposable email", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?email=user@mailinator.com"));
 		expect(res.status).toBe(200);
 		const body = await res.json<{
 			email: string;
@@ -15,16 +13,14 @@ describe('GET /check?email=...', () => {
 			valid_tld: boolean;
 			disposable: boolean;
 		}>();
-		expect(body.email).toBe('user@mailinator.com');
-		expect(body.domain).toBe('mailinator.com');
+		expect(body.email).toBe("user@mailinator.com");
+		expect(body.domain).toBe("mailinator.com");
 		expect(body.valid_tld).toBe(true);
 		expect(body.disposable).toBe(true);
 	});
 
-	it('detects a legitimate email', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/check?email=john@yahoo.com'),
-		);
+	it("detects a legitimate email", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?email=john@yahoo.com"));
 		expect(res.status).toBe(200);
 		const body = await res.json<{
 			email: string;
@@ -36,10 +32,8 @@ describe('GET /check?email=...', () => {
 		expect(body.disposable).toBe(false);
 	});
 
-	it('flags email with invalid TLD', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/check?email=user@fake.foobarbazqux'),
-		);
+	it("flags email with invalid TLD", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?email=user@fake.foobarbazqux"));
 		expect(res.status).toBe(200);
 		const body = await res.json<{
 			email: string;
@@ -47,55 +41,45 @@ describe('GET /check?email=...', () => {
 			valid_tld: boolean;
 			disposable: boolean;
 		}>();
-		expect(body.domain).toBe('fake.foobarbazqux');
+		expect(body.domain).toBe("fake.foobarbazqux");
 		expect(body.valid_tld).toBe(false);
 	});
 });
 
-describe('GET /check?domain=...', () => {
-	it('detects a disposable domain', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/check?domain=guerrillamail.com'),
-		);
+describe("GET /check?domain=...", () => {
+	it("detects a disposable domain", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?domain=guerrillamail.com"));
 		expect(res.status).toBe(200);
 		const body = await res.json<{ domain: string; valid_tld: boolean; disposable: boolean }>();
 		expect(body.valid_tld).toBe(true);
 		expect(body.disposable).toBe(true);
 	});
 
-	it('detects a legitimate domain', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/check?domain=proton.me'),
-		);
+	it("detects a legitimate domain", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?domain=proton.me"));
 		expect(res.status).toBe(200);
 		const body = await res.json<{ domain: string; valid_tld: boolean; disposable: boolean }>();
 		expect(body.valid_tld).toBe(true);
 		expect(body.disposable).toBe(false);
 	});
 
-	it('flags domain with invalid TLD', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/check?domain=example.xyz123'),
-		);
+	it("flags domain with invalid TLD", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?domain=example.xyz123"));
 		expect(res.status).toBe(200);
 		const body = await res.json<{ domain: string; valid_tld: boolean; disposable: boolean }>();
-		expect(body.domain).toBe('example.xyz123');
+		expect(body.domain).toBe("example.xyz123");
 		expect(body.valid_tld).toBe(false);
 	});
 });
 
-describe('POST /check', () => {
-	it('batch checks emails', async () => {
+describe("POST /check", () => {
+	it("batch checks emails", async () => {
 		const res = await env.fetch(
-			new Request('http://localhost/check', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+			new Request("http://localhost/check", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					emails: [
-						'user@mailinator.com',
-						'john@yahoo.com',
-						'test@guerrillamail.com',
-					],
+					emails: ["user@mailinator.com", "john@yahoo.com", "test@guerrillamail.com"],
 				}),
 			}),
 		);
@@ -112,13 +96,13 @@ describe('POST /check', () => {
 		expect(body.results[2].disposable).toBe(true);
 	});
 
-	it('batch checks domains', async () => {
+	it("batch checks domains", async () => {
 		const res = await env.fetch(
-			new Request('http://localhost/check', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+			new Request("http://localhost/check", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					domains: ['mailinator.com', 'yahoo.com', 'guerrillamail.com'],
+					domains: ["mailinator.com", "yahoo.com", "guerrillamail.com"],
 				}),
 			}),
 		);
@@ -136,9 +120,9 @@ describe('POST /check', () => {
 	});
 });
 
-describe('GET /stats', () => {
-	it('returns filter metadata', async () => {
-		const res = await env.fetch(new Request('http://localhost/stats'));
+describe("GET /stats", () => {
+	it("returns filter metadata", async () => {
+		const res = await env.fetch(new Request("http://localhost/stats"));
 		expect(res.status).toBe(200);
 		const body = await res.json<{
 			itemCount: number;
@@ -156,79 +140,128 @@ describe('GET /stats', () => {
 	});
 });
 
-describe('/llms.txt', () => {
-	it('returns the llms.txt markdown', async () => {
-		const res = await env.fetch(new Request('http://localhost/llms.txt'));
+describe("/llms.txt", () => {
+	it("returns the llms.txt markdown", async () => {
+		const res = await env.fetch(new Request("http://localhost/llms.txt"));
 		expect(res.status).toBe(200);
-		expect(res.headers.get('Content-Type')).toContain('text/plain');
+		expect(res.headers.get("Content-Type")).toContain("text/plain");
 		const body = await res.text();
-		expect(body).toContain('# throwaway');
-		expect(body).toContain('https://throwaway.sslboard.com');
-		expect(body).toContain('GET /check');
+		expect(body).toContain("# throwaway");
+		expect(body).toContain("https://throwaway.sslboard.com");
+		expect(body).toContain("GET /check");
 	});
 
-	it('405 for POST', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/llms.txt', { method: 'POST' }),
-		);
+	it("405 for POST", async () => {
+		const res = await env.fetch(new Request("http://localhost/llms.txt", { method: "POST" }));
 		expect(res.status).toBe(405);
 	});
 });
 
-describe('Error handling', () => {
-	it('400 for missing params on GET /check', async () => {
-		const res = await env.fetch(new Request('http://localhost/check'));
+describe("CORS & security headers", () => {
+	it("includes CORS headers on JSON responses", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?domain=gmail.com"));
+		expect(res.headers.get("Access-Control-Allow-Origin")).toBe("*");
+		expect(res.headers.get("Access-Control-Allow-Methods")).toBe("GET, POST, OPTIONS");
+		expect(res.headers.get("Access-Control-Allow-Headers")).toBe("Content-Type");
+	});
+
+	it("responds to preflight OPTIONS with 204", async () => {
+		const res = await env.fetch(new Request("http://localhost/any-path", { method: "OPTIONS" }));
+		expect(res.status).toBe(204);
+		expect(res.headers.get("Access-Control-Allow-Origin")).toBe("*");
+	});
+
+	it("sets security headers on HTML page", async () => {
+		const res = await env.fetch(new Request("http://localhost/"));
+		expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
+		expect(res.headers.get("Strict-Transport-Security")).toContain("max-age=");
+	});
+
+	it("sets security headers on JSON responses", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?domain=gmail.com"));
+		expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
+		expect(res.headers.get("Strict-Transport-Security")).toContain("max-age=");
+	});
+});
+
+describe("Input limits", () => {
+	it("413 for oversized batch emails array", async () => {
+		const emails = Array.from({ length: 1001 }, (_, i) => `user${i}@example.com`);
+		const res = await env.fetch(
+			new Request("http://localhost/check", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ emails }),
+			}),
+		);
+		expect(res.status).toBe(413);
+		const body = await res.json<{ error: string }>();
+		expect(body.error).toContain("1000");
+	});
+
+	it("413 for oversized batch domains array", async () => {
+		const domains = Array.from({ length: 1001 }, (_, i) => `domain${i}.com`);
+		const res = await env.fetch(
+			new Request("http://localhost/check", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ domains }),
+			}),
+		);
+		expect(res.status).toBe(413);
+	});
+});
+
+describe("Error handling", () => {
+	it("400 for missing params on GET /check", async () => {
+		const res = await env.fetch(new Request("http://localhost/check"));
 		expect(res.status).toBe(400);
 		const body = await res.json<{ error: string }>();
 		expect(body.error).toBeDefined();
 	});
 
-	it('400 for POST /check with empty body', async () => {
+	it("400 for POST /check with empty body", async () => {
 		const res = await env.fetch(
-			new Request('http://localhost/check', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
+			new Request("http://localhost/check", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({}),
 			}),
 		);
 		expect(res.status).toBe(400);
 	});
 
-	it('400 for POST /check with invalid JSON', async () => {
+	it("400 for POST /check with invalid JSON", async () => {
 		const res = await env.fetch(
-			new Request('http://localhost/check', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: 'not json',
+			new Request("http://localhost/check", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: "not json",
 			}),
 		);
 		expect(res.status).toBe(400);
 	});
 
-	it('404 for unknown path', async () => {
-		const res = await env.fetch(new Request('http://localhost/unknown'));
+	it("404 for unknown path", async () => {
+		const res = await env.fetch(new Request("http://localhost/unknown"));
 		expect(res.status).toBe(404);
 	});
 
-	it('200 with HTML for GET /', async () => {
-		const res = await env.fetch(new Request('http://localhost/'));
+	it("200 with HTML for GET /", async () => {
+		const res = await env.fetch(new Request("http://localhost/"));
 		expect(res.status).toBe(200);
-		expect(res.headers.get('Content-Type')).toContain('text/html');
+		expect(res.headers.get("Content-Type")).toContain("text/html");
 		const body = await res.text();
-		expect(body).toContain('throwaway');
+		expect(body).toContain("throwaway");
 	});
 
-	it('405 for unsupported method on /check', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/check', { method: 'DELETE' }),
-		);
+	it("405 for unsupported method on /check", async () => {
+		const res = await env.fetch(new Request("http://localhost/check", { method: "DELETE" }));
 		expect(res.status).toBe(405);
 	});
 
-	it('405 for unsupported method on /stats', async () => {
-		const res = await env.fetch(
-			new Request('http://localhost/stats', { method: 'POST' }),
-		);
+	it("405 for unsupported method on /stats", async () => {
+		const res = await env.fetch(new Request("http://localhost/stats", { method: "POST" }));
 		expect(res.status).toBe(405);
 	});
 });

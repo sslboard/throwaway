@@ -4,6 +4,8 @@
   "description": "Detect disposable email domains via a bloom filter — Cloudflare Worker JSON API",
   "type": "module",
   "private": true,
+  "author": "chris@sslboard.com",
+  "license": "MIT",
   "scripts": {
     "build:filter": "tsx scripts/build-filter.ts",
     "build": "npm run build:filter && tsc --noEmit",

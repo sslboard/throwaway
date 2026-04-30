@@ -4,7 +4,7 @@
 
 ## What it does
 
-Given an email address or domain, returns whether the TLD is a real ICANN-recognized suffix and whether the domain is a known disposable/temporary email provider (mailinator, guerrillamail, etc). Built on a 100k+ domain bloom filter for fast O(1) lookups.
+Given an email address or domain, returns whether the TLD is a real ICANN-recognized suffix and whether the domain is a known disposable/temporary email provider (mailinator, guerrillamail, etc). Uses the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ domains) compiled into a bloom filter for fast O(1) lookups.
 
 Use this before sending signup emails, creating accounts, or accepting form submissions to block throwaway addresses and syntactically invalid domains.
 

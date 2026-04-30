@@ -1,6 +1,6 @@
 # throwaway
 
-A Cloudflare Worker that detects disposable/temporary email domains and invalid TLDs, exposed as a fast JSON API. Ships 122K+ domains in a ~291KB binary bloom filter — one runtime dependency ([tldts](https://github.com/nicolo-ribaudo/tldts)), no external calls, pure edge compute. Includes a clean web UI at `/` for quick checks and `/llms.txt` for AI agent discovery.
+A Cloudflare Worker that detects disposable/temporary email domains and invalid TLDs, exposed as a fast JSON API. Ships 72K+ domains in a ~173KB binary bloom filter — one runtime dependency ([tldts](https://github.com/nicolo-ribaudo/tldts)), no external calls, pure edge compute. Includes a clean web UI at `/` for quick checks and `/llms.txt` for AI agent discovery.
 
 **Live deployment:** [throwaway.sslboard.com](https://throwaway.sslboard.com)
 
@@ -8,7 +8,7 @@ A Cloudflare Worker that detects disposable/temporary email domains and invalid 
 
 ## How It Works
 
-At build time, `npm run build:filter` reads the [disposable-email-domains](https://www.npmjs.com/package/disposable-email-domains) list (122K+ entries) and compiles it into a **bloom filter** — a space-efficient probabilistic data structure. The filter is stored as a raw `.bin` file and loaded via Cloudflare Workers' [Data rule](https://developers.cloudflare.com/workers/wrangler/configuration/#rules) as an `ArrayBuffer` at module load time. No base64, no encoding overhead, zero decode cost.
+At build time, `npm run build:filter` fetches the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ entries) and compiles it into a **bloom filter** — a space-efficient probabilistic data structure. The filter is stored as a raw `.bin` file and loaded via Cloudflare Workers' [Data rule](https://developers.cloudflare.com/workers/wrangler/configuration/#rules) as an `ArrayBuffer` at module load time. No base64, no encoding overhead, zero decode cost.
 
 At request time, [tldts](https://github.com/nicolo-ribaudo/tldts) parses the domain to determine whether the TLD is a real, ICANN-recognized public suffix. This catches addresses like `user@fake.notarealtld` that have no chance of receiving mail.
 
@@ -16,9 +16,9 @@ At request time, [tldts](https://github.com/nicolo-ribaudo/tldts) parses the dom
 
 | Property            | Value                                    |
 | ------------------- | ---------------------------------------- |
-| Items               | ~122K domains                            |
-| Filter size         | ~291 KB                                  |
-| False positive rate | ~0.1% (1 in 1,000)                       |
+| Items               | ~72K domains                             |
+| Filter size         | ~173 KB                                  |
+| False positive rate | ~0.01% (1 in 10,000)                    |
 | False negatives     | **Zero**                                 |
 | Hash functions      | 10 (double-hashing from 2 cyrb53 hashes) |
 
@@ -176,7 +176,7 @@ If you want to update the domain list:
 npm run build:filter
 ```
 
-This re-reads the `disposable-email-domains` package and writes fresh `src/generated/filter.bin` and `src/generated/filter-meta.ts` files.
+This re-fetches the domain list from [disposable/disposable](https://github.com/disposable/disposable) and writes fresh `src/generated/filter.bin` and `src/generated/filter-meta.ts` files.
 
 ## License
 

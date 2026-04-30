@@ -131,7 +131,7 @@ describe("GET /stats", () => {
 			byteSize: number;
 			falsePositiveRate: number;
 		}>();
-		expect(body.itemCount).toBeGreaterThan(100000);
+		expect(body.itemCount).toBeGreaterThan(50000);
 		expect(body.bitCount).toBeGreaterThan(0);
 		expect(body.hashCount).toBeGreaterThan(0);
 		expect(body.byteSize).toBeGreaterThan(0);

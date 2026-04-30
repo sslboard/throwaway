@@ -1,23 +1,30 @@
 /**
- * Build script: reads the disposable-email-detector domain list,
+ * Build script: fetches the disposable domain list from GitHub,
  * builds a bloom filter, writes raw binary + typed metadata.
  *
  * Run via: npx tsx scripts/build-filter.ts
  */
 
 import { BloomFilter } from "../src/bloom";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Load the disposable domain list from the dev dependency
-const listPath = resolve(__dirname, "../node_modules/disposable-email-domains/index.json");
-const rawList: string[] = JSON.parse(readFileSync(listPath, "utf-8"));
+const DOMAINS_URL =
+	"https://raw.githubusercontent.com/disposable/disposable-email-domains/master/domains.txt";
+
+console.log(`Fetching domain list from ${DOMAINS_URL} ...`);
+const response = await fetch(DOMAINS_URL);
+if (!response.ok) {
+	throw new Error(`Failed to fetch domain list: ${response.status} ${response.statusText}`);
+}
+const text = await response.text();
+const rawList = text.split("\n").filter(Boolean);
 
 // Normalize: lowercase, trim
-const domains = [...new Set(rawList.map((d) => d.toLowerCase().trim()))];
+const domains = [...new Set(rawList.map((d) => d.toLowerCase().trim()))].filter(Boolean);
 const n = domains.length;
 
 const TARGET_FP_RATE = 0.0001; // 0.01%

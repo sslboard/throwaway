@@ -1,6 +1,6 @@
 {
 	"name": "throwaway-worker",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "Detect disposable email domains via a bloom filter — Cloudflare Worker JSON API",
 	"type": "module",
 	"private": true,

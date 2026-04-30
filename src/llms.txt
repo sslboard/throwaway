@@ -108,3 +108,7 @@ GET /stats
 3. **`valid_tld: true`, `disposable: false`** → accept. Looks legitimate.
 
 No API key needed. No rate limits currently enforced.
+
+## About
+
+Built by the people at [SSLBoard](https://sslboard.com).

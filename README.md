@@ -178,4 +178,4 @@ This re-reads the `disposable-email-domains` package and writes fresh `src/gener
 
 ## License
 
-MIT
+MIT — by the people at [SSLBoard.com](https://sslboard.com)

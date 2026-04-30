@@ -371,6 +371,27 @@
 				color: var(--fg);
 			}
 
+			.api-section-label {
+				font-size: 0.62rem;
+				font-weight: 600;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+				color: var(--muted);
+				text-align: center;
+				margin: 2rem 0 1rem;
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+
+			.api-section-label::before,
+			.api-section-label::after {
+				content: '';
+				flex: 1;
+				height: 1px;
+				background: var(--border);
+			}
+
 			/* ── Mobile ── */
 
 			@media (max-width: 480px) {
@@ -416,8 +437,10 @@
 			</div>
 
 			<footer>
-				<a href="/stats">stats</a>
+				<a href="https://sslboard.com" target="_blank" rel="noopener">by the people at SSLBoard.com</a>
 			</footer>
+
+			<div class="api-section-label">REST API</div>
 
 			<div class="api-panel" id="apiPanel">
 				<div class="api-section">

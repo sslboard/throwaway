@@ -1,0 +1,26 @@
+{
+  "name": "throwaway-worker",
+  "version": "1.0.0",
+  "description": "Detect disposable email domains via a bloom filter — Cloudflare Worker JSON API",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build:filter": "tsx scripts/build-filter.ts",
+    "build": "npm run build:filter && tsc --noEmit",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.8.0",
+    "@cloudflare/workers-types": "^4.20250401.0",
+    "disposable-email-domains": "^1.0.62",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.1.0",
+    "wrangler": "^4.0.0"
+  },
+  "dependencies": {
+    "tldts": "^7.0.29"
+  }
+}

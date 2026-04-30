@@ -1,0 +1,9 @@
+{
+  "name": "throwaway-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-04-01",
+  "rules": [
+    { "type": "Data", "globs": ["**/*.bin"], "fallthrough": true },
+    { "type": "Text", "globs": ["**/*.html"], "fallthrough": true }
+  ]
+}

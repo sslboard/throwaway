@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>throwaway — disposable email detector</title>
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⊘</text></svg>">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+	<style>
+		*, *::before, *::after {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		:root {
+			--bg: #F7F6F3;
+			--card: #FFFFFF;
+			--fg: #18181B;
+			--muted: #A1A1AA;
+			--border: #E4E4E7;
+			--border-focus: #71717A;
+			--disposable: #DC2626;
+			--disposable-bg: #FEF2F2;
+			--disposable-border: #FECACA;
+			--clean: #16A34A;
+			--clean-bg: #F0FDF4;
+			--clean-border: #BBF7D0;
+			--invalid: #B45309;
+			--invalid-bg: #FFFBEB;
+			--invalid-border: #FDE68A;
+			--serif: 'Cormorant Garamond', 'Georgia', serif;
+			--sans: 'Outfit', 'Helvetica Neue', sans-serif;
+			--radius: 12px;
+			--shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+			--shadow-lg: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+		}
+
+		html, body {
+			height: 100%;
+			font-family: var(--sans);
+			background: var(--bg);
+			color: var(--fg);
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+		}
+
+		body {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			min-height: 100dvh;
+			padding: 2rem;
+			background-image:
+				radial-gradient(ellipse 80% 50% at 50% 0%, rgba(200, 195, 185, 0.15), transparent),
+				radial-gradient(ellipse 60% 40% at 80% 100%, rgba(180, 175, 165, 0.08), transparent);
+		}
+
+		main {
+			width: 100%;
+			max-width: 440px;
+			margin-top: auto;
+			margin-bottom: auto;
+			animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+		}
+
+		@keyframes fadeUp {
+			from { opacity: 0; transform: translateY(10px); }
+			to   { opacity: 1; transform: translateY(0); }
+		}
+
+		/* ── Header ── */
+
+		.header {
+			text-align: center;
+			margin-bottom: 2rem;
+		}
+
+		h1 {
+			font-family: var(--serif);
+			font-weight: 300;
+			font-size: clamp(2.5rem, 7vw, 3.75rem);
+			letter-spacing: -0.03em;
+			line-height: 1;
+			margin-bottom: 0.4em;
+			color: var(--fg);
+		}
+
+		.tagline {
+			font-size: 0.7rem;
+			font-weight: 500;
+			letter-spacing: 0.2em;
+			text-transform: uppercase;
+			color: var(--muted);
+		}
+
+		/* ── Input ── */
+
+		.input-wrap {
+			position: relative;
+			margin-bottom: 2rem;
+		}
+
+		input {
+			display: block;
+			width: 100%;
+			padding: 0.875rem 0;
+			font-family: var(--sans);
+			font-size: 1.125rem;
+			font-weight: 400;
+			color: var(--fg);
+			background: transparent;
+			border: none;
+			border-bottom: 1px solid var(--border);
+			outline: none;
+			text-align: center;
+			transition: border-color 0.25s ease, box-shadow 0.25s ease;
+			caret-color: var(--fg);
+			-webkit-appearance: none;
+			appearance: none;
+		}
+
+		input::placeholder {
+			color: var(--muted);
+			font-weight: 300;
+		}
+
+		input:focus {
+			border-bottom-color: var(--border-focus);
+			box-shadow: 0 1px 0 0 var(--border-focus);
+		}
+
+		.hint {
+			font-size: 0.7rem;
+			color: var(--muted);
+			text-align: center;
+			margin-top: 0.6rem;
+			opacity: 0;
+			transition: opacity 0.25s ease;
+			letter-spacing: 0.04em;
+		}
+
+		.input-wrap:focus-within .hint {
+			opacity: 1;
+		}
+
+		/* ── Result ── */
+
+		.result {
+			min-height: 72px;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.result-inner {
+			opacity: 0;
+			transform: translateY(6px);
+			transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+			            transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+			pointer-events: none;
+			width: 100%;
+		}
+
+		.result-inner.visible {
+			opacity: 1;
+			transform: translateY(0);
+			pointer-events: auto;
+		}
+
+		.result-pill {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.5rem 1rem;
+			border-radius: 100px;
+			border: 1px solid transparent;
+			margin-bottom: 0.75rem;
+		}
+
+		.result-pill.disposable {
+			background: var(--disposable-bg);
+			border-color: var(--disposable-border);
+			color: var(--disposable);
+		}
+
+		.result-pill.clean {
+			background: var(--clean-bg);
+			border-color: var(--clean-border);
+			color: var(--clean);
+		}
+
+		.result-pill.invalid {
+			background: var(--invalid-bg);
+			border-color: var(--invalid-border);
+			color: var(--invalid);
+		}
+
+		.result-pill-dot {
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: currentColor;
+			flex-shrink: 0;
+		}
+
+		.result-verdict {
+			font-size: 0.75rem;
+			font-weight: 600;
+			letter-spacing: 0.1em;
+			text-transform: uppercase;
+		}
+
+		/* ── Loading ── */
+
+		.loading {
+			display: inline-block;
+			width: 18px;
+			height: 18px;
+			border: 2px solid var(--border);
+			border-top-color: var(--fg);
+			border-radius: 50%;
+			animation: spin 0.6s linear infinite;
+			opacity: 0;
+			transition: opacity 0.2s ease;
+		}
+
+		.loading.active {
+			opacity: 1;
+		}
+
+		@keyframes spin {
+			to { transform: rotate(360deg); }
+		}
+
+		/* ── Error ── */
+
+		.result-error {
+			font-size: 0.8rem;
+			color: var(--disposable);
+			font-weight: 400;
+			text-align: center;
+		}
+
+		/* ── Footer ── */
+
+		footer {
+			margin-top: 1.25rem;
+			text-align: center;
+		}
+
+		footer a {
+			font-size: 0.65rem;
+			color: var(--muted);
+			text-decoration: none;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+			transition: color 0.2s ease;
+		}
+
+		footer a:hover {
+			color: var(--fg);
+		}
+
+		.api-section {
+			font-size: 0.72rem;
+			line-height: 1.7;
+			color: var(--muted);
+			text-align: left;
+		}
+
+		.api-section strong {
+			color: var(--fg);
+			font-weight: 500;
+		}
+
+		.api-section h3 {
+			font-size: 0.65rem;
+			font-weight: 600;
+			letter-spacing: 0.15em;
+			text-transform: uppercase;
+			color: var(--fg);
+			margin-top: 1rem;
+			margin-bottom: 0.4rem;
+		}
+
+		.api-section h3:first-child {
+			margin-top: 0;
+		}
+
+		.api-section code {
+			font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+			font-size: 0.68rem;
+			background: rgba(0,0,0,0.04);
+			padding: 0.15em 0.4em;
+			border-radius: 4px;
+			color: var(--fg);
+		}
+
+		pre.api-example {
+			background: rgba(0,0,0,0.03);
+			border: 1px solid var(--border);
+			border-radius: 8px;
+			padding: 0.6rem 0.8rem;
+			margin-top: 0.4rem;
+			margin-bottom: 0.75rem;
+			font-family: 'SF Mono', 'Fira Code', 'Menlo', monospace;
+			font-size: 0.62rem;
+			line-height: 1.6;
+			overflow-x: auto;
+			color: var(--fg);
+			white-space: pre;
+		}
+
+		.api-method {
+			display: inline-block;
+			font-size: 0.58rem;
+			font-weight: 600;
+			letter-spacing: 0.08em;
+			padding: 0.1em 0.45em;
+			border-radius: 3px;
+			margin-right: 0.4em;
+			vertical-align: middle;
+		}
+
+		.api-method.get  { background: var(--clean-bg); color: var(--clean); }
+		.api-method.post { background: var(--invalid-bg); color: var(--invalid); }
+
+		.api-try {
+			display: inline-block;
+			margin-top: 0.25rem;
+			font-size: 0.58rem;
+			color: var(--muted);
+			cursor: pointer;
+			text-decoration: underline;
+			text-decoration-style: dotted;
+			text-underline-offset: 2px;
+			transition: color 0.2s ease;
+		}
+
+		.api-try:hover {
+			color: var(--fg);
+		}
+
+		/* ── Mobile ── */
+
+		@media (max-width: 480px) {
+			body { padding: 1.25rem; }
+			.card { padding: 1.25rem; }
+		}
+	</style>
+</head>
+<body>
+	<main>
+		<div class="header">
+			<h1>throwaway</h1>
+			<p class="tagline">disposable email detector</p>
+		</div>
+
+		<div class="input-wrap">
+			<input
+				type="text"
+				id="emailInput"
+				placeholder="enter an email address"
+				autocomplete="off"
+				autofocus
+				spellcheck="false"
+			>
+			<p class="hint">press enter to check</p>
+		</div>
+
+		<div class="result">
+			<div class="loading" id="loader"></div>
+			<div class="result-inner" id="resultInner">
+				<div style="text-align:center">
+					<div class="result-pill" id="resultPill">
+						<span class="result-pill-dot"></span>
+						<span class="result-verdict" id="resultVerdict"></span>
+					</div>
+				</div>
+			</div>
+			<div class="result-error" id="resultError"></div>
+		</div>
+
+		<footer>
+			<a href="/stats">stats</a>
+		</footer>
+
+		<div class="api-panel" id="apiPanel">
+			<div class="api-section">
+				<h3>Single check</h3>
+				<p>
+					<span class="api-method get">GET</span><code id="apiEmail">/check?email=user@example.com</code>
+					<span class="api-try" data-url="/check?email=user@mailinator.com">try it</span>
+				</p>
+				<pre class="api-example">{ "email": "user@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "disposable": true }</pre>
+				<p>
+					<span class="api-method get">GET</span><code id="apiDomain">/check?domain=example.com</code>
+				</p>
+				<pre class="api-example">{ "domain": "example.com", "valid_tld": true, "disposable": false }</pre>
+
+				<h3>Batch check</h3>
+				<p>
+					<span class="api-method post">POST</span><code id="apiBatch">/check</code>
+				</p>
+				<pre class="api-example">{ "emails": ["a@mailinator.com", "b@gmail.com"] }
+
+→ { "results": [
+    { "email": "a@mailinator.com", "domain": "mailinator.com",
+      "valid_tld": true, "disposable": true },
+    { "email": "b@gmail.com", "domain": "gmail.com",
+      "valid_tld": true, "disposable": false }
+  ] }</pre>
+				<p>
+					Use <code>"domains"</code> instead of <code>"emails"</code> to batch-check bare domains.
+				</p>
+
+				<h3>Response fields</h3>
+				<p>
+					<strong>valid_tld</strong> — <code>true</code> if the TLD is a real, ICANN-recognized suffix.
+					<strong>disposable</strong> — <code>true</code> if the domain is a known throwaway provider.
+				</p>
+			</div>
+		</div>
+	</main>
+
+	<script>
+		const input = document.getElementById('emailInput');
+		const loader = document.getElementById('loader');
+		const resultInner = document.getElementById('resultInner');
+		const resultPill = document.getElementById('resultPill');
+		const resultVerdict = document.getElementById('resultVerdict');
+		const resultError = document.getElementById('resultError');
+
+		// Prefix API doc URLs with the current origin
+		const origin = location.origin;
+		document.getElementById('apiEmail').textContent = origin + '/check?email=user@example.com';
+		document.getElementById('apiDomain').textContent = origin + '/check?domain=example.com';
+		document.getElementById('apiBatch').textContent = origin + '/check';
+
+		let debounce = null;
+
+		function showLoading() {
+			loader.classList.add('active');
+			resultInner.classList.remove('visible');
+			resultError.textContent = '';
+		}
+
+		function hideLoading() {
+			loader.classList.remove('active');
+		}
+
+		function showError(msg) {
+			hideLoading();
+			resultInner.classList.remove('visible');
+			resultError.textContent = msg;
+		}
+
+		function showResult(data) {
+			hideLoading();
+			resultError.textContent = '';
+
+			let cls, verdict;
+			if (!data.valid_tld) {
+				cls = 'invalid';
+				verdict = 'invalid';
+			} else if (data.disposable) {
+				cls = 'disposable';
+				verdict = 'disposable';
+			} else {
+				cls = 'clean';
+				verdict = 'legitimate';
+			}
+
+			resultPill.className = 'result-pill ' + cls;
+			resultVerdict.textContent = verdict;
+
+			// Trigger reflow for animation restart
+			resultInner.classList.remove('visible');
+			void resultInner.offsetWidth;
+			resultInner.classList.add('visible');
+		}
+
+		async function check(email) {
+			email = email.trim();
+			if (!email) return;
+
+			showLoading();
+
+			try {
+				const res = await fetch('/check?email=' + encodeURIComponent(email));
+				const data = await res.json();
+
+				if (data.error) {
+					showError(data.error);
+					return;
+				}
+
+				showResult(data);
+			} catch {
+				showError('could not reach the server');
+			}
+		}
+
+		input.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				check(input.value);
+			}
+		});
+
+		input.addEventListener('paste', () => {
+			// Check after paste content is inserted
+			setTimeout(() => check(input.value), 50);
+		});
+
+		// "try it" links
+		for (const el of document.querySelectorAll('.api-try')) {
+			el.addEventListener('click', async () => {
+				const url = el.dataset.url;
+				if (!url) return;
+				const email = new URL(url, location.origin).searchParams.get('email') || '';
+				if (email) {
+					input.value = email;
+					check(email);
+				}
+			});
+		}
+
+		// Re-focus input on click, but not when selecting text in the API panel
+		const apiPanel = document.getElementById('apiPanel');
+		document.addEventListener('mousedown', (e) => {
+			if (apiPanel.contains(e.target)) return;
+			if (e.target.tagName === 'A') return;
+			if (e.target === input) return;
+			input.focus();
+		});
+	</script>
+</body>
+</html>

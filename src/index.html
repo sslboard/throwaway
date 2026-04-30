@@ -500,7 +500,46 @@
 				background: var(--border);
 			}
 
-			/* ── Mobile ── */
+			/* ── GitHub badge ── */
+
+		.github-badge {
+			position: fixed;
+			top: 1.25rem;
+			right: 1.25rem;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.4rem;
+			padding: 0.4rem 0.75rem;
+			border-radius: 100px;
+			background: var(--card);
+			border: 1px solid var(--border);
+			box-shadow: var(--shadow);
+			text-decoration: none;
+			font-size: 0.65rem;
+			font-weight: 500;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			color: var(--muted);
+			transition:
+				color 0.2s ease,
+				border-color 0.2s ease,
+				box-shadow 0.2s ease;
+			z-index: 10;
+		}
+
+		.github-badge:hover {
+			color: var(--fg);
+			border-color: var(--border-focus);
+			box-shadow: var(--shadow-lg);
+		}
+
+		.github-badge svg {
+			width: 14px;
+			height: 14px;
+			fill: currentColor;
+		}
+
+		/* ── Mobile ── */
 
 			@media (max-width: 480px) {
 				body {
@@ -518,6 +557,15 @@
 		></script>
 	</head>
 	<body>
+		<a
+			class="github-badge"
+			href="https://github.com/sslboard/throwaway"
+			target="_blank"
+			rel="noopener"
+		>
+			<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.07-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.26-1.23-.55-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.04-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.66.01-.24.47.04.66.31.21.68.72.78 1.14.14.58.62 1.13 1.24.82.02.64.01 1.24.01 1.42 0 .21-.15.45-.55.38A8.013 8.013 0 0 1 0 8c0-4.42 3.58-8 8-8z"/></svg>
+			Open Source
+		</a>
 		<main>
 			<div class="header">
 				<img class="logo" src="/throwaway.svg" alt="throwaway logo" width="56" height="56" />
@@ -595,9 +643,10 @@
 
 					<h3>Response fields</h3>
 					<p>
-						<strong>valid_tld</strong> — <code>true</code> if the TLD is a real, ICANN-recognized
-						suffix. <strong>disposable</strong> — <code>true</code> if the domain is a known
-						throwaway provider.
+						<strong>valid_tld</strong> — <code>true</code> if the TLD is a real, ICANN-recognized suffix.
+					</p>
+					<p>
+						<strong>disposable</strong> — <code>true</code> if the domain is a known throwaway provider.
 					</p>
 				</div>
 			</div>

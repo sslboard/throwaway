@@ -2,3 +2,5 @@ node_modules/
 dist/
 .wrangler/
 .dev.vars
+src/generated/filter.bin
+src/generated/filter-meta.ts

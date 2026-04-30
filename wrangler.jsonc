@@ -2,6 +2,8 @@
 	"name": "throwaway-worker",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-04-01",
+	"workers_dev": false,
+	"preview_urls": false,
 	"routes": [{ "pattern": "throwaway.sslboard.com", "custom_domain": true }],
 	"rules": [
 		{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": true },

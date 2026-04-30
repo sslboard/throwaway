@@ -1,8 +1,9 @@
-import { parse as parseTld } from 'tldts';
-import { BloomFilter } from './bloom';
-import { BIT_COUNT, HASH_COUNT, ITEM_COUNT } from './generated/filter-meta';
-import filterData from './generated/filter.bin';
-import indexHtml from './index.html';
+import { parse as parseTld } from "tldts";
+import { BloomFilter } from "./bloom";
+import { BIT_COUNT, HASH_COUNT, ITEM_COUNT } from "./generated/filter-meta";
+import filterData from "./generated/filter.bin";
+import indexHtml from "./index.html";
+import llmsTxt from "./llms.txt";
 
 const filter = new BloomFilter(
 	BIT_COUNT,
@@ -12,9 +13,12 @@ const filter = new BloomFilter(
 
 /** Extract the domain from an email address (everything after last @, lowercased). */
 function extractDomain(email: string): string | null {
-	const atIndex = email.lastIndexOf('@');
+	const atIndex = email.lastIndexOf("@");
 	if (atIndex === -1 || atIndex === email.length - 1) return null;
-	return email.slice(atIndex + 1).toLowerCase().trim();
+	return email
+		.slice(atIndex + 1)
+		.toLowerCase()
+		.trim();
 }
 
 /** Check whether a domain has a valid, ICANN-recognized TLD. */
@@ -26,7 +30,7 @@ function isValidTld(domain: string): boolean {
 function jsonResponse(body: unknown, status = 200): Response {
 	return new Response(JSON.stringify(body), {
 		status,
-		headers: { 'Content-Type': 'application/json' },
+		headers: { "Content-Type": "application/json" },
 	});
 }
 
@@ -37,14 +41,14 @@ function errorResponse(message: string, status: number): Response {
 async function handleCheck(request: Request): Promise<Response> {
 	const url = new URL(request.url);
 
-	if (request.method === 'GET') {
-		const email = url.searchParams.get('email');
-		const domain = url.searchParams.get('domain');
+	if (request.method === "GET") {
+		const email = url.searchParams.get("email");
+		const domain = url.searchParams.get("domain");
 
 		if (email) {
 			const extracted = extractDomain(email);
 			if (!extracted) {
-				return errorResponse('Invalid email address', 400);
+				return errorResponse("Invalid email address", 400);
 			}
 			return jsonResponse({
 				email,
@@ -75,15 +79,11 @@ async function handleCheck(request: Request): Promise<Response> {
 	try {
 		parsed = JSON.parse(rawBody);
 	} catch {
-		return errorResponse('Invalid JSON body', 400);
+		return errorResponse("Invalid JSON body", 400);
 	}
 
-	if (
-		typeof parsed !== 'object' ||
-		parsed === null ||
-		Array.isArray(parsed)
-	) {
-		return errorResponse('Request body must be a JSON object', 400);
+	if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+		return errorResponse("Request body must be a JSON object", 400);
 	}
 
 	const obj = parsed as Record<string, unknown>;
@@ -93,7 +93,7 @@ async function handleCheck(request: Request): Promise<Response> {
 			const extracted = extractDomain(email);
 			return {
 				email,
-				domain: extracted ?? '',
+				domain: extracted ?? "",
 				valid_tld: extracted ? isValidTld(extracted) : false,
 				disposable: extracted ? filter.has(extracted) : false,
 			};
@@ -134,26 +134,35 @@ export default {
 		const url = new URL(request.url);
 		const path = url.pathname;
 
-		if (path === '/check') {
-			if (request.method !== 'GET' && request.method !== 'POST') {
-				return errorResponse('Method not allowed', 405);
+		if (path === "/check") {
+			if (request.method !== "GET" && request.method !== "POST") {
+				return errorResponse("Method not allowed", 405);
 			}
 			return handleCheck(request);
 		}
 
-		if (path === '/stats') {
-			if (request.method !== 'GET') {
-				return errorResponse('Method not allowed', 405);
+		if (path === "/stats") {
+			if (request.method !== "GET") {
+				return errorResponse("Method not allowed", 405);
 			}
 			return handleStats();
 		}
 
-		if (path === '/') {
-			return new Response(indexHtml, {
-				headers: { 'Content-Type': 'text/html;charset=UTF-8' },
+		if (path === "/llms.txt") {
+			if (request.method !== "GET") {
+				return errorResponse("Method not allowed", 405);
+			}
+			return new Response(llmsTxt, {
+				headers: { "Content-Type": "text/plain; charset=utf-8" },
 			});
 		}
 
-		return errorResponse('Not found', 404);
+		if (path === "/") {
+			return new Response(indexHtml, {
+				headers: { "Content-Type": "text/html;charset=UTF-8" },
+			});
+		}
+
+		return errorResponse("Not found", 404);
 	},
 };

@@ -1,0 +1,110 @@
+# throwaway
+
+> Disposable & invalid email detector — bloom filter API on Cloudflare Workers
+
+## What it does
+
+Given an email address or domain, returns whether the TLD is a real ICANN-recognized suffix and whether the domain is a known disposable/temporary email provider (mailinator, guerrillamail, etc). Built on a 100k+ domain bloom filter for fast O(1) lookups.
+
+Use this before sending signup emails, creating accounts, or accepting form submissions to block throwaway addresses and syntactically invalid domains.
+
+## API
+
+Base URL: `https://throwaway.sslboard.com`
+
+### Check a single email
+
+```
+GET /check?email=user@example.com
+```
+
+```json
+{
+  "email": "user@mailinator.com",
+  "domain": "mailinator.com",
+  "valid_tld": true,
+  "disposable": true
+}
+```
+
+### Check a single domain
+
+```
+GET /check?domain=example.com
+```
+
+```json
+{
+  "domain": "example.com",
+  "valid_tld": true,
+  "disposable": false
+}
+```
+
+### Batch check emails
+
+```
+POST /check
+Content-Type: application/json
+
+{ "emails": ["a@mailinator.com", "b@gmail.com", "c@fake.notarealtld"] }
+```
+
+```json
+{
+  "results": [
+    { "email": "a@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "disposable": true },
+    { "email": "b@gmail.com", "domain": "gmail.com", "valid_tld": true, "disposable": false },
+    { "email": "c@fake.notarealtld", "domain": "fake.notarealtld", "valid_tld": false, "disposable": false }
+  ]
+}
+```
+
+### Batch check domains
+
+```
+POST /check
+Content-Type: application/json
+
+{ "domains": ["mailinator.com", "yahoo.com"] }
+```
+
+```json
+{
+  "results": [
+    { "domain": "mailinator.com", "valid_tld": true, "disposable": true },
+    { "domain": "yahoo.com", "valid_tld": true, "disposable": false }
+  ]
+}
+```
+
+### Filter stats
+
+```
+GET /stats
+```
+
+```json
+{
+  "itemCount": 139000,
+  "bitCount": 2000000,
+  "hashCount": 10,
+  "byteSize": 250000,
+  "falsePositiveRate": 0.004
+}
+```
+
+## Response fields
+
+| Field | Type | Meaning |
+|---|---|---|
+| `valid_tld` | boolean | `true` if the domain ends in a real ICANN-recognized TLD (`.com`, `.co.uk`, etc). `false` means the address can't possibly receive mail. |
+| `disposable` | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`. |
+
+## How to interpret results
+
+1. **`valid_tld: false`** → reject. The domain is not real.
+2. **`valid_tld: true`, `disposable: true`** → reject. Known throwaway provider.
+3. **`valid_tld: true`, `disposable: false`** → accept. Looks legitimate.
+
+No API key needed. No rate limits currently enforced.

@@ -156,6 +156,25 @@ describe('GET /stats', () => {
 	});
 });
 
+describe('/llms.txt', () => {
+	it('returns the llms.txt markdown', async () => {
+		const res = await env.fetch(new Request('http://localhost/llms.txt'));
+		expect(res.status).toBe(200);
+		expect(res.headers.get('Content-Type')).toContain('text/plain');
+		const body = await res.text();
+		expect(body).toContain('# throwaway');
+		expect(body).toContain('https://throwaway.sslboard.com');
+		expect(body).toContain('GET /check');
+	});
+
+	it('405 for POST', async () => {
+		const res = await env.fetch(
+			new Request('http://localhost/llms.txt', { method: 'POST' }),
+		);
+		expect(res.status).toBe(405);
+	});
+});
+
 describe('Error handling', () => {
 	it('400 for missing params on GET /check', async () => {
 		const res = await env.fetch(new Request('http://localhost/check'));

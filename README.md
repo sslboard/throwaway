@@ -6,6 +6,16 @@ A Cloudflare Worker that detects disposable/temporary email domains and invalid 
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/sslboard/throwaway)
 
+## Honest context
+
+**This project was written almost entirely by AI.** I needed a disposable-email checker for [SSLBoard](https://sslboard.com) — a free cybersecurity assessment tool — and I used Claude to build it. I'm sharing it as open source because the underlying approach (a binary bloom filter served from a Cloudflare Worker, no external calls) is genuinely useful and I haven't seen it done this way before.
+
+I understand the code, I can maintain it, and I'm happy to be accountable for it. But I'd rather be upfront than have someone dig through the commit history wondering why it looks the way it does.
+
+**Why I needed this:** About 22% of SSLBoard users sign up with a disposable email. That's not people protecting their privacy from a corporation — it's people scanning infrastructure they don't own, anonymously, with no way to follow up or hold anyone accountable. Blocking disposable addresses isn't anti-privacy; it's anti-abuse in a specific context where anonymity enables harm. Your use case may differ, and the tool is neutral — it just reports whether a domain is known-disposable.
+
+**Coverage gaps:** The domain list comes from [disposable/disposable](https://github.com/disposable/disposable), a community-maintained blocklist. It won't catch every disposable provider, especially newer ones. If you find a miss, [open an issue upstream](https://github.com/disposable/disposable/issues) or submit a PR here with a regression test.
+
 ## How It Works
 
 At build time, `npm run build:filter` fetches the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ entries) and compiles it into a **bloom filter** — a space-efficient probabilistic data structure. The filter is stored as a raw `.bin` file and loaded via Cloudflare Workers' [Data rule](https://developers.cloudflare.com/workers/wrangler/configuration/#rules) as an `ArrayBuffer` at module load time. No base64, no encoding overhead, zero decode cost.
@@ -22,7 +32,7 @@ At request time, [tldts](https://github.com/nicolo-ribaudo/tldts) parses the dom
 | False negatives     | **Zero**                                 |
 | Hash functions      | 10 (double-hashing from 2 cyrb53 hashes) |
 
-**Why 0.1% false positives are acceptable:** Disposable email signups are low-quality. A false positive means one legitimate user retries with a different address — a minor inconvenience. False negatives (letting disposables through) are the real problem, and bloom filters guarantee **zero false negatives**.
+**On false positives:** At ~0.01%, a false positive means roughly 1 in 10,000 legitimate users gets incorrectly flagged. That's worth knowing and worth weighing against your own tolerance. In SSLBoard's case it's acceptable; in a consumer signup flow it might not be. Bloom filters guarantee **zero false negatives** — a known-disposable domain will never slip through — but the false positive rate is real and depends on filter tuning.
 
 ## API
 

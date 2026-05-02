@@ -6,7 +6,7 @@
  */
 
 import { BloomFilter } from "../src/bloom";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, readFileSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,16 +15,33 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const DOMAINS_URL =
 	"https://raw.githubusercontent.com/disposable/disposable-email-domains/master/domains.txt";
 
+const SUPPLEMENTAL_PATH = resolve(__dirname, "supplemental-domains.txt");
+
 console.log(`Fetching domain list from ${DOMAINS_URL} ...`);
 const response = await fetch(DOMAINS_URL);
 if (!response.ok) {
 	throw new Error(`Failed to fetch domain list: ${response.status} ${response.statusText}`);
 }
 const text = await response.text();
-const rawList = text.split("\n").filter(Boolean);
+const upstreamList = text.split("\n").filter(Boolean);
 
-// Normalize: lowercase, trim
-const domains = [...new Set(rawList.map((d) => d.toLowerCase().trim()))].filter(Boolean);
+// Load supplemental domains (one per line, # comments ignored)
+let supplementalList: string[] = [];
+try {
+	const supplementalText = readFileSync(SUPPLEMENTAL_PATH, "utf-8");
+	supplementalList = supplementalText
+		.split("\n")
+		.map((line) => line.trim())
+		.filter((line) => line && !line.startsWith("#"));
+	if (supplementalList.length > 0) {
+		console.log(`Loaded ${supplementalList.length} supplemental domain(s) from ${SUPPLEMENTAL_PATH}`);
+	}
+} catch {
+	// No supplemental file — that's fine
+}
+
+// Merge upstream + supplemental, normalize, dedupe
+const domains = [...new Set([...upstreamList, ...supplementalList].map((d) => d.toLowerCase().trim()))].filter(Boolean);
 const n = domains.length;
 
 const TARGET_FP_RATE = 0.0001; // 0.01%

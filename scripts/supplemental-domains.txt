@@ -1,0 +1,3 @@
+# Supplemental disposable email domains not (yet) in the upstream list.
+# One domain per line, lowercase. Lines starting with # are ignored.
+inraud.com

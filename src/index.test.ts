@@ -63,6 +63,14 @@ describe("GET /check?domain=...", () => {
 		expect(body.disposable).toBe(false);
 	});
 
+	it("detects a supplemental domain (inraud.com)", async () => {
+		const res = await env.fetch(new Request("http://localhost/check?domain=inraud.com"));
+		expect(res.status).toBe(200);
+		const body = await res.json<{ domain: string; valid_tld: boolean; disposable: boolean }>();
+		expect(body.valid_tld).toBe(true);
+		expect(body.disposable).toBe(true);
+	});
+
 	it("flags domain with invalid TLD", async () => {
 		const res = await env.fetch(new Request("http://localhost/check?domain=example.xyz123"));
 		expect(res.status).toBe(200);

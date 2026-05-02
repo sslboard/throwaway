@@ -1,6 +1,6 @@
 # throwaway
 
-A Cloudflare Worker that detects disposable/temporary email domains and invalid TLDs, exposed as a fast JSON API. Ships 72K+ domains in a ~173KB binary bloom filter — one runtime dependency ([tldts](https://github.com/nicolo-ribaudo/tldts)), no external calls, pure edge compute. Includes a clean web UI at `/` for quick checks and `/llms.txt` for AI agent discovery.
+A Cloudflare Worker that detects disposable/temporary email domains and invalid TLDs, exposed as a fast JSON API. Ships 72K+ domains in a ~173KB binary bloom filter with one runtime dependency ([tldts](https://github.com/nicolo-ribaudo/tldts)), no external calls, pure edge compute. Includes a clean web UI at `/` for quick checks and `/llms.txt` for AI agent discovery.
 
 **Live deployment:** [throwaway.sslboard.com](https://throwaway.sslboard.com)
 
@@ -8,17 +8,17 @@ A Cloudflare Worker that detects disposable/temporary email domains and invalid 
 
 ## Honest context
 
-**This project was written almost entirely by AI.** I needed a disposable-email checker for [SSLBoard](https://sslboard.com) — a free cybersecurity assessment tool — and I used Claude to build it. I'm sharing it as open source because the underlying approach (a binary bloom filter served from a Cloudflare Worker, no external calls) is genuinely useful and I haven't seen it done this way before.
+**This project was written almost entirely by AI.** I needed a disposable-email checker for [SSLBoard](https://sslboard.com) (a free cybersecurity assessment tool) and I used Claude to build it. I'm sharing it as open source because the underlying approach (a binary bloom filter served from a Cloudflare Worker, no external calls) is genuinely useful and I haven't seen it done this way before.
 
 I understand the code, I can maintain it, and I'm happy to be accountable for it. But I'd rather be upfront than have someone dig through the commit history wondering why it looks the way it does.
 
-**Why I needed this:** About 22% of SSLBoard users sign up with a disposable email. That's not people protecting their privacy from a corporation — it's people scanning infrastructure they don't own, anonymously, with no way to follow up or hold anyone accountable. Blocking disposable addresses isn't anti-privacy; it's anti-abuse in a specific context where anonymity enables harm. Your use case may differ, and the tool is neutral — it just reports whether a domain is known-disposable.
+**Why I needed this:** About 22% of SSLBoard users sign up with a disposable email. That's not people protecting their privacy from a corporation. It's people scanning infrastructure they don't own, anonymously, with no way to follow up or hold anyone accountable. Blocking disposable addresses isn't anti-privacy; it's anti-abuse in a specific context where anonymity enables harm. Your use case may differ, and the tool is neutral: it just reports whether a domain is known-disposable.
 
 **Coverage gaps:** The domain list comes from [disposable/disposable](https://github.com/disposable/disposable), a community-maintained blocklist. It won't catch every disposable provider, especially newer ones. If you find a miss, [open an issue upstream](https://github.com/disposable/disposable/issues) or submit a PR here with a regression test.
 
 ## How It Works
 
-At build time, `npm run build:filter` fetches the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ entries) and compiles it into a **bloom filter** — a space-efficient probabilistic data structure. The filter is stored as a raw `.bin` file and loaded via Cloudflare Workers' [Data rule](https://developers.cloudflare.com/workers/wrangler/configuration/#rules) as an `ArrayBuffer` at module load time. No base64, no encoding overhead, zero decode cost.
+At build time, `npm run build:filter` fetches the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ entries) and compiles it into a **bloom filter** (a space-efficient probabilistic data structure). The filter is stored as a raw `.bin` file and loaded via Cloudflare Workers' [Data rule](https://developers.cloudflare.com/workers/wrangler/configuration/#rules) as an `ArrayBuffer` at module load time. No base64, no encoding overhead, zero decode cost.
 
 At request time, [tldts](https://github.com/nicolo-ribaudo/tldts) parses the domain to determine whether the TLD is a real, ICANN-recognized public suffix. This catches addresses like `user@fake.notarealtld` that have no chance of receiving mail.
 
@@ -38,7 +38,7 @@ At request time, [tldts](https://github.com/nicolo-ribaudo/tldts) parses the dom
 
 ### `GET /`
 
-Minimal web UI — single input field to check emails. Shows three verdicts: **LEGITIMATE**, **DISPOSABLE**, or **INVALID**.
+Minimal web UI with a single input field to check emails. Shows three verdicts: **LEGITIMATE**, **DISPOSABLE**, or **INVALID**.
 
 ### `GET /check?email=user@domain.com`
 
@@ -141,9 +141,9 @@ Machine-readable API documentation for AI agents. Plain text markdown.
 
 ### Decision Logic
 
-1. `valid_tld: false` → **reject** — domain is not real
-2. `valid_tld: true` + `disposable: true` → **reject** — known throwaway provider
-3. `valid_tld: true` + `disposable: false` → **accept** — looks legitimate
+1. `valid_tld: false` → **reject** (domain is not real)
+2. `valid_tld: true` + `disposable: true` → **reject** (known throwaway provider)
+3. `valid_tld: true` + `disposable: false` → **accept** (looks legitimate)
 
 ### Error Responses
 
@@ -157,10 +157,10 @@ All errors return `{"error": "message"}` with appropriate status codes:
 
 ## Performance
 
-- **Synchronous** — no I/O, no external API calls, no KV lookups
-- **Microsecond responses** — bloom filter lookup is pure arithmetic
-- **Zero cold-start overhead** — filter loaded as a `Uint8Array` at module load time
-- **One runtime dependency** — `tldts` for TLD validation (bundled by Wrangler)
+- **Synchronous**: no I/O, no external API calls, no KV lookups
+- **Microsecond responses**: bloom filter lookup is pure arithmetic
+- **Zero cold-start overhead**: filter loaded as a `Uint8Array` at module load time
+- **One runtime dependency**: `tldts` for TLD validation (bundled by Wrangler)
 
 ## Deploy Your Own
 
@@ -190,4 +190,4 @@ This re-fetches the domain list from [disposable/disposable](https://github.com/
 
 ## License
 
-MIT — by the people at [SSLBoard.com](https://sslboard.com)
+MIT, by the people at [SSLBoard.com](https://sslboard.com)

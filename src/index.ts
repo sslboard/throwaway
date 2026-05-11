@@ -131,21 +131,23 @@ async function handleCheck(request: Request): Promise<Response> {
 			if (!extracted) {
 				return errorResponse("Invalid email address", 400);
 			}
+			const validTld = isValidTld(extracted);
 			return jsonResponse({
 				email,
 				domain: extracted,
-				valid_tld: isValidTld(extracted),
-				has_mx: await resolveMx(extracted),
+				valid_tld: validTld,
+				has_mx: validTld ? await resolveMx(extracted) : false,
 				disposable: filter.has(extracted),
 			});
 		}
 
 		if (domain) {
 			const normalized = domain.toLowerCase().trim();
+			const validTld = isValidTld(normalized);
 			return jsonResponse({
 				domain: normalized,
-				valid_tld: isValidTld(normalized),
-				has_mx: await resolveMx(normalized),
+				valid_tld: validTld,
+				has_mx: validTld ? await resolveMx(normalized) : false,
 				disposable: filter.has(normalized),
 			});
 		}
@@ -181,15 +183,18 @@ async function handleCheck(request: Request): Promise<Response> {
 			const extracted = extractDomain(email);
 			return { email, extracted };
 		});
-		const uniqueDomains = [...new Set(emailEntries.map((e) => e.extracted).filter(Boolean))] as string[];
-		const mxMap = await resolveMxBatch(uniqueDomains);
-		const results = emailEntries.map(({ email, extracted }) => ({
-			email,
-			domain: extracted ?? "",
-			valid_tld: extracted ? isValidTld(extracted) : false,
-			has_mx: extracted ? (mxMap.get(extracted) ?? false) : false,
-			disposable: extracted ? filter.has(extracted) : false,
-		}));
+		const validDomains = [...new Set(emailEntries.map((e) => e.extracted).filter((d): d is string => !!d && isValidTld(d)))];
+		const mxMap = await resolveMxBatch(validDomains);
+		const results = emailEntries.map(({ email, extracted }) => {
+			const validTld = extracted ? isValidTld(extracted) : false;
+			return {
+				email,
+				domain: extracted ?? "",
+				valid_tld: validTld,
+				has_mx: validTld && extracted ? (mxMap.get(extracted) ?? false) : false,
+				disposable: extracted ? filter.has(extracted) : false,
+			};
+		});
 		return jsonResponse({ results });
 	}
 
@@ -198,14 +203,17 @@ async function handleCheck(request: Request): Promise<Response> {
 			return errorResponse(`Batch size exceeds ${MAX_BATCH_SIZE}`, 413);
 		}
 		const normalizedDomains = (obj.domains as string[]).map((domain) => domain.toLowerCase().trim());
-		const uniqueDomains = [...new Set(normalizedDomains)];
-		const mxMap = await resolveMxBatch(uniqueDomains);
-		const results = normalizedDomains.map((normalized) => ({
-			domain: normalized,
-			valid_tld: isValidTld(normalized),
-			has_mx: mxMap.get(normalized) ?? false,
-			disposable: filter.has(normalized),
-		}));
+		const uniqueValid = [...new Set(normalizedDomains.filter((d) => isValidTld(d)))];
+		const mxMap = await resolveMxBatch(uniqueValid);
+		const results = normalizedDomains.map((normalized) => {
+			const validTld = isValidTld(normalized);
+			return {
+				domain: normalized,
+				valid_tld: validTld,
+				has_mx: validTld ? (mxMap.get(normalized) ?? false) : false,
+				disposable: filter.has(normalized),
+			};
+		});
 		return jsonResponse({ results });
 	}
 

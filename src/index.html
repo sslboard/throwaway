@@ -366,6 +366,13 @@
 
 			/* ── Error ── */
 
+			.result-detail {
+				font-size: 0.7rem;
+				color: var(--muted);
+				margin-top: 0.6rem;
+				text-align: center;
+			}
+
 			.result-error {
 				font-size: 0.8rem;
 				color: var(--disposable);
@@ -593,6 +600,7 @@
 							<span class="result-pill-dot"></span>
 							<span class="result-verdict" id="resultVerdict"></span>
 						</div>
+						<div class="result-detail" id="resultDetail"></div>
 					</div>
 				</div>
 				<div class="result-error" id="resultError"></div>
@@ -615,14 +623,14 @@
 						<span class="api-try" data-url="/check?email=user@mailinator.com">try it</span>
 					</p>
 					<pre class="api-example">
-{ "email": "user@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "disposable": true }</pre
+{ "email": "user@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true }</pre
 					>
 					<p>
 						<span class="api-method get">GET</span
 						><code id="apiDomain">/check?domain=example.com</code>
 					</p>
 					<pre class="api-example">
-{ "domain": "example.com", "valid_tld": true, "disposable": false }</pre
+{ "domain": "example.com", "valid_tld": true, "has_mx": true, "disposable": false }</pre
 					>
 
 					<h3>Batch check</h3>
@@ -632,9 +640,9 @@
 
 → { "results": [
     { "email": "a@mailinator.com", "domain": "mailinator.com",
-      "valid_tld": true, "disposable": true },
+      "valid_tld": true, "has_mx": true, "disposable": true },
     { "email": "b@gmail.com", "domain": "gmail.com",
-      "valid_tld": true, "disposable": false }
+      "valid_tld": true, "has_mx": true, "disposable": false }
   ] }</pre
 					>
 					<p>
@@ -647,6 +655,9 @@
 					</p>
 					<p>
 						<strong>disposable</strong> — <code>true</code> if the domain is a known throwaway provider.
+					</p>
+					<p>
+						<strong>has_mx</strong> — <code>true</code> if the domain has MX records and can receive email.
 					</p>
 				</div>
 			</div>
@@ -702,6 +713,13 @@
 
 				resultPill.className = "result-pill " + cls;
 				resultVerdict.textContent = verdict;
+
+				const resultDetail = document.getElementById("resultDetail");
+				if (data.valid_tld && !data.has_mx) {
+					resultDetail.textContent = "no MX records — this domain cannot receive email";
+				} else {
+					resultDetail.textContent = "";
+				}
 
 				// Trigger reflow for animation restart
 				resultInner.classList.remove("visible");

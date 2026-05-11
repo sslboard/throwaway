@@ -40,6 +40,14 @@ async function resolveMx(domain: string): Promise<boolean> {
 	}
 }
 
+/**
+ * Decision from README: reject if TLD is invalid, no MX records, or domain is a known disposable.
+ * Equivalent to `!valid_tld || !has_mx || disposable` with current response semantics.
+ */
+function shouldReject(validTld: boolean, hasMx: boolean, disposable: boolean): boolean {
+	return !validTld || !hasMx || disposable;
+}
+
 /** Resolve MX records for many domains in parallel (capped concurrency). */
 async function resolveMxBatch(domains: string[]): Promise<Map<string, boolean>> {
 	const result = new Map<string, boolean>();
@@ -132,23 +140,29 @@ async function handleCheck(request: Request): Promise<Response> {
 				return errorResponse("Invalid email address", 400);
 			}
 			const validTld = isValidTld(extracted);
+			const hasMx = validTld ? await resolveMx(extracted) : false;
+			const disposable = filter.has(extracted);
 			return jsonResponse({
 				email,
 				domain: extracted,
 				valid_tld: validTld,
-				has_mx: validTld ? await resolveMx(extracted) : false,
-				disposable: filter.has(extracted),
+				has_mx: hasMx,
+				disposable,
+				should_reject: shouldReject(validTld, hasMx, disposable),
 			});
 		}
 
 		if (domain) {
 			const normalized = domain.toLowerCase().trim();
 			const validTld = isValidTld(normalized);
+			const hasMx = validTld ? await resolveMx(normalized) : false;
+			const disposable = filter.has(normalized);
 			return jsonResponse({
 				domain: normalized,
 				valid_tld: validTld,
-				has_mx: validTld ? await resolveMx(normalized) : false,
-				disposable: filter.has(normalized),
+				has_mx: hasMx,
+				disposable,
+				should_reject: shouldReject(validTld, hasMx, disposable),
 			});
 		}
 
@@ -187,12 +201,15 @@ async function handleCheck(request: Request): Promise<Response> {
 		const mxMap = await resolveMxBatch(validDomains);
 		const results = emailEntries.map(({ email, extracted }) => {
 			const validTld = extracted ? isValidTld(extracted) : false;
+			const hasMx = validTld && extracted ? (mxMap.get(extracted) ?? false) : false;
+			const disposable = extracted ? filter.has(extracted) : false;
 			return {
 				email,
 				domain: extracted ?? "",
 				valid_tld: validTld,
-				has_mx: validTld && extracted ? (mxMap.get(extracted) ?? false) : false,
-				disposable: extracted ? filter.has(extracted) : false,
+				has_mx: hasMx,
+				disposable,
+				should_reject: shouldReject(validTld, hasMx, disposable),
 			};
 		});
 		return jsonResponse({ results });
@@ -207,11 +224,14 @@ async function handleCheck(request: Request): Promise<Response> {
 		const mxMap = await resolveMxBatch(uniqueValid);
 		const results = normalizedDomains.map((normalized) => {
 			const validTld = isValidTld(normalized);
+			const hasMx = validTld ? (mxMap.get(normalized) ?? false) : false;
+			const disposable = filter.has(normalized);
 			return {
 				domain: normalized,
 				valid_tld: validTld,
-				has_mx: validTld ? (mxMap.get(normalized) ?? false) : false,
-				disposable: filter.has(normalized),
+				has_mx: hasMx,
+				disposable,
+				should_reject: shouldReject(validTld, hasMx, disposable),
 			};
 		});
 		return jsonResponse({ results });

@@ -52,7 +52,8 @@ Check a single email address.
 	"domain": "mailinator.com",
 	"valid_tld": true,
 	"has_mx": true,
-	"disposable": true
+	"disposable": true,
+	"should_reject": true
 }
 ```
 
@@ -61,7 +62,7 @@ Check a single email address.
 Check a single domain.
 
 ```json
-{ "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true }
+{ "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true }
 ```
 
 ### `POST /check`
@@ -86,15 +87,24 @@ Response:
 			"domain": "mailinator.com",
 			"valid_tld": true,
 			"has_mx": true,
-			"disposable": true
+			"disposable": true,
+			"should_reject": true
 		},
-		{ "email": "john@gmail.com", "domain": "gmail.com", "valid_tld": true, "has_mx": true, "disposable": false },
+		{
+			"email": "john@gmail.com",
+			"domain": "gmail.com",
+			"valid_tld": true,
+			"has_mx": true,
+			"disposable": false,
+			"should_reject": false
+		},
 		{
 			"email": "test@fake.notarealtld",
 			"domain": "fake.notarealtld",
 			"valid_tld": false,
 			"has_mx": false,
-			"disposable": false
+			"disposable": false,
+			"should_reject": true
 		}
 	]
 }
@@ -113,8 +123,8 @@ Response:
 ```json
 {
 	"results": [
-		{ "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true },
-		{ "domain": "gmail.com", "valid_tld": true, "has_mx": true, "disposable": false }
+		{ "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true },
+		{ "domain": "gmail.com", "valid_tld": true, "has_mx": true, "disposable": false, "should_reject": false }
 	]
 }
 ```
@@ -144,8 +154,11 @@ Machine-readable API documentation for AI agents. Plain text markdown.
 | `valid_tld`  | boolean | `true` if the domain ends in a real ICANN-recognized TLD. `false` means the address can't receive mail. |
 | `has_mx`     | boolean | `true` if the domain has MX records (can receive email). `false` means no mail server exists.           |
 | `disposable` | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`.  |
+| `should_reject` | boolean | `true` when rules 1–3 below apply (invalid TLD, no MX, or disposable); `false` only for rule 4 (accept). |
 
 ### Decision Logic
+
+`should_reject` is derived from these rules:
 
 1. `valid_tld: false` → **reject** (domain is not real)
 2. `has_mx: false` → **reject** (no mail server, can't receive email)

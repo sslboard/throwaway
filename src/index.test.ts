@@ -13,12 +13,14 @@ describe("GET /check?email=...", () => {
 			valid_tld: boolean;
 			has_mx: boolean;
 			disposable: boolean;
+			should_reject: boolean;
 		}>();
 		expect(body.email).toBe("user@mailinator.com");
 		expect(body.domain).toBe("mailinator.com");
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
 		expect(body.disposable).toBe(true);
+		expect(body.should_reject).toBe(true);
 	});
 
 	it("detects a legitimate email", async () => {
@@ -30,10 +32,12 @@ describe("GET /check?email=...", () => {
 			valid_tld: boolean;
 			has_mx: boolean;
 			disposable: boolean;
+			should_reject: boolean;
 		}>();
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
 		expect(body.disposable).toBe(false);
+		expect(body.should_reject).toBe(!body.has_mx);
 	});
 
 	it("flags email with invalid TLD", async () => {
@@ -45,9 +49,11 @@ describe("GET /check?email=...", () => {
 			valid_tld: boolean;
 			has_mx: boolean;
 			disposable: boolean;
+			should_reject: boolean;
 		}>();
 		expect(body.domain).toBe("fake.foobarbazqux");
 		expect(body.valid_tld).toBe(false);
+		expect(body.should_reject).toBe(true);
 	});
 });
 
@@ -55,43 +61,78 @@ describe("GET /check?domain=...", () => {
 	it("detects a disposable domain", async () => {
 		const res = await env.fetch(new Request("http://localhost/check?domain=guerrillamail.com"));
 		expect(res.status).toBe(200);
-		const body = await res.json<{ domain: string; valid_tld: boolean; has_mx: boolean; disposable: boolean }>();
+		const body = await res.json<{
+			domain: string;
+			valid_tld: boolean;
+			has_mx: boolean;
+			disposable: boolean;
+			should_reject: boolean;
+		}>();
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
 		expect(body.disposable).toBe(true);
+		expect(body.should_reject).toBe(true);
 	});
 
 	it("detects a legitimate domain", async () => {
 		const res = await env.fetch(new Request("http://localhost/check?domain=proton.me"));
 		expect(res.status).toBe(200);
-		const body = await res.json<{ domain: string; valid_tld: boolean; has_mx: boolean; disposable: boolean }>();
+		const body = await res.json<{
+			domain: string;
+			valid_tld: boolean;
+			has_mx: boolean;
+			disposable: boolean;
+			should_reject: boolean;
+		}>();
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
 		expect(body.disposable).toBe(false);
+		expect(body.should_reject).toBe(!body.has_mx);
 	});
 
 	it("detects a supplemental domain (inraud.com)", async () => {
 		const res = await env.fetch(new Request("http://localhost/check?domain=inraud.com"));
 		expect(res.status).toBe(200);
-		const body = await res.json<{ domain: string; valid_tld: boolean; has_mx: boolean; disposable: boolean }>();
+		const body = await res.json<{
+			domain: string;
+			valid_tld: boolean;
+			has_mx: boolean;
+			disposable: boolean;
+			should_reject: boolean;
+		}>();
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
 		expect(body.disposable).toBe(true);
+		expect(body.should_reject).toBe(true);
 	});
 
 	it("flags domain with invalid TLD", async () => {
 		const res = await env.fetch(new Request("http://localhost/check?domain=example.xyz123"));
 		expect(res.status).toBe(200);
-		const body = await res.json<{ domain: string; valid_tld: boolean; has_mx: boolean; disposable: boolean }>();
+		const body = await res.json<{
+			domain: string;
+			valid_tld: boolean;
+			has_mx: boolean;
+			disposable: boolean;
+			should_reject: boolean;
+		}>();
 		expect(body.domain).toBe("example.xyz123");
 		expect(body.valid_tld).toBe(false);
+		expect(body.should_reject).toBe(true);
 	});
 
 	it("flags domain without MX records", async () => {
 		const res = await env.fetch(new Request("http://localhost/check?domain=this-domain-does-not-exist-xyz123.com"));
 		expect(res.status).toBe(200);
-		const body = await res.json<{ domain: string; valid_tld: boolean; has_mx: boolean; disposable: boolean }>();
+		const body = await res.json<{
+			domain: string;
+			valid_tld: boolean;
+			has_mx: boolean;
+			disposable: boolean;
+			should_reject: boolean;
+		}>();
 		expect(body.has_mx).toBe(false);
+		expect(body.should_reject).toBe(true);
 	});
 });
 
@@ -108,7 +149,14 @@ describe("POST /check", () => {
 		);
 		expect(res.status).toBe(200);
 		const body = await res.json<{
-			results: { email: string; domain: string; valid_tld: boolean; has_mx: boolean; disposable: boolean }[];
+			results: {
+				email: string;
+				domain: string;
+				valid_tld: boolean;
+				has_mx: boolean;
+				disposable: boolean;
+				should_reject: boolean;
+			}[];
 		}>();
 		expect(body.results).toHaveLength(3);
 		expect(body.results[0].valid_tld).toBe(true);
@@ -120,6 +168,9 @@ describe("POST /check", () => {
 		expect(body.results[2].valid_tld).toBe(true);
 		expect(body.results[2].has_mx).toBe(true);
 		expect(body.results[2].disposable).toBe(true);
+		expect(body.results[0].should_reject).toBe(true);
+		expect(body.results[1].should_reject).toBe(!body.results[1].has_mx);
+		expect(body.results[2].should_reject).toBe(true);
 	});
 
 	it("batch checks domains", async () => {
@@ -134,7 +185,13 @@ describe("POST /check", () => {
 		);
 		expect(res.status).toBe(200);
 		const body = await res.json<{
-			results: { domain: string; valid_tld: boolean; has_mx: boolean; disposable: boolean }[];
+			results: {
+				domain: string;
+				valid_tld: boolean;
+				has_mx: boolean;
+				disposable: boolean;
+				should_reject: boolean;
+			}[];
 		}>();
 		expect(body.results).toHaveLength(3);
 		expect(body.results[0].valid_tld).toBe(true);
@@ -146,6 +203,7 @@ describe("POST /check", () => {
 		expect(body.results[2].valid_tld).toBe(true);
 		expect(body.results[2].has_mx).toBe(true);
 		expect(body.results[2].disposable).toBe(true);
+		expect(body.results.map((r) => r.should_reject)).toEqual([true, !body.results[1].has_mx, true]);
 	});
 });
 

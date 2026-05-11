@@ -623,14 +623,14 @@
 						<span class="api-try" data-url="/check?email=user@mailinator.com">try it</span>
 					</p>
 					<pre class="api-example">
-{ "email": "user@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true }</pre
+{ "email": "user@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true }</pre
 					>
 					<p>
 						<span class="api-method get">GET</span
 						><code id="apiDomain">/check?domain=example.com</code>
 					</p>
 					<pre class="api-example">
-{ "domain": "example.com", "valid_tld": true, "has_mx": true, "disposable": false }</pre
+{ "domain": "example.com", "valid_tld": true, "has_mx": true, "disposable": false, "should_reject": false }</pre
 					>
 
 					<h3>Batch check</h3>
@@ -640,9 +640,9 @@
 
 → { "results": [
     { "email": "a@mailinator.com", "domain": "mailinator.com",
-      "valid_tld": true, "has_mx": true, "disposable": true },
+      "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true },
     { "email": "b@gmail.com", "domain": "gmail.com",
-      "valid_tld": true, "has_mx": true, "disposable": false }
+      "valid_tld": true, "has_mx": true, "disposable": false, "should_reject": false }
   ] }</pre
 					>
 					<p>
@@ -658,6 +658,9 @@
 					</p>
 					<p>
 						<strong>has_mx</strong> — <code>true</code> if the domain has MX records and can receive email.
+					</p>
+					<p>
+						<strong>should_reject</strong> — <code>true</code> if the address should be blocked (invalid TLD, no MX, or disposable).
 					</p>
 				</div>
 			</div>

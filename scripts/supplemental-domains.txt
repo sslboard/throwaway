@@ -11,3 +11,8 @@ hayatsh.com
 radeshop.com
 skola.edu.pl
 volkai.cloud
+# Added 2026-05-11 — manual additions
+collegevs.edu.pl
+phuturemail.com
+xeramail.com
+tempforward.com

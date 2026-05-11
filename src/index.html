@@ -706,6 +706,9 @@
 				} else if (data.disposable) {
 					cls = "disposable";
 					verdict = "disposable";
+				} else if (!data.has_mx) {
+					cls = "invalid";
+					verdict = "no MX records";
 				} else {
 					cls = "clean";
 					verdict = "legitimate";
@@ -715,11 +718,7 @@
 				resultVerdict.textContent = verdict;
 
 				const resultDetail = document.getElementById("resultDetail");
-				if (data.valid_tld && !data.has_mx) {
-					resultDetail.textContent = "no MX records — this domain cannot receive email";
-				} else {
-					resultDetail.textContent = "";
-				}
+				resultDetail.textContent = "";
 
 				// Trigger reflow for animation restart
 				resultInner.classList.remove("visible");

@@ -20,6 +20,8 @@
 		"format:check": "prettier --check ."
 	},
 	"devDependencies": {
+		"@emnapi/core": "1.10.0",
+		"@emnapi/runtime": "1.10.0",
 		"@cloudflare/vitest-pool-workers": "^0.15.1",
 		"@playwright/test": "^1.59.1",
 		"prettier": "^3.8.3",

@@ -4,9 +4,9 @@
 
 ## What it does
 
-Given an email address or domain, returns whether the TLD is a real ICANN-recognized suffix and whether the domain is a known disposable/temporary email provider (mailinator, guerrillamail, etc). Uses the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ domains) compiled into a bloom filter for fast O(1) lookups.
+Given an email address or domain, returns whether the TLD is a real ICANN-recognized suffix, whether the domain has MX records (can receive mail), and whether the domain is a known disposable/temporary email provider (mailinator, guerrillamail, etc). Uses the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ domains) compiled into a bloom filter for fast O(1) lookups.
 
-Use this before sending signup emails, creating accounts, or accepting form submissions to block throwaway addresses and syntactically invalid domains.
+Use this before sending signup emails, creating accounts, or accepting form submissions to block throwaway addresses, non-existent domains, and syntactically invalid domains.
 
 ## API
 
@@ -23,6 +23,7 @@ GET /check?email=user@example.com
   "email": "user@mailinator.com",
   "domain": "mailinator.com",
   "valid_tld": true,
+  "has_mx": true,
   "disposable": true
 }
 ```
@@ -37,6 +38,7 @@ GET /check?domain=example.com
 {
   "domain": "example.com",
   "valid_tld": true,
+  "has_mx": true,
   "disposable": false
 }
 ```
@@ -53,9 +55,9 @@ Content-Type: application/json
 ```json
 {
   "results": [
-    { "email": "a@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "disposable": true },
-    { "email": "b@gmail.com", "domain": "gmail.com", "valid_tld": true, "disposable": false },
-    { "email": "c@fake.notarealtld", "domain": "fake.notarealtld", "valid_tld": false, "disposable": false }
+    { "email": "a@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true },
+    { "email": "b@gmail.com", "domain": "gmail.com", "valid_tld": true, "has_mx": true, "disposable": false },
+    { "email": "c@fake.notarealtld", "domain": "fake.notarealtld", "valid_tld": false, "has_mx": false, "disposable": false }
   ]
 }
 ```
@@ -72,8 +74,8 @@ Content-Type: application/json
 ```json
 {
   "results": [
-    { "domain": "mailinator.com", "valid_tld": true, "disposable": true },
-    { "domain": "yahoo.com", "valid_tld": true, "disposable": false }
+    { "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true },
+    { "domain": "yahoo.com", "valid_tld": true, "has_mx": true, "disposable": false }
   ]
 }
 ```
@@ -99,13 +101,15 @@ GET /stats
 | Field | Type | Meaning |
 |---|---|---|
 | `valid_tld` | boolean | `true` if the domain ends in a real ICANN-recognized TLD (`.com`, `.co.uk`, etc). `false` means the address can't possibly receive mail. |
+| `has_mx` | boolean | `true` if the domain has MX records (can receive email). `false` means the domain doesn't exist or has no mail server. |
 | `disposable` | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`. |
 
 ## How to interpret results
 
 1. **`valid_tld: false`** → reject. The domain is not real.
-2. **`valid_tld: true`, `disposable: true`** → reject. Known throwaway provider.
-3. **`valid_tld: true`, `disposable: false`** → accept. Looks legitimate.
+2. **`has_mx: false`** → reject. The domain has no mail server and can't receive email.
+3. **`valid_tld: true`, `has_mx: true`, `disposable: true`** → reject. Known throwaway provider.
+4. **`valid_tld: true`, `has_mx: true`, `disposable: false`** → accept. Looks legitimate.
 
 No API key needed. No rate limits currently enforced.
 

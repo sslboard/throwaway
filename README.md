@@ -1,6 +1,6 @@
 # throwaway
 
-A Cloudflare Worker that detects disposable/temporary email domains and invalid TLDs, exposed as a fast JSON API. Ships 72K+ domains in a ~173KB binary bloom filter with one runtime dependency ([tldts](https://github.com/nicolo-ribaudo/tldts)), no external calls, pure edge compute. Includes a clean web UI at `/` for quick checks and `/llms.txt` for AI agent discovery.
+A Cloudflare Worker that detects disposable/temporary email domains, invalid TLDs, and non-existent domains (no MX records), exposed as a fast JSON API. Ships 72K+ domains in a ~173KB binary bloom filter. Uses [tldts](https://github.com/nicolo-ribaudo/tldts) for TLD validation and Cloudflare DNS-over-HTTPS for MX resolution. Includes a clean web UI at `/` for quick checks and `/llms.txt` for AI agent discovery.
 
 **Live deployment:** [throwaway.sslboard.com](https://throwaway.sslboard.com)
 
@@ -21,6 +21,8 @@ I understand the code, I can maintain it, and I'm happy to be accountable for it
 At build time, `npm run build:filter` fetches the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ entries) and compiles it into a **bloom filter** (a space-efficient probabilistic data structure). The filter is stored as a raw `.bin` file and loaded via Cloudflare Workers' [Data rule](https://developers.cloudflare.com/workers/wrangler/configuration/#rules) as an `ArrayBuffer` at module load time. No base64, no encoding overhead, zero decode cost.
 
 At request time, [tldts](https://github.com/nicolo-ribaudo/tldts) parses the domain to determine whether the TLD is a real, ICANN-recognized public suffix. This catches addresses like `user@fake.notarealtld` that have no chance of receiving mail.
+
+Additionally, each domain is checked for MX records via Cloudflare DNS-over-HTTPS (`cloudflare-dns.com`). Domains without MX records can't receive email, so even a domain with a valid TLD but no mail server is flagged (`has_mx: false`). The lookup has a 3-second timeout and fails open (returns `false` on error).
 
 ### Bloom Filter Properties
 
@@ -49,6 +51,7 @@ Check a single email address.
 	"email": "user@mailinator.com",
 	"domain": "mailinator.com",
 	"valid_tld": true,
+	"has_mx": true,
 	"disposable": true
 }
 ```
@@ -58,7 +61,7 @@ Check a single email address.
 Check a single domain.
 
 ```json
-{ "domain": "mailinator.com", "valid_tld": true, "disposable": true }
+{ "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true }
 ```
 
 ### `POST /check`
@@ -82,13 +85,15 @@ Response:
 			"email": "user@mailinator.com",
 			"domain": "mailinator.com",
 			"valid_tld": true,
+			"has_mx": true,
 			"disposable": true
 		},
-		{ "email": "john@gmail.com", "domain": "gmail.com", "valid_tld": true, "disposable": false },
+		{ "email": "john@gmail.com", "domain": "gmail.com", "valid_tld": true, "has_mx": true, "disposable": false },
 		{
 			"email": "test@fake.notarealtld",
 			"domain": "fake.notarealtld",
 			"valid_tld": false,
+			"has_mx": false,
 			"disposable": false
 		}
 	]
@@ -108,8 +113,8 @@ Response:
 ```json
 {
 	"results": [
-		{ "domain": "mailinator.com", "valid_tld": true, "disposable": true },
-		{ "domain": "gmail.com", "valid_tld": true, "disposable": false }
+		{ "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true },
+		{ "domain": "gmail.com", "valid_tld": true, "has_mx": true, "disposable": false }
 	]
 }
 ```
@@ -137,13 +142,15 @@ Machine-readable API documentation for AI agents. Plain text markdown.
 | Field        | Type    | Meaning                                                                                                 |
 | ------------ | ------- | ------------------------------------------------------------------------------------------------------- |
 | `valid_tld`  | boolean | `true` if the domain ends in a real ICANN-recognized TLD. `false` means the address can't receive mail. |
+| `has_mx`     | boolean | `true` if the domain has MX records (can receive email). `false` means no mail server exists.           |
 | `disposable` | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`.  |
 
 ### Decision Logic
 
 1. `valid_tld: false` → **reject** (domain is not real)
-2. `valid_tld: true` + `disposable: true` → **reject** (known throwaway provider)
-3. `valid_tld: true` + `disposable: false` → **accept** (looks legitimate)
+2. `has_mx: false` → **reject** (no mail server, can't receive email)
+3. `valid_tld: true` + `has_mx: true` + `disposable: true` → **reject** (known throwaway provider)
+4. `valid_tld: true` + `has_mx: true` + `disposable: false` → **accept** (looks legitimate)
 
 ### Error Responses
 
@@ -157,8 +164,8 @@ All errors return `{"error": "message"}` with appropriate status codes:
 
 ## Performance
 
-- **Synchronous**: no I/O, no external API calls, no KV lookups
-- **Microsecond responses**: bloom filter lookup is pure arithmetic
+- **Bloom filter lookup**: pure arithmetic, microsecond responses
+- **MX resolution**: single DNS-over-HTTPS call to Cloudflare (3s timeout, fails open)
 - **Zero cold-start overhead**: filter loaded as a `Uint8Array` at module load time
 - **One runtime dependency**: `tldts` for TLD validation (bundled by Wrangler)
 

@@ -12,6 +12,6 @@
 		"noEmit": true,
 		"types": ["./worker-configuration.d.ts", "@cloudflare/vitest-pool-workers"]
 	},
-	"include": ["src/**/*.ts"],
+	"include": ["src/**/*.ts", "package.json"],
 	"exclude": ["node_modules"]
 }

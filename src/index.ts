@@ -2,12 +2,15 @@ import { parse as parseTld } from "tldts";
 import { BloomFilter } from "./bloom";
 import { BIT_COUNT, HASH_COUNT, ITEM_COUNT } from "./generated/filter-meta";
 import filterData from "./generated/filter.bin";
-import indexHtml from "./index.html";
+import indexHtmlTemplate from "./index.html";
 import llmsTxt from "./llms.txt";
+import { version as PKG_VERSION } from "../package.json";
 import ogImage from "./throwaway.jpg";
 import logoSvg from "./throwaway.svg";
 
 const filter = new BloomFilter(BIT_COUNT, HASH_COUNT, new Uint8Array(filterData));
+
+const indexHtml = indexHtmlTemplate.replaceAll("{{VERSION}}", PKG_VERSION);
 
 /** Extract the domain from an email address (everything after last @, lowercased). */
 function extractDomain(email: string): string | null {

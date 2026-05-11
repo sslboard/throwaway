@@ -195,6 +195,32 @@ npm run build:filter
 
 This re-fetches the domain list from [disposable/disposable](https://github.com/disposable/disposable) and writes fresh `src/generated/filter.bin` and `src/generated/filter-meta.ts` files.
 
+## End-to-end tests (Playwright)
+
+The `e2e/` specs drive the `/` UI in a browser and assert the verdict text (e.g. legitimate, disposable, no MX records, invalid) against a **local** Worker.
+
+**Install browsers once** (after `npm install`):
+
+```bash
+npx playwright install chromium
+```
+
+**Run the suite**:
+
+```bash
+npm run test:e2e
+```
+
+Playwright starts `wrangler dev` on **port 8788** and targets that URL. If `src/generated/filter.bin` is missing, the dev-server command runs `npm run build:filter` first. When `CI` is set in the environment, an existing server on that port is not reused. The Worker resolves MX records over the network, so the runner needs outbound HTTPS (for example to `cloudflare-dns.com`).
+
+**Debug in the Playwright UI**:
+
+```bash
+npx playwright test --ui
+```
+
+**CI**: install browsers in the job (for example `npx playwright install chromium` or `npx playwright install --with-deps chromium` on Linux), then run `npm run test:e2e`.
+
 ## License
 
 MIT, by the people at [SSLBoard.com](https://sslboard.com)

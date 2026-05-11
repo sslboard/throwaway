@@ -4,3 +4,9 @@ dist/
 .dev.vars
 src/generated/filter.bin
 src/generated/filter-meta.ts
+
+# Playwright
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/

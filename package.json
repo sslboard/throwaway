@@ -5,8 +5,7 @@
 	"type": "module",
 	"private": true,
 	"engines": {
-		"node": ">=25.2.1",
-		"npm": ">=11.6.2"
+		"node": ">=22"
 	},
 	"author": "chris@sslboard.com",
 	"license": "MIT",

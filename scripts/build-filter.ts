@@ -40,11 +40,37 @@ try {
 	// No supplemental file — that's fine
 }
 
+// Check supplemental domains against an upstream-only bloom filter
+const TARGET_FP_RATE = 0.0001; // 0.01%
+
+const upstreamNormalized = upstreamList.map((d) => d.toLowerCase().trim()).filter(Boolean);
+const upstreamFilter = BloomFilter.fromItems(upstreamNormalized, TARGET_FP_RATE);
+const duplicates: Set<string> = new Set();
+for (const domain of supplementalList) {
+	const normalized = domain.toLowerCase().trim();
+	if (upstreamFilter.has(normalized)) {
+		console.warn(`⚠️  Removing supplemental domain "${normalized}" — already in upstream disposable list`);
+		duplicates.add(normalized);
+	}
+}
+
+// Rewrite supplemental file with duplicates removed (preserving comments)
+if (duplicates.size > 0) {
+	const supplementalText = readFileSync(SUPPLEMENTAL_PATH, "utf-8");
+	const kept = supplementalText
+		.split("\n")
+		.filter((line) => {
+			const trimmed = line.trim().toLowerCase();
+			return !trimmed || trimmed.startsWith("#") || !duplicates.has(trimmed);
+		});
+	writeFileSync(SUPPLEMENTAL_PATH, kept.join("\n"));
+	console.log(`Removed ${duplicates.size} duplicate(s) from ${SUPPLEMENTAL_PATH}`);
+	supplementalList = supplementalList.filter((d) => !duplicates.has(d.toLowerCase().trim()));
+}
+
 // Merge upstream + supplemental, normalize, dedupe
 const domains = [...new Set([...upstreamList, ...supplementalList].map((d) => d.toLowerCase().trim()))].filter(Boolean);
 const n = domains.length;
-
-const TARGET_FP_RATE = 0.0001; // 0.01%
 
 const filter = BloomFilter.fromItems(domains, TARGET_FP_RATE);
 

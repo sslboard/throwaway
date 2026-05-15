@@ -1,8 +1,6 @@
 # Supplemental disposable email domains not (yet) in the upstream list.
 # One domain per line, lowercase. Lines starting with # are ignored.
-inraud.com
 # Added 2026-05-08 — weekly temp email domain check
-embassybase.com
 mailwave.dev
 aula.edu.pl
 edud.site

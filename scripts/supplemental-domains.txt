@@ -33,3 +33,22 @@ priyodown.com
 priyomail.org
 priyomail.nl
 priyo.edu.pl
+# Added 2026-05-23 — weekly temp email domain check
+# temp-mail.org (newly rotated domains, May 2026)
+nuitx.com
+bittnex.com
+okcpress.com
+marineso.com
+ameady.com
+noyavip.com
+nriza.com
+gzeos.com
+bitmah.com
+acanok.com
+getasail.com
+homvela.com
+# emailondeck.com (newly rotated domains, 2026)
+scolore.com
+tsespren.com
+# tmailor.com
+srfigservices.in

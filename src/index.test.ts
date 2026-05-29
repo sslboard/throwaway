@@ -227,6 +227,21 @@ describe("GET /stats", () => {
 	});
 });
 
+describe("GET /health", () => {
+	it("returns package version", async () => {
+		const res = await env.fetch(new Request("http://localhost/health"));
+		expect(res.status).toBe(200);
+		expect(res.headers.get("Content-Type")).toContain("application/json");
+		const body = await res.json<{ version: string }>();
+		expect(body.version).toMatch(/^\d+\.\d+\.\d+$/);
+	});
+
+	it("405 for POST", async () => {
+		const res = await env.fetch(new Request("http://localhost/health", { method: "POST" }));
+		expect(res.status).toBe(405);
+	});
+});
+
 describe("/llms.txt", () => {
 	it("returns the llms.txt markdown", async () => {
 		const res = await env.fetch(new Request("http://localhost/llms.txt"));
@@ -262,6 +277,25 @@ describe("CORS & security headers", () => {
 		const res = await env.fetch(new Request("http://localhost/"));
 		expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
 		expect(res.headers.get("Strict-Transport-Security")).toContain("max-age=");
+	});
+
+	it("sets strict CSP on HTML page (no unsafe-inline)", async () => {
+		const res = await env.fetch(new Request("http://localhost/"));
+		const csp = res.headers.get("Content-Security-Policy") ?? "";
+		expect(csp).toContain("script-src 'self' https://analytics.ahrefs.com");
+		expect(csp).not.toContain("unsafe-inline");
+	});
+
+	it("serves static assets for the landing page", async () => {
+		const css = await env.fetch(new Request("http://localhost/styles.css"));
+		expect(css.status).toBe(200);
+		expect(css.headers.get("Content-Type")).toContain("text/css");
+		expect(await css.text()).toContain(".result-center");
+
+		const js = await env.fetch(new Request("http://localhost/app.js"));
+		expect(js.status).toBe(200);
+		expect(js.headers.get("Content-Type")).toContain("javascript");
+		expect(await js.text()).toContain("getElementById");
 	});
 
 	it("sets security headers on JSON responses", async () => {

@@ -1,0 +1,21 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://analytics.ahrefs.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://analytics.ahrefs.com; connect-src 'self' https://analytics.ahrefs.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+
+/styles.css
+  Cache-Control: public, max-age=604800, immutable
+
+/app.js
+  Cache-Control: public, max-age=604800, immutable
+
+/throwaway.svg
+  Cache-Control: public, max-age=604800, immutable
+
+/throwaway.jpg
+  Cache-Control: public, max-age=604800, immutable

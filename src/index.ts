@@ -2,15 +2,10 @@ import { parse as parseTld } from "tldts";
 import { BloomFilter } from "./bloom";
 import { BIT_COUNT, HASH_COUNT, ITEM_COUNT } from "./generated/filter-meta";
 import filterData from "./generated/filter.bin";
-import indexHtmlTemplate from "./index.html";
 import llmsTxt from "./llms.txt";
-import { version as PKG_VERSION } from "../package.json";
-import ogImage from "./throwaway.jpg";
-import logoSvg from "./throwaway.svg";
+import { version } from "../package.json";
 
 const filter = new BloomFilter(BIT_COUNT, HASH_COUNT, new Uint8Array(filterData));
-
-const indexHtml = indexHtmlTemplate.replaceAll("{{VERSION}}", PKG_VERSION);
 
 /** Extract the domain from an email address (everything after last @, lowercased). */
 function extractDomain(email: string): string | null {
@@ -95,21 +90,6 @@ const SECURITY_HEADERS: Record<string, string> = {
 	"X-Frame-Options": "DENY",
 	"Referrer-Policy": "strict-origin-when-cross-origin",
 	"Permissions-Policy": "camera=(), microphone=(), geolocation=()",
-};
-
-/** CSP for the HTML page — allows Ahrefs analytics + Google Fonts. */
-const CSP_HEADER: Record<string, string> = {
-	"Content-Security-Policy": [
-		"default-src 'self'",
-		"script-src 'self' 'unsafe-inline' https://analytics.ahrefs.com",
-		"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-		"font-src 'self' https://fonts.gstatic.com",
-		"img-src 'self' data: https://analytics.ahrefs.com",
-		"connect-src 'self' https://analytics.ahrefs.com",
-		"frame-ancestors 'none'",
-		"base-uri 'self'",
-		"form-action 'self'",
-	].join("; "),
 };
 
 const MAX_BODY_SIZE = 100_000; // 100 KB
@@ -253,8 +233,12 @@ function handleStats(): Response {
 	});
 }
 
+function handleHealth(): Response {
+	return jsonResponse({ version });
+}
+
 export default {
-	async fetch(request: Request): Promise<Response> {
+	async fetch(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
 		const path = url.pathname;
 
@@ -270,6 +254,13 @@ export default {
 				return errorResponse("Method not allowed", 405);
 			}
 			return handleStats();
+		}
+
+		if (path === "/health") {
+			if (request.method !== "GET") {
+				return errorResponse("Method not allowed", 405);
+			}
+			return handleHealth();
 		}
 
 		if (path === "/llms.txt") {
@@ -305,43 +296,16 @@ export default {
 			});
 		}
 
-		if (path === "/throwaway.jpg") {
-			return new Response(ogImage, {
-				headers: {
-					"Content-Type": "image/jpeg",
-					"Cache-Control": "public, max-age=604800, immutable",
-					...SECURITY_HEADERS,
-				},
-			});
-		}
-
-		if (path === "/throwaway.svg") {
-			return new Response(logoSvg, {
-				headers: {
-					"Content-Type": "image/svg+xml; charset=utf-8",
-					"Cache-Control": "public, max-age=604800, immutable",
-					...SECURITY_HEADERS,
-				},
-			});
-		}
-
-		if (path === "/") {
-			return new Response(indexHtml, {
-				headers: {
-					"Content-Type": "text/html;charset=UTF-8",
-					...SECURITY_HEADERS,
-					...CSP_HEADER,
-					...CORS_HEADERS,
-				},
-			});
-		}
-
 		// Preflight
 		if (request.method === "OPTIONS") {
 			return new Response(null, {
 				status: 204,
 				headers: CORS_HEADERS,
 			});
+		}
+
+		if (request.method === "GET" || request.method === "HEAD") {
+			return env.ASSETS.fetch(request);
 		}
 
 		return errorResponse("Not found", 404);

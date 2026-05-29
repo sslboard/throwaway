@@ -282,7 +282,9 @@ describe("CORS & security headers", () => {
 	it("sets strict CSP on HTML page (no unsafe-inline)", async () => {
 		const res = await env.fetch(new Request("http://localhost/"));
 		const csp = res.headers.get("Content-Security-Policy") ?? "";
-		expect(csp).toContain("script-src 'self' https://analytics.ahrefs.com");
+		expect(csp).toContain("script-src 'self' https://analytics.ahrefs.com https://static.cloudflareinsights.com");
+		expect(csp).toContain("style-src 'self' https://fonts.googleapis.com");
+		expect(csp).toContain("font-src 'self' https://fonts.gstatic.com");
 		expect(csp).not.toContain("unsafe-inline");
 	});
 

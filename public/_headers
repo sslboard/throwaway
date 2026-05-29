@@ -9,13 +9,13 @@
   Content-Security-Policy: default-src 'self'; script-src 'self' https://analytics.ahrefs.com https://static.cloudflareinsights.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://analytics.ahrefs.com; connect-src 'self' https://analytics.ahrefs.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 
 /styles.css
-  Cache-Control: public, max-age=604800, immutable
+  Cache-Control: public, max-age=600
 
 /app.js
-  Cache-Control: public, max-age=604800, immutable
+  Cache-Control: public, max-age=600
 
 /throwaway.svg
-  Cache-Control: public, max-age=604800, immutable
+  Cache-Control: public, max-age=600
 
 /throwaway.jpg
-  Cache-Control: public, max-age=604800, immutable
+  Cache-Control: public, max-age=600

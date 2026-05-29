@@ -7,7 +7,7 @@ const resultError = document.getElementById("resultError");
 
 // Prefix API doc URLs with the current origin
 const origin = location.origin;
-document.getElementById("apiEmail").textContent = origin + "/check?email=user@example.com";
+document.getElementById("apiEmail").textContent = origin + "/check?email=user@mailinator.com";
 document.getElementById("apiDomain").textContent = origin + "/check?domain=example.com";
 document.getElementById("apiBatch").textContent = origin + "/check";
 

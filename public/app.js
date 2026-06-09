@@ -1,7 +1,8 @@
 const input = document.getElementById("emailInput");
 const loader = document.getElementById("loader");
 const resultInner = document.getElementById("resultInner");
-const resultPills = document.getElementById("resultPills");
+const resultPills =
+	document.getElementById("resultPills") ?? document.getElementById("resultPill")?.parentElement;
 const resultError = document.getElementById("resultError");
 
 // Prefix API doc URLs with the current origin

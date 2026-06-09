@@ -183,6 +183,14 @@
 			pointer-events: auto;
 		}
 
+		.result-pills {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 0.6rem;
+		}
+
 		.result-pill {
 			display: inline-flex;
 			align-items: center;
@@ -190,7 +198,6 @@
 			padding: 0.65rem 1.25rem;
 			border-radius: 100px;
 			border: 1px solid transparent;
-			margin-bottom: 0.75rem;
 		}
 
 		.result-pill.disposable {

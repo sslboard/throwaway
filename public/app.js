@@ -1,8 +1,7 @@
 const input = document.getElementById("emailInput");
 const loader = document.getElementById("loader");
 const resultInner = document.getElementById("resultInner");
-const resultPill = document.getElementById("resultPill");
-const resultVerdict = document.getElementById("resultVerdict");
+const resultPills = document.getElementById("resultPills");
 const resultError = document.getElementById("resultError");
 
 // Prefix API doc URLs with the current origin
@@ -27,34 +26,41 @@ function showError(msg) {
 	resultError.textContent = msg;
 }
 
+function createPill(label, cls) {
+	const pill = document.createElement("div");
+	pill.className = "result-pill " + cls;
+
+	const dot = document.createElement("span");
+	dot.className = "result-pill-dot";
+
+	const text = document.createElement("span");
+	text.className = "result-verdict";
+	text.textContent = label;
+
+	pill.append(dot, text);
+	return pill;
+}
+
+function dnsBlockedLabel(data) {
+	if (data.dns_blocked_category === "family") return "Blocked: Family";
+	if (data.dns_blocked_category === "malware") return "Blocked: Malware";
+	return "DNS Blocked";
+}
+
 function showResult(data) {
 	hideLoading();
 	resultError.textContent = "";
+	resultPills.replaceChildren();
 
-	let cls, verdict;
-	if (!data.valid_tld) {
-		cls = "invalid";
-		verdict = "invalid";
-	} else if (data.disposable) {
-		cls = "disposable";
-		verdict = "disposable";
-	} else if (!data.has_mx) {
-		cls = "invalid";
-		verdict = "no MX records";
+	if (!data.should_reject) {
+		resultPills.append(createPill("Accept", "clean"));
 	} else {
-		cls = "clean";
-		verdict = "legitimate";
-	}
+		resultPills.append(createPill("Reject", "disposable"));
 
-	resultPill.className = "result-pill " + cls;
-	resultVerdict.textContent = verdict;
-
-	const resultDetail = document.getElementById("resultDetail");
-	if (data.dns_blocked) {
-		const category = data.dns_blocked_category ? ` (${data.dns_blocked_category})` : "";
-		resultDetail.textContent = `blocked by filtered DNS${category}`;
-	} else {
-		resultDetail.textContent = "";
+		if (!data.valid_tld) resultPills.append(createPill("Invalid TLD", "disposable"));
+		if (data.valid_tld && !data.has_mx) resultPills.append(createPill("No MX", "disposable"));
+		if (data.disposable) resultPills.append(createPill("Disposable", "disposable"));
+		if (data.dns_blocked) resultPills.append(createPill(dnsBlockedLabel(data), "disposable"));
 	}
 
 	// Trigger reflow for animation restart

@@ -12,6 +12,8 @@ describe("GET /check?email=...", () => {
 			domain: string;
 			valid_tld: boolean;
 			has_mx: boolean;
+			dns_blocked: boolean;
+			dns_blocked_category?: "malware" | "family" | "unknown";
 			disposable: boolean;
 			should_reject: boolean;
 		}>();
@@ -19,6 +21,7 @@ describe("GET /check?email=...", () => {
 		expect(body.domain).toBe("mailinator.com");
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
+		expect(body).toHaveProperty("dns_blocked");
 		expect(body.disposable).toBe(true);
 		expect(body.should_reject).toBe(true);
 	});
@@ -31,11 +34,14 @@ describe("GET /check?email=...", () => {
 			domain: string;
 			valid_tld: boolean;
 			has_mx: boolean;
+			dns_blocked: boolean;
+			dns_blocked_category?: "malware" | "family" | "unknown";
 			disposable: boolean;
 			should_reject: boolean;
 		}>();
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
+		expect(body).toHaveProperty("dns_blocked");
 		expect(body.disposable).toBe(false);
 		expect(body.should_reject).toBe(!body.has_mx);
 	});
@@ -48,6 +54,8 @@ describe("GET /check?email=...", () => {
 			domain: string;
 			valid_tld: boolean;
 			has_mx: boolean;
+			dns_blocked: boolean;
+			dns_blocked_category?: "malware" | "family" | "unknown";
 			disposable: boolean;
 			should_reject: boolean;
 		}>();
@@ -65,11 +73,14 @@ describe("GET /check?domain=...", () => {
 			domain: string;
 			valid_tld: boolean;
 			has_mx: boolean;
+			dns_blocked: boolean;
+			dns_blocked_category?: "malware" | "family" | "unknown";
 			disposable: boolean;
 			should_reject: boolean;
 		}>();
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
+		expect(body).toHaveProperty("dns_blocked");
 		expect(body.disposable).toBe(true);
 		expect(body.should_reject).toBe(true);
 	});
@@ -81,11 +92,14 @@ describe("GET /check?domain=...", () => {
 			domain: string;
 			valid_tld: boolean;
 			has_mx: boolean;
+			dns_blocked: boolean;
+			dns_blocked_category?: "malware" | "family" | "unknown";
 			disposable: boolean;
 			should_reject: boolean;
 		}>();
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
+		expect(body).toHaveProperty("dns_blocked");
 		expect(body.disposable).toBe(false);
 		expect(body.should_reject).toBe(!body.has_mx);
 	});
@@ -97,11 +111,14 @@ describe("GET /check?domain=...", () => {
 			domain: string;
 			valid_tld: boolean;
 			has_mx: boolean;
+			dns_blocked: boolean;
+			dns_blocked_category?: "malware" | "family" | "unknown";
 			disposable: boolean;
 			should_reject: boolean;
 		}>();
 		expect(body.valid_tld).toBe(true);
 		expect(body).toHaveProperty("has_mx");
+		expect(body).toHaveProperty("dns_blocked");
 		expect(body.disposable).toBe(true);
 		expect(body.should_reject).toBe(true);
 	});
@@ -113,6 +130,8 @@ describe("GET /check?domain=...", () => {
 			domain: string;
 			valid_tld: boolean;
 			has_mx: boolean;
+			dns_blocked: boolean;
+			dns_blocked_category?: "malware" | "family" | "unknown";
 			disposable: boolean;
 			should_reject: boolean;
 		}>();
@@ -122,12 +141,16 @@ describe("GET /check?domain=...", () => {
 	});
 
 	it("flags domain without MX records", async () => {
-		const res = await env.fetch(new Request("http://localhost/check?domain=this-domain-does-not-exist-xyz123.com"));
+		const res = await env.fetch(
+			new Request("http://localhost/check?domain=this-domain-does-not-exist-xyz123.com"),
+		);
 		expect(res.status).toBe(200);
 		const body = await res.json<{
 			domain: string;
 			valid_tld: boolean;
 			has_mx: boolean;
+			dns_blocked: boolean;
+			dns_blocked_category?: "malware" | "family" | "unknown";
 			disposable: boolean;
 			should_reject: boolean;
 		}>();
@@ -154,6 +177,8 @@ describe("POST /check", () => {
 				domain: string;
 				valid_tld: boolean;
 				has_mx: boolean;
+				dns_blocked: boolean;
+				dns_blocked_category?: "malware" | "family" | "unknown";
 				disposable: boolean;
 				should_reject: boolean;
 			}[];
@@ -161,6 +186,7 @@ describe("POST /check", () => {
 		expect(body.results).toHaveLength(3);
 		expect(body.results[0].valid_tld).toBe(true);
 		expect(body.results[0].has_mx).toBe(true);
+		expect(body.results[0]).toHaveProperty("dns_blocked");
 		expect(body.results[0].disposable).toBe(true);
 		expect(body.results[1].valid_tld).toBe(true);
 		expect(body.results[1].has_mx).toBe(true);
@@ -189,6 +215,8 @@ describe("POST /check", () => {
 				domain: string;
 				valid_tld: boolean;
 				has_mx: boolean;
+				dns_blocked: boolean;
+				dns_blocked_category?: "malware" | "family" | "unknown";
 				disposable: boolean;
 				should_reject: boolean;
 			}[];
@@ -196,6 +224,7 @@ describe("POST /check", () => {
 		expect(body.results).toHaveLength(3);
 		expect(body.results[0].valid_tld).toBe(true);
 		expect(body.results[0].has_mx).toBe(true);
+		expect(body.results[0]).toHaveProperty("dns_blocked");
 		expect(body.results[0].disposable).toBe(true);
 		expect(body.results[1].valid_tld).toBe(true);
 		expect(body.results[1].has_mx).toBe(true);
@@ -282,7 +311,9 @@ describe("CORS & security headers", () => {
 	it("sets strict CSP on HTML page (no unsafe-inline)", async () => {
 		const res = await env.fetch(new Request("http://localhost/"));
 		const csp = res.headers.get("Content-Security-Policy") ?? "";
-		expect(csp).toContain("script-src 'self' https://analytics.ahrefs.com https://static.cloudflareinsights.com");
+		expect(csp).toContain(
+			"script-src 'self' https://analytics.ahrefs.com https://static.cloudflareinsights.com",
+		);
 		expect(csp).toContain("style-src 'self' https://fonts.googleapis.com");
 		expect(csp).toContain("font-src 'self' https://fonts.gstatic.com");
 		expect(csp).not.toContain("unsafe-inline");

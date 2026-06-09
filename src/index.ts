@@ -23,32 +23,117 @@ function isValidTld(domain: string): boolean {
 	return result.isIcann === true && result.domain !== null;
 }
 
-/** Resolve MX records for a domain via Cloudflare DNS-over-HTTPS. */
-async function resolveMx(domain: string): Promise<boolean> {
+const FAMILY_DOH = "https://family.cloudflare-dns.com/dns-query";
+const SECURITY_DOH = "https://security.cloudflare-dns.com/dns-query";
+const UNFILTERED_DOH = "https://cloudflare-dns.com/dns-query";
+
+type DnsQuery = {
+	ok: boolean;
+	status?: number;
+	hasAnswer: boolean;
+	blocked: boolean;
+};
+
+type MxResolution = {
+	hasMx: boolean;
+	dnsBlocked?: boolean;
+	dnsBlockedCategory?: "malware" | "family" | "unknown";
+};
+
+/** Query one DNS-over-HTTPS endpoint. */
+async function queryDns(endpoint: string, domain: string, type: "A" | "MX"): Promise<DnsQuery> {
 	try {
-		const res = await fetch(
-			`https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(domain)}&type=MX`,
-			{ headers: { Accept: "application/dns-json" }, signal: AbortSignal.timeout(3000) },
-		);
-		if (!res.ok) return false;
-		const data = (await res.json()) as { Answer?: unknown[] };
-		return Array.isArray(data.Answer) && data.Answer.length > 0;
+		const res = await fetch(`${endpoint}?name=${encodeURIComponent(domain)}&type=${type}`, {
+			headers: { Accept: "application/dns-json" },
+			signal: AbortSignal.timeout(3000),
+		});
+		if (!res.ok) return { ok: false, hasAnswer: false, blocked: false };
+		const data = (await res.json()) as {
+			Status?: number;
+			Answer?: { data?: string }[];
+			Comment?: string[];
+		};
+		const answers = Array.isArray(data.Answer) ? data.Answer : [];
+		const blocked =
+			data.Status === 5 ||
+			data.Comment?.some((comment) => /filtered|blocked|censored/i.test(comment)) === true ||
+			answers.some((answer) => answer.data === "0.0.0.0");
+		return {
+			ok: data.Status === 0 || data.Status === 3,
+			status: data.Status,
+			hasAnswer: answers.length > 0,
+			blocked,
+		};
 	} catch {
-		return false;
+		return { ok: false, hasAnswer: false, blocked: false };
 	}
 }
 
 /**
- * Decision from README: reject if TLD is invalid, no MX records, or domain is a known disposable.
- * Equivalent to `!valid_tld || !has_mx || disposable` with current response semantics.
+ * Resolve MX records using unfiltered DNS, then check filtered DNS only for
+ * domains that can receive email. This keeps `has_mx` strictly about mail
+ * deliverability while letting `dns_blocked` protect against risky domains.
  */
-function shouldReject(validTld: boolean, hasMx: boolean, disposable: boolean): boolean {
-	return !validTld || !hasMx || disposable;
+async function resolveMx(domain: string): Promise<MxResolution> {
+	const mx = await queryDns(UNFILTERED_DOH, domain, "MX");
+	if (!mx.ok || !mx.hasAnswer) {
+		return { hasMx: false };
+	}
+
+	const family = await queryDns(FAMILY_DOH, domain, "A");
+	if (!family.blocked) {
+		return { hasMx: true, dnsBlocked: false };
+	}
+
+	const security = await queryDns(SECURITY_DOH, domain, "A");
+	const dnsBlockedCategory = security.blocked ? "malware" : security.ok ? "family" : "unknown";
+	return { hasMx: true, dnsBlocked: true, dnsBlockedCategory };
+}
+
+/**
+ * Decision from README: reject if TLD is invalid, no MX records, or domain is a known disposable.
+ * Equivalent to `!valid_tld || !has_mx || disposable || dns_blocked` with current response semantics.
+ */
+function shouldReject(
+	validTld: boolean,
+	hasMx: boolean,
+	disposable: boolean,
+	dnsBlocked = false,
+): boolean {
+	return !validTld || !hasMx || disposable || dnsBlocked;
+}
+
+function mxForInvalidDomain(): MxResolution {
+	return { hasMx: false };
+}
+
+function checkPayload(fields: {
+	email?: string;
+	domain: string;
+	validTld: boolean;
+	mx: MxResolution;
+	disposable: boolean;
+}) {
+	return {
+		...(fields.email !== undefined ? { email: fields.email } : {}),
+		domain: fields.domain,
+		valid_tld: fields.validTld,
+		has_mx: fields.mx.hasMx,
+		...(fields.mx.dnsBlocked !== undefined ? { dns_blocked: fields.mx.dnsBlocked } : {}),
+		...(fields.mx.dnsBlockedCategory ? { dns_blocked_category: fields.mx.dnsBlockedCategory } : {}),
+		disposable: fields.disposable,
+		should_reject: shouldReject(
+			fields.validTld,
+			fields.mx.hasMx,
+			fields.disposable,
+			fields.mx.dnsBlocked,
+		),
+	};
 }
 
 /** Resolve MX records for many domains in parallel (capped concurrency). */
-async function resolveMxBatch(domains: string[]): Promise<Map<string, boolean>> {
-	const result = new Map<string, boolean>();
+async function resolveMxBatch(domains: string[]): Promise<Map<string, MxResolution>> {
+	const result = new Map<string, MxResolution>();
 	const CONCURRENCY = 20;
 	for (let i = 0; i < domains.length; i += CONCURRENCY) {
 		const slice = domains.slice(i, i + CONCURRENCY);
@@ -123,30 +208,17 @@ async function handleCheck(request: Request): Promise<Response> {
 				return errorResponse("Invalid email address", 400);
 			}
 			const validTld = isValidTld(extracted);
-			const hasMx = validTld ? await resolveMx(extracted) : false;
+			const mx = validTld ? await resolveMx(extracted) : mxForInvalidDomain();
 			const disposable = filter.has(extracted);
-			return jsonResponse({
-				email,
-				domain: extracted,
-				valid_tld: validTld,
-				has_mx: hasMx,
-				disposable,
-				should_reject: shouldReject(validTld, hasMx, disposable),
-			});
+			return jsonResponse(checkPayload({ email, domain: extracted, validTld, mx, disposable }));
 		}
 
 		if (domain) {
 			const normalized = domain.toLowerCase().trim();
 			const validTld = isValidTld(normalized);
-			const hasMx = validTld ? await resolveMx(normalized) : false;
+			const mx = validTld ? await resolveMx(normalized) : mxForInvalidDomain();
 			const disposable = filter.has(normalized);
-			return jsonResponse({
-				domain: normalized,
-				valid_tld: validTld,
-				has_mx: hasMx,
-				disposable,
-				should_reject: shouldReject(validTld, hasMx, disposable),
-			});
+			return jsonResponse(checkPayload({ domain: normalized, validTld, mx, disposable }));
 		}
 
 		return errorResponse('Missing required query parameter: "email" or "domain"', 400);
@@ -180,20 +252,20 @@ async function handleCheck(request: Request): Promise<Response> {
 			const extracted = extractDomain(email);
 			return { email, extracted };
 		});
-		const validDomains = [...new Set(emailEntries.map((e) => e.extracted).filter((d): d is string => !!d && isValidTld(d)))];
+		const validDomains = [
+			...new Set(
+				emailEntries.map((e) => e.extracted).filter((d): d is string => !!d && isValidTld(d)),
+			),
+		];
 		const mxMap = await resolveMxBatch(validDomains);
 		const results = emailEntries.map(({ email, extracted }) => {
 			const validTld = extracted ? isValidTld(extracted) : false;
-			const hasMx = validTld && extracted ? (mxMap.get(extracted) ?? false) : false;
+			const mx =
+				validTld && extracted
+					? (mxMap.get(extracted) ?? mxForInvalidDomain())
+					: mxForInvalidDomain();
 			const disposable = extracted ? filter.has(extracted) : false;
-			return {
-				email,
-				domain: extracted ?? "",
-				valid_tld: validTld,
-				has_mx: hasMx,
-				disposable,
-				should_reject: shouldReject(validTld, hasMx, disposable),
-			};
+			return checkPayload({ email, domain: extracted ?? "", validTld, mx, disposable });
 		});
 		return jsonResponse({ results });
 	}
@@ -202,20 +274,16 @@ async function handleCheck(request: Request): Promise<Response> {
 		if (obj.domains.length > MAX_BATCH_SIZE) {
 			return errorResponse(`Batch size exceeds ${MAX_BATCH_SIZE}`, 413);
 		}
-		const normalizedDomains = (obj.domains as string[]).map((domain) => domain.toLowerCase().trim());
+		const normalizedDomains = (obj.domains as string[]).map((domain) =>
+			domain.toLowerCase().trim(),
+		);
 		const uniqueValid = [...new Set(normalizedDomains.filter((d) => isValidTld(d)))];
 		const mxMap = await resolveMxBatch(uniqueValid);
 		const results = normalizedDomains.map((normalized) => {
 			const validTld = isValidTld(normalized);
-			const hasMx = validTld ? (mxMap.get(normalized) ?? false) : false;
+			const mx = validTld ? (mxMap.get(normalized) ?? mxForInvalidDomain()) : mxForInvalidDomain();
 			const disposable = filter.has(normalized);
-			return {
-				domain: normalized,
-				valid_tld: validTld,
-				has_mx: hasMx,
-				disposable,
-				should_reject: shouldReject(validTld, hasMx, disposable),
-			};
+			return checkPayload({ domain: normalized, validTld, mx, disposable });
 		});
 		return jsonResponse({ results });
 	}

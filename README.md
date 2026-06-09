@@ -8,7 +8,7 @@ A Cloudflare Worker that detects disposable/temporary email domains, invalid TLD
 
 ## Honest context
 
-**This project was written almost entirely by AI.** I needed a disposable-email checker for [SSLBoard](https://sslboard.com) (a free cybersecurity assessment tool) and I used Claude to build it. I'm sharing it as open source because the underlying approach (a binary bloom filter served from a Cloudflare Worker, no external calls) is genuinely useful and I haven't seen it done this way before.
+**This project was written almost entirely by AI.** I needed a disposable-email checker for [SSLBoard](https://sslboard.com) (a free cybersecurity assessment tool) and I used Claude to build it. I'm sharing it as open source because the underlying approach (a binary bloom filter served from a Cloudflare Worker, with DNS checks but no paid external API dependency) is genuinely useful and I haven't seen it done this way before.
 
 I understand the code, I can maintain it, and I'm happy to be accountable for it. But I'd rather be upfront than have someone dig through the commit history wondering why it looks the way it does.
 
@@ -22,7 +22,7 @@ At build time, `npm run build:filter` fetches the [disposable/disposable](https:
 
 At request time, [tldts](https://github.com/nicolo-ribaudo/tldts) parses the domain to determine whether the TLD is a real, ICANN-recognized public suffix. This catches addresses like `user@fake.notarealtld` that have no chance of receiving mail.
 
-Additionally, each domain is checked for MX records via Cloudflare DNS-over-HTTPS (`cloudflare-dns.com`). Domains without MX records can't receive email, so even a domain with a valid TLD but no mail server is flagged (`has_mx: false`). The lookup has a 3-second timeout and fails open (returns `false` on error).
+Additionally, each domain is checked for MX records via Cloudflare DNS-over-HTTPS. The resolver uses unfiltered Cloudflare DNS for MX records, then checks Cloudflare family DNS for domains that can receive email. This keeps `has_mx` focused on deliverability while `dns_blocked` reports whether filtered DNS blocks an otherwise email-capable domain. Domains without MX records can't receive email, so even a domain with a valid TLD but no mail server is flagged (`has_mx: false`) and filtered-DNS checks are skipped. The lookup has a 3-second timeout per resolver and returns `false` on DNS errors.
 
 ### Bloom Filter Properties
 
@@ -30,7 +30,7 @@ Additionally, each domain is checked for MX records via Cloudflare DNS-over-HTTP
 | ------------------- | ---------------------------------------- |
 | Items               | ~72K domains                             |
 | Filter size         | ~173 KB                                  |
-| False positive rate | ~0.01% (1 in 10,000)                    |
+| False positive rate | ~0.01% (1 in 10,000)                     |
 | False negatives     | **Zero**                                 |
 | Hash functions      | 10 (double-hashing from 2 cyrb53 hashes) |
 
@@ -52,6 +52,7 @@ Check a single email address.
 	"domain": "mailinator.com",
 	"valid_tld": true,
 	"has_mx": true,
+	"dns_blocked": false,
 	"disposable": true,
 	"should_reject": true
 }
@@ -62,7 +63,14 @@ Check a single email address.
 Check a single domain.
 
 ```json
-{ "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true }
+{
+	"domain": "mailinator.com",
+	"valid_tld": true,
+	"has_mx": true,
+	"dns_blocked": false,
+	"disposable": true,
+	"should_reject": true
+}
 ```
 
 ### `POST /check`
@@ -87,6 +95,7 @@ Response:
 			"domain": "mailinator.com",
 			"valid_tld": true,
 			"has_mx": true,
+			"dns_blocked": false,
 			"disposable": true,
 			"should_reject": true
 		},
@@ -95,6 +104,7 @@ Response:
 			"domain": "gmail.com",
 			"valid_tld": true,
 			"has_mx": true,
+			"dns_blocked": false,
 			"disposable": false,
 			"should_reject": false
 		},
@@ -123,8 +133,22 @@ Response:
 ```json
 {
 	"results": [
-		{ "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true },
-		{ "domain": "gmail.com", "valid_tld": true, "has_mx": true, "disposable": false, "should_reject": false }
+		{
+			"domain": "mailinator.com",
+			"valid_tld": true,
+			"has_mx": true,
+			"dns_blocked": false,
+			"disposable": true,
+			"should_reject": true
+		},
+		{
+			"domain": "gmail.com",
+			"valid_tld": true,
+			"has_mx": true,
+			"dns_blocked": false,
+			"disposable": false,
+			"should_reject": false
+		}
 	]
 }
 ```
@@ -149,12 +173,14 @@ Machine-readable API documentation for AI agents. Plain text markdown.
 
 ### Response Fields
 
-| Field        | Type    | Meaning                                                                                                 |
-| ------------ | ------- | ------------------------------------------------------------------------------------------------------- |
-| `valid_tld`  | boolean | `true` if the domain ends in a real ICANN-recognized TLD. `false` means the address can't receive mail. |
-| `has_mx`     | boolean | `true` if the domain has MX records (can receive email). `false` means no mail server exists.           |
-| `disposable` | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`.  |
-| `should_reject` | boolean | `true` when rules 1–3 below apply (invalid TLD, no MX, or disposable); `false` only for rule 4 (accept). |
+| Field                  | Type    | Meaning                                                                                                                                                        |
+| ---------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `valid_tld`            | boolean | `true` if the domain ends in a real ICANN-recognized TLD. `false` means the address can't receive mail.                                                        |
+| `has_mx`               | boolean | `true` if the domain has MX records (can receive email). `false` means no mail server exists.                                                                  |
+| `dns_blocked`          | boolean | `true` if Cloudflare family DNS appeared to block an otherwise email-capable domain. Omitted when `has_mx` is `false` because filtered-DNS checks are skipped. |
+| `dns_blocked_category` | string  | Optional when `dns_blocked` is `true`: `malware`, `family`, or `unknown`, inferred by comparing Cloudflare family DNS with malware-only DNS.                   |
+| `disposable`           | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`.                                                         |
+| `should_reject`        | boolean | `true` when rules 1–4 below apply (invalid TLD, no MX, disposable, or filtered-DNS blocked); `false` only for rule 5 (accept).                                 |
 
 ### Decision Logic
 
@@ -163,7 +189,8 @@ Machine-readable API documentation for AI agents. Plain text markdown.
 1. `valid_tld: false` → **reject** (domain is not real)
 2. `has_mx: false` → **reject** (no mail server, can't receive email)
 3. `valid_tld: true` + `has_mx: true` + `disposable: true` → **reject** (known throwaway provider)
-4. `valid_tld: true` + `has_mx: true` + `disposable: false` → **accept** (looks legitimate)
+4. `valid_tld: true` + `has_mx: true` + `dns_blocked: true` → **reject** (blocked by filtered DNS)
+5. `valid_tld: true` + `has_mx: true` + `disposable: false` + `dns_blocked: false` → **accept**
 
 ### Error Responses
 
@@ -178,7 +205,7 @@ All errors return `{"error": "message"}` with appropriate status codes:
 ## Performance
 
 - **Bloom filter lookup**: pure arithmetic, microsecond responses
-- **MX resolution**: single DNS-over-HTTPS call to Cloudflare (3s timeout, fails open)
+- **MX resolution**: DNS-over-HTTPS via unfiltered Cloudflare DNS for MX, plus Cloudflare family/security DNS A-record checks for otherwise email-capable domains (3s timeout per resolver)
 - **Zero cold-start overhead**: filter loaded as a `Uint8Array` at module load time
 - **One runtime dependency**: `tldts` for TLD validation (bundled by Wrangler)
 

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hosts": {
+    "scribd.com": {
+      "reason": "article",
+      "evidence": "SERP result is a document/article page, not a disposable email generator",
+      "added": "2026-06-09"
+    },
+    "toolpix.pythonanywhere.com": {
+      "reason": "redirect",
+      "evidence": "SERP result redirected to th.trip.com travel booking page, not a temp email generator",
+      "added": "2026-06-09"
+    }
+  }
+}

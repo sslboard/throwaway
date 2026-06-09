@@ -4,7 +4,7 @@
 
 ## What it does
 
-Given an email address or domain, returns whether the TLD is a real ICANN-recognized suffix, whether the domain has MX records (can receive mail), and whether the domain is a known disposable/temporary email provider (mailinator, guerrillamail, etc). Uses the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ domains) compiled into a bloom filter for fast O(1) lookups.
+Given an email address or domain, returns whether the TLD is a real ICANN-recognized suffix, whether the domain has MX records (can receive mail), whether Cloudflare family DNS appears to block the domain, and whether the domain is a known disposable/temporary email provider (mailinator, guerrillamail, etc). Uses the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ domains) compiled into a bloom filter for fast O(1) lookups.
 
 Use this before sending signup emails, creating accounts, or accepting form submissions to block throwaway addresses, non-existent domains, and syntactically invalid domains.
 
@@ -24,6 +24,7 @@ GET /check?email=user@example.com
   "domain": "mailinator.com",
   "valid_tld": true,
   "has_mx": true,
+  "dns_blocked": false,
   "disposable": true,
   "should_reject": true
 }
@@ -40,6 +41,7 @@ GET /check?domain=example.com
   "domain": "example.com",
   "valid_tld": true,
   "has_mx": true,
+  "dns_blocked": false,
   "disposable": false,
   "should_reject": false
 }
@@ -57,8 +59,8 @@ Content-Type: application/json
 ```json
 {
   "results": [
-    { "email": "a@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true },
-    { "email": "b@gmail.com", "domain": "gmail.com", "valid_tld": true, "has_mx": true, "disposable": false, "should_reject": false },
+    { "email": "a@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": true, "should_reject": true },
+    { "email": "b@gmail.com", "domain": "gmail.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": false, "should_reject": false },
     { "email": "c@fake.notarealtld", "domain": "fake.notarealtld", "valid_tld": false, "has_mx": false, "disposable": false, "should_reject": true }
   ]
 }
@@ -76,8 +78,8 @@ Content-Type: application/json
 ```json
 {
   "results": [
-    { "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true },
-    { "domain": "yahoo.com", "valid_tld": true, "has_mx": true, "disposable": false, "should_reject": false }
+    { "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": true, "should_reject": true },
+    { "domain": "yahoo.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": false, "should_reject": false }
   ]
 }
 ```
@@ -104,8 +106,10 @@ GET /stats
 |---|---|---|
 | `valid_tld` | boolean | `true` if the domain ends in a real ICANN-recognized TLD (`.com`, `.co.uk`, etc). `false` means the address can't possibly receive mail. |
 | `has_mx` | boolean | `true` if the domain has MX records (can receive email). `false` means the domain doesn't exist or has no mail server. |
+| `dns_blocked` | boolean | `true` if Cloudflare family DNS appeared to block an otherwise email-capable domain. Omitted when `has_mx` is `false` because filtered-DNS checks are skipped. |
+| `dns_blocked_category` | string | Optional when `dns_blocked` is `true`: `malware`, `family`, or `unknown`, inferred by comparing Cloudflare family DNS with malware-only DNS. |
 | `disposable` | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`. |
-| `should_reject` | boolean | `true` when the rules below say to reject (invalid TLD, no MX, or disposable). |
+| `should_reject` | boolean | `true` when the rules below say to reject (invalid TLD, no MX, disposable, or filtered-DNS blocked). |
 
 ## How to interpret results
 
@@ -114,7 +118,8 @@ Use **`should_reject`** for a single accept/reject gate, or read the fields indi
 1. **`valid_tld: false`** → reject. The domain is not real.
 2. **`has_mx: false`** → reject. The domain has no mail server and can't receive email.
 3. **`valid_tld: true`, `has_mx: true`, `disposable: true`** → reject. Known throwaway provider.
-4. **`valid_tld: true`, `has_mx: true`, `disposable: false`** → accept. Looks legitimate.
+4. **`valid_tld: true`, `has_mx: true`, `dns_blocked: true`** → reject. Blocked by filtered DNS.
+5. **`valid_tld: true`, `has_mx: true`, `disposable: false`, `dns_blocked: false`** → accept.
 
 No API key needed. No rate limits currently enforced.
 

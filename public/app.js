@@ -50,7 +50,12 @@ function showResult(data) {
 	resultVerdict.textContent = verdict;
 
 	const resultDetail = document.getElementById("resultDetail");
-	resultDetail.textContent = "";
+	if (data.dns_blocked) {
+		const category = data.dns_blocked_category ? ` (${data.dns_blocked_category})` : "";
+		resultDetail.textContent = `blocked by filtered DNS${category}`;
+	} else {
+		resultDetail.textContent = "";
+	}
 
 	// Trigger reflow for animation restart
 	resultInner.classList.remove("visible");

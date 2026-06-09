@@ -53,7 +53,7 @@
 				"@type": "WebApplication",
 				"name": "throwaway",
 				"url": "https://throwaway.sslboard.com",
-				"description": "Free API to detect disposable and temporary email domains. 72K+ domains in a fast bloom filter — no external calls, pure edge compute.",
+				"description": "Free API to detect disposable and temporary email domains. 72K+ domains in a fast bloom filter, MX checks, and filtered-DNS signals on Cloudflare Workers.",
 				"applicationCategory": "DeveloperApplication",
 				"operatingSystem": "Any",
 				"offers": {
@@ -69,9 +69,10 @@
 				"featureList": [
 					"Detect 72K+ disposable email domains",
 					"Validate ICANN-recognized TLDs",
+					"Check MX records and filtered-DNS block signals",
 					"Batch email checking API",
 					"Microsecond response times",
-					"No external API calls",
+					"No paid external API dependency",
 					"CORS-enabled REST API"
 				]
 			}
@@ -131,7 +132,11 @@
 				target="_blank"
 				rel="noopener"
 			>
-				<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.07-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.26-1.23-.55-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.04-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.66.01-.24.47.04.66.31.21.68.72.78 1.14.14.58.62 1.13 1.24.82.02.64.01 1.24.01 1.42 0 .21-.15.45-.55.38A8.013 8.013 0 0 1 0 8c0-4.42 3.58-8 8-8z"/></svg>
+				<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+					<path
+						d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.07-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.26-1.23-.55-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.04-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.66.01-.24.47.04.66.31.21.68.72.78 1.14.14.58.62 1.13 1.24.82.02.64.01 1.24.01 1.42 0 .21-.15.45-.55.38A8.013 8.013 0 0 1 0 8c0-4.42 3.58-8 8-8z"
+					/>
+				</svg>
 				Open Source
 			</a>
 		</div>
@@ -188,14 +193,14 @@
 						<span class="api-try" data-url="/check?email=user@mailinator.com">try it</span>
 					</p>
 					<pre class="api-example">
-{ "email": "user@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true }</pre
+{ "email": "user@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": true, "should_reject": true }</pre
 					>
 					<p>
 						<span class="api-method get">GET</span
 						><code id="apiDomain">/check?domain=example.com</code>
 					</p>
 					<pre class="api-example">
-{ "domain": "example.com", "valid_tld": true, "has_mx": true, "disposable": false, "should_reject": false }</pre
+{ "domain": "example.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": false, "should_reject": false }</pre
 					>
 
 					<h3>Batch check</h3>
@@ -205,9 +210,9 @@
 
 → { "results": [
     { "email": "a@mailinator.com", "domain": "mailinator.com",
-      "valid_tld": true, "has_mx": true, "disposable": true, "should_reject": true },
+      "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": true, "should_reject": true },
     { "email": "b@gmail.com", "domain": "gmail.com",
-      "valid_tld": true, "has_mx": true, "disposable": false, "should_reject": false }
+      "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": false, "should_reject": false }
   ] }</pre
 					>
 					<p>
@@ -216,16 +221,24 @@
 
 					<h3>Response fields</h3>
 					<p>
-						<strong>valid_tld</strong> — <code>true</code> if the TLD is a real, ICANN-recognized suffix.
+						<strong>valid_tld</strong> — <code>true</code> if the TLD is a real, ICANN-recognized
+						suffix.
 					</p>
 					<p>
-						<strong>disposable</strong> — <code>true</code> if the domain is a known throwaway provider.
+						<strong>disposable</strong> — <code>true</code> if the domain is a known throwaway
+						provider.
 					</p>
 					<p>
-						<strong>has_mx</strong> — <code>true</code> if the domain has MX records and can receive email.
+						<strong>has_mx</strong> — <code>true</code> if the domain has MX records and can receive
+						email.
 					</p>
 					<p>
-						<strong>should_reject</strong> — <code>true</code> if the address should be blocked (invalid TLD, no MX, or disposable).
+						<strong>dns_blocked</strong> — <code>true</code> if Cloudflare family DNS appears to
+						block an otherwise email-capable domain; omitted when there are no MX records.
+					</p>
+					<p>
+						<strong>should_reject</strong> — <code>true</code> if the address should be blocked
+						(invalid TLD, no MX, disposable, or DNS-blocked).
 					</p>
 				</div>
 			</div>

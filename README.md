@@ -22,7 +22,7 @@ At build time, `npm run build:filter` fetches the [disposable/disposable](https:
 
 At request time, [tldts](https://github.com/nicolo-ribaudo/tldts) parses the domain to determine whether the TLD is a real, ICANN-recognized public suffix. This catches addresses like `user@fake.notarealtld` that have no chance of receiving mail.
 
-Additionally, each domain is checked for MX records via Cloudflare DNS-over-HTTPS. The resolver uses unfiltered Cloudflare DNS for MX records, then checks Cloudflare family DNS for domains that can receive email. This keeps `has_mx` focused on deliverability while `dns_blocked` reports whether filtered DNS blocks an otherwise email-capable domain. Domains without MX records can't receive email, so even a domain with a valid TLD but no mail server is flagged (`has_mx: false`) and filtered-DNS checks are skipped. The lookup has a 3-second timeout per resolver and returns `false` on DNS errors.
+Additionally, each domain is checked for MX records via Cloudflare DNS-over-HTTPS. The resolver uses unfiltered Cloudflare DNS for MX records, then checks Cloudflare family DNS for domains that can receive email. This keeps `has_mx` focused on deliverability while `dns_blocked` reports whether filtered DNS blocks an otherwise email-capable domain. Domains without MX records can't receive email, so even a domain with a valid TLD but no mail server is flagged (`has_mx: false`) and filtered-DNS checks are skipped. DNS lookups have a 3-second timeout per resolver; MX lookup failures are treated as no MX, and filtered-DNS lookup failures are treated as not blocked unless a block was already detected and only category detection failed.
 
 ### Bloom Filter Properties
 
@@ -40,7 +40,7 @@ Additionally, each domain is checked for MX records via Cloudflare DNS-over-HTTP
 
 ### `GET /`
 
-Minimal web UI with a single input field to check emails. Shows three verdicts: **LEGITIMATE**, **DISPOSABLE**, or **INVALID**.
+Minimal web UI with a single input field to check emails. Shows **Accept** for addresses that pass all checks, or **Reject** with reason pills such as **Invalid TLD**, **No MX**, **Disposable**, **Blocked: Family**, **Blocked: Malware**, or **DNS Blocked**.
 
 ### `GET /check?email=user@domain.com`
 
@@ -194,7 +194,7 @@ The homepage also supports markdown negotiation with `Accept: text/markdown` or 
 | `valid_tld`            | boolean | `true` if the domain ends in a real ICANN-recognized TLD. `false` means the address can't receive mail.                                                        |
 | `has_mx`               | boolean | `true` if the domain has MX records (can receive email). `false` means no mail server exists.                                                                  |
 | `dns_blocked`          | boolean | `true` if Cloudflare family DNS appeared to block an otherwise email-capable domain. Omitted when `has_mx` is `false` because filtered-DNS checks are skipped. |
-| `dns_blocked_category` | string  | Optional when `dns_blocked` is `true`: `malware`, `family`, or `unknown`, inferred by comparing Cloudflare family DNS with malware-only DNS.                   |
+| `dns_blocked_category` | string  | Optional when `dns_blocked` is `true`: `malware`, `family`, or `unknown`, inferred by comparing Cloudflare family DNS with malware-only DNS. The UI labels unknown categories as `DNS Blocked`. |
 | `disposable`           | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`.                                                         |
 | `should_reject`        | boolean | `true` when rules 1–4 below apply (invalid TLD, no MX, disposable, or filtered-DNS blocked); `false` only for rule 5 (accept).                                 |
 

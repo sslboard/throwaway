@@ -3,6 +3,8 @@ import json
 import os
 SERVICE = "yopmail.com"
 URL = os.environ.get("SERVICE_URL", "https://yopmail.com/en/email-generator")
+if "/email-generator" not in URL:
+    URL = "https://yopmail.com/en/email-generator"
 EXTRACT_QUERY = r"""
 (() => {
   const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
@@ -13,6 +15,8 @@ EXTRACT_QUERY = r"""
     if (text) sources.push({kind, value: text, selector});
   };
   add('generated-email-body', document.body ? document.body.innerText : '', 'document.body.innerText');
+  const generated = document.querySelector('#egen, #geny');
+  if (generated) add('generated-email-selector', generated.innerText || generated.textContent || '', generated.id ? `#${generated.id}` : '#egen/#geny');
 
   const emails = uniq(sources.flatMap(s => s.value.match(EMAIL_RE) || []));
   return {location: location.href, title: document.title, readyState: document.readyState, emails, evidence: sources.filter(s => EMAIL_RE.test(s.value)).slice(0, 20)};

@@ -1,47 +1,90 @@
 # Weekly Temp Email Domain Check — 2026-06-09
 
 ## Summary
-- Services reviewed: 10 Google first-page temp-email services
-- Candidate domains tested: 18 unique domains
-- New domains added: 1 (`web-library.net`)
+- Services reviewed: 30 queued from Google SERPs; 19 attempted with existing deterministic adapters; 17 produced live temp-email domains.
+- Candidate domains tested: 17
+- New domains added: 9 (`cometclear.com`, `quiet-branch.com`, `mroxis.com`, `deep-mail.org`, `ensam.edu.pl`, `encg.edu.pl`, `ofppt.edu.pl`, `zenvex.edu.pl`, `znvx.me`)
 - Local detector base URL: `http://localhost:8787`
 
 ## Services tested
+
 | Service | URL | Email/domain harvested | Local detector result | Action |
 |---|---|---|---|---|
-| Temp Mail | https://temp-mail.org/en/ | `ditel10295@fanchatu.com` | `disposable: true`, `valid_tld: true`, `has_mx: true` | Already covered |
-| temp-mail.io | https://temp-mail.io/en | `t9d438spl0@gmeenramy.com` | `disposable: true`, `valid_tld: true`, `has_mx: true` | Already covered |
-| Internxt Temp Mail | https://internxt.com/temporary-email | `jry2k@web-library.net` | Initially `disposable: false`, `valid_tld: true`, `has_mx: true`; recheck after rebuild `disposable: true` | Added `web-library.net` |
-| Tempmailo | https://tempmailo.com/ | `xibola@denipl.net` | `disposable: true`, `valid_tld: true`, `has_mx: true` | Already covered |
-| EmailOnDeck | https://www.emailondeck.com/ | No generated email; clicking Get Email reached captcha step | Not tested | Not fully tested |
-| Tempail | https://tempail.com/ | `nidrapukke@necub.com` | `disposable: true`, `valid_tld: true`, `has_mx: true` | Already covered |
-| Guerrilla Mail | https://www.guerrillamail.com/ | `xmtrmy+4wpmz1mbhg868@sharklasers.com`; visible domains `guerrillamail.info`, `grr.la`, `guerrillamail.biz`, `guerrillamail.com`, `guerrillamail.de`, `guerrillamail.net`, `guerrillamail.org`, `guerrillamailblock.com`, `pokemail.net`, `spam4.me` | All `disposable: true`, `valid_tld: true`, `has_mx: true` | Already covered |
-| Mail.tm | https://mail.tm/en/ | `rochetteemerald@web-library.net` | Initially `disposable: false`, `valid_tld: true`, `has_mx: true`; recheck after rebuild `disposable: true` | Added `web-library.net` |
-| tempmail.la | https://tempmail.la/ | `radiator4782810345@lovecalculatorname.org` | `disposable: true`, `valid_tld: true`, `has_mx: true` | Already covered |
-| temp-inbox | https://temp-inbox.me/ | `gretaltbtn@instantbox.live` | `disposable: true`, `valid_tld: true`, `has_mx: true` | Already covered |
+| temp-mail.org | https://temp-mail.org/en/ | `sojedal333@aspensif.com` / `aspensif.com` | covered | none |
+| temp-mail.io | https://temp-mail.io/en | `dftlfeckar@ruutukf.com` / `ruutukf.com` | covered | none |
+| internxt.com | https://internxt.com/temporary-email | `4hitx@web-library.net` / `web-library.net` | covered | none |
+| tempmailo.com | https://tempmailo.com/ | `ruhocuxi@denipl.net` / `denipl.net` | covered | none |
+| emailondeck.com | https://www.emailondeck.com/ | none | not tested | blocked by CAPTCHA/anti-bot gating; no bypass attempted |
+| tempail.com | https://tempail.com/ | `ziydecafyu@necub.com` / `necub.com` | covered | none |
+| mail.tm | https://mail.tm/en/ | `shereecondemned@web-library.net` / `web-library.net` | covered | none |
+| tmailor.com | https://tmailor.com/ | `m1ngpuxx@contaco.org` / `contaco.org` | covered | none |
+| temp-inbox.me | https://temp-inbox.me/ | `devonnar4c0@instantbox.live`, `test@temp-inbox.me` / `instantbox.live`, `temp-inbox.me` | covered | none |
+| disposablemail.com | https://www.disposablemail.com/ | `juanmanuel.karson@dropons.com` / `dropons.com` | covered | none |
+| maildrop.cc | https://maildrop.cc/ | `fancy.sparrow3481@maildrop.cc` / `maildrop.cc` | covered | none |
+| yopmail.com | https://yopmail.com/en/ | none | not tested | adapter failed to find expected generated email; needs review |
+| guerrillamail.com | https://www.guerrillamail.com/ | `xmuhma+cvna5zy2ylnrc@sharklasers.com` / `sharklasers.com` | covered | none |
+| mails.org | https://mails.org/ | `devon.j@cometclear.com` / `cometclear.com` | missed before update; covered after update | added `cometclear.com` |
+| fake-email.pro | https://fake-email.pro/ | `averiewalsh.0@quiet-branch.com` / `quiet-branch.com` | missed before update; covered after update | added `quiet-branch.com` |
+| 10minutemail.com | https://10minutemail.com/ | `bzlqvxxelijvxscrgs@jbsze.ne` / `jbsze.ne` | covered; `has_mx: false` | none |
+| 10minutemail.net | https://10minutemail.net/ | `msb05781@laoia.com` / `laoia.com` | covered | none |
+| minuteinbox.com | https://www.minuteinbox.com/ | `kaceson.jahriel@minafter.com` / `minafter.com` | covered | none |
+| 10minemail.com | https://10minemail.com/en/ | `tipigi1603@5nek.com` / `5nek.com` | covered | none |
 
 ## Domains added to `scripts/supplemental-domains.txt`
-- `web-library.net` — generated live by Internxt Temp Mail (`jry2k@web-library.net`) and Mail.tm (`rochetteemerald@web-library.net`); local detector returned `disposable: false` before adding.
+
+- `cometclear.com` — generated by mails.org as `devon.j@cometclear.com`; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
+- `quiet-branch.com` — generated by fake-email.pro as `averiewalsh.0@quiet-branch.com`; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
+- `mroxis.com` — generated by temp-email.io as `rqi05@mroxis.com`; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
+- `deep-mail.org` — generated by deepweb.net as `tamia.cole@deep-mail.org`; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
+- `ensam.edu.pl` — generated by zenvex.dev as `fd693uq@ensam.edu.pl`; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
+- `encg.edu.pl` — exposed by zenvex.dev domain dropdown as a selectable receiving domain; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
+- `ofppt.edu.pl` — exposed by zenvex.dev domain dropdown as a selectable receiving domain; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
+- `zenvex.edu.pl` — exposed by zenvex.dev domain dropdown as a selectable receiving domain; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
+- `znvx.me` — exposed by zenvex.dev domain dropdown as a selectable receiving domain; local detector initially returned `disposable: false`, `valid_tld: true`, `has_mx: true`.
 
 ## Already covered
-- `fanchatu.com` — Temp Mail
-- `gmeenramy.com` — temp-mail.io
-- `denipl.net` — Tempmailo
-- `necub.com` — Tempail
-- `sharklasers.com` — Guerrilla Mail
-- `guerrillamail.info`, `grr.la`, `guerrillamail.biz`, `guerrillamail.com`, `guerrillamail.de`, `guerrillamail.net`, `guerrillamail.org`, `guerrillamailblock.com`, `pokemail.net`, `spam4.me` — Guerrilla Mail visible domain list
-- `lovecalculatorname.org` — tempmail.la
-- `instantbox.live` — temp-inbox
+
+- `5nek.com` — 10minemail.com
+- `aspensif.com` — temp-mail.org
+- `contaco.org` — tmailor.com
+- `denipl.net` — tempmailo.com
+- `dropons.com` — disposablemail.com
+- `instantbox.live` — temp-inbox.me
+- `jbsze.ne` — 10minutemail.com; covered despite `has_mx: false`
+- `laoia.com` — 10minutemail.net
+- `maildrop.cc` — maildrop.cc
+- `minafter.com` — minuteinbox.com
+- `necub.com` — tempail.com
+- `ruutukf.com` — temp-mail.io
+- `sharklasers.com` — guerrillamail.com
+- `temp-inbox.me` — temp-inbox.me
+- `web-library.net` — internxt.com / mail.tm
 
 ## Services not fully tested
-- EmailOnDeck — clicking Get Email navigated to `?act=recap` and displayed `Invalid captcha, step 1 failed`; no CAPTCHA bypass attempted.
+
+- emailondeck.com — CAPTCHA/anti-bot gated generation; no bypass attempted.
+- amazon.com, bluestacks.com, pcmag.com, privacyinternational.org, linkedin.com, dwanethomas.com — queued by SERP collector but no adapter exists; likely non-generator/listing/article/social results and need exclusion review.
+
+## Adapter maintenance after initial run
+
+- Created and verified adapters for `temp-email.io`, `deepweb.net`, `tempgbox.net`, `temporarymail.com`, and `zenvex.dev`.
+- Fixed `yopmail.com` adapter by forcing `/email-generator` when the SERP queue URL is `/en/` and reading the generated address from `#egen`/`#geny`.
+- Verification queue for those six services completed with 6 `ok` adapter results and candidate domains: `mroxis.com`, `deep-mail.org`, `googlemail.com`, `horizonspost.com`, `ensam.edu.pl`, `yopmail.com`.
+- Added follow-up misses `mroxis.com`, `deep-mail.org`, and `ensam.edu.pl` to `scripts/supplemental-domains.txt`; recheck passed.
+- Enhanced `zenvex.dev` adapter to open its domain dropdown and enumerate `[role="option"]` choices: `encg.edu.pl`, `ensam.edu.pl`, `ofppt.edu.pl`, `zenvex.edu.pl`, `znvx.me`.
+- Added zenvex.dev dropdown misses `encg.edu.pl`, `ofppt.edu.pl`, `zenvex.edu.pl`, and `znvx.me`; recheck passed.
+- Enhanced `temporarymail.com` adapter to enumerate exact `#selectedDomain option` values. Exposed domains checked: `allfreemail.net`, `allwebemails.com`, `easymailer.live`, `horizonspost.com`, `inboxorigin.com`, `mailmagnet.co`, `mycreativeinbox.com`, `openmail.pro`, `solarnyx.com`; all were already covered.
+- Did not add `googlemail.com` despite the TempGBox generated address because it is Google's broad mail domain and would create a large false-positive risk. Treat this as a policy exception to review manually.
 
 ## Validation
-- `npm run build:filter`: pass. Initial refresh loaded 46 supplemental domains and removed 4 upstream duplicates (`brixozu.com`, `fanchatu.com`, `fixscal.com`, `dosbee.com`), producing 73,440 items. Final rebuild after adding `web-library.net` loaded 43 supplemental domains and produced 73,441 items.
-- `npm test`: pass — 2 test files, 45 tests passed.
-- Recheck newly added domains: pass — `jry2k@web-library.net` and `rochetteemerald@web-library.net` both returned `disposable: true` locally after rebuild.
+
+- `npm run build:filter`: pass. Item count changed from 73,441 to 73,450 after adding nine supplemental domains.
+- Recheck newly added domains: pass; `cometclear.com`, `quiet-branch.com`, `mroxis.com`, `deep-mail.org`, `ensam.edu.pl`, `encg.edu.pl`, `ofppt.edu.pl`, `zenvex.edu.pl`, and `znvx.me` now return `disposable: true` locally.
+- `npm test`: pass — 2 test files, 45 tests.
 
 ## Notes
-- Browser harvesting used new tabs via `browser-harness` and tested against local `wrangler dev` at `http://localhost:8787`.
-- No production API calls were used for detector validation.
-- The working tree already contained uncommitted 2026-06-09 supplemental additions before this browser-harvest run: `xbsees.com`, `retreze.com`, `mistark.com`, `brixozu.com`, `fanchatu.com`, `tixpad.com`, `xemtop.com`, `fixscal.com`, `snocv.com`, `dosbee.com`, `lulujewels.shop`, `damzfa.id`, and `minhminclone.io.vn`. The filter refresh removed the four now-upstream duplicates listed above.
+
+- SERP collection saved canonical queue to `/tmp/throwaway-serp-services.json`; adapter evidence saved to `/tmp/throwaway-adapter-results.json` and `/tmp/throwaway-adapter-results/`.
+- Updated `.pi/skills/weekly-temp-email-domain-checker/services.md` with newly queued hosts and the two newly verified domains.
+- No upstream duplicate removals from `scripts/supplemental-domains.txt` were observed in this run.
+- Browser inspection of missing-adapter services initially stopped after a harness batching issue opened a blank tab and timed out; follow-up adapter work was done one service at a time and is recorded above.

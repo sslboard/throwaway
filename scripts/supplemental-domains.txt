@@ -54,3 +54,18 @@ damzfa.id
 minhminclone.io.vn
 # Internxt Temp Mail / Mail.tm generated domain, verified 2026-06-09
 web-library.net
+
+# Added 2026-06-09 — weekly temp email domain check
+cometclear.com
+quiet-branch.com
+
+# Added 2026-06-09 — weekly temp email domain check adapter follow-up
+mroxis.com
+deep-mail.org
+ensam.edu.pl
+
+# Added 2026-06-09 — zenvex.dev exposed domain dropdown
+encg.edu.pl
+ofppt.edu.pl
+zenvex.edu.pl
+znvx.me

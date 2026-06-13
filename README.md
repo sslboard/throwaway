@@ -1,6 +1,6 @@
 # throwaway
 
-A Cloudflare Worker that detects disposable/temporary email domains, invalid TLDs, and non-existent domains (no MX records), exposed as a fast JSON API. Ships 72K+ domains in a ~173KB binary bloom filter. Uses [tldts](https://github.com/nicolo-ribaudo/tldts) for TLD validation and Cloudflare DNS-over-HTTPS for MX resolution. Includes a clean web UI at `/` for quick checks and `/llms.txt` for AI agent discovery.
+A Cloudflare Worker that detects disposable/temporary email domains, invalid TLDs, and non-existent domains (no MX records), exposed as a fast JSON API. Ships 72K+ domains in a ~173KB binary bloom filter. Uses [tldts](https://github.com/nicolo-ribaudo/tldts) for TLD validation and Cloudflare DNS-over-HTTPS for MX resolution. Includes a clean web UI at `/` for quick checks, `/llms.txt` for AI agent discovery, OpenAPI/catalog metadata, no-auth documentation, and MCP-compatible tool discovery.
 
 **Live deployment:** [throwaway.sslboard.com](https://throwaway.sslboard.com)
 
@@ -170,6 +170,22 @@ Returns filter metadata.
 ### `GET /llms.txt`
 
 Machine-readable API documentation for AI agents. Plain text markdown.
+
+### Agent-readiness endpoints
+
+All agent-facing endpoints are public and require no authentication:
+
+- `GET /llms-full.txt` — expanded machine-readable documentation with all discovery links.
+- `GET /auth.md` — explicit no-auth/no-commerce policy and request limits.
+- `GET /openapi.json` — OpenAPI 3.1 REST contract.
+- `GET /api-catalog.json` — machine-readable service catalog.
+- `GET /.well-known/mcp-server.json` — MCP server discovery card.
+- `GET /mcp` — lightweight JSON-RPC tool endpoint for listing and calling validation tools.
+- `GET /.well-known/agent-skills.json` — usage guidance for agents.
+- `GET /.well-known/agent-card.json` — minimal stateless agent card.
+- `GET /robots.txt` and `GET /sitemap.xml` — crawler policy and discovery inventory.
+
+The homepage also supports markdown negotiation with `Accept: text/markdown` or `?format=markdown`.
 
 ### Response Fields
 

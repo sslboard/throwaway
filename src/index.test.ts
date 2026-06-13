@@ -419,3 +419,68 @@ describe("Error handling", () => {
 		expect(res.status).toBe(405);
 	});
 });
+
+describe("agent-readiness discovery", () => {
+	it("serves markdown homepage when requested", async () => {
+		const res = await env.fetch(
+			new Request("http://localhost/", { headers: { Accept: "text/markdown" } }),
+		);
+		expect(res.status).toBe(200);
+		expect(res.headers.get("Content-Type")).toContain("text/markdown");
+		expect(await res.text()).toContain("/openapi.json");
+	});
+
+	it("serves no-auth documentation", async () => {
+		const res = await env.fetch(new Request("http://localhost/auth.md"));
+		expect(res.status).toBe(200);
+		expect(await res.text()).toContain("No API key is required");
+	});
+
+	it("serves OpenAPI and API catalog metadata", async () => {
+		const openapi = await env.fetch(new Request("http://localhost/openapi.json"));
+		expect(openapi.status).toBe(200);
+		expect(openapi.headers.get("Content-Type")).toContain("application/openapi+json");
+		expect(await openapi.json()).toHaveProperty("openapi", "3.1.0");
+
+		const catalog = await env.fetch(new Request("http://localhost/api-catalog.json"));
+		expect(catalog.status).toBe(200);
+		expect(await catalog.json()).toHaveProperty("authentication", "none");
+	});
+
+	it("serves MCP, skill, and agent discovery metadata", async () => {
+		const mcp = await env.fetch(new Request("http://localhost/.well-known/mcp-server.json"));
+		expect(mcp.status).toBe(200);
+		expect(await mcp.json()).toHaveProperty("authentication.type", "none");
+
+		const skills = await env.fetch(new Request("http://localhost/.well-known/agent-skills.json"));
+		expect(skills.status).toBe(200);
+		expect(await skills.text()).toContain("should_reject");
+
+		const card = await env.fetch(new Request("http://localhost/.well-known/agent-card.json"));
+		expect(card.status).toBe(200);
+		expect(await card.text()).toContain("email_validation");
+	});
+
+	it("advertises discovery resources in robots, sitemap, and Link headers", async () => {
+		const robots = await env.fetch(new Request("http://localhost/robots.txt"));
+		expect(await robots.text()).toContain("LLMS: https://throwaway.sslboard.com/llms.txt");
+
+		const sitemap = await env.fetch(new Request("http://localhost/sitemap.xml"));
+		expect(await sitemap.text()).toContain("https://throwaway.sslboard.com/openapi.json");
+
+		const stats = await env.fetch(new Request("http://localhost/stats"));
+		expect(stats.headers.get("Link")).toContain("/openapi.json");
+	});
+
+	it("lists MCP tools", async () => {
+		const res = await env.fetch(
+			new Request("http://localhost/mcp", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+			}),
+		);
+		expect(res.status).toBe(200);
+		expect(await res.text()).toContain("check_email");
+	});
+});

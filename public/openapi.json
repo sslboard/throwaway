@@ -1,0 +1,285 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "throwaway API",
+    "version": "1.2.3",
+    "description": "Public no-auth API for disposable email, TLD, MX, and filtered-DNS checks.",
+    "license": {
+      "name": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://throwaway.sslboard.com"
+    }
+  ],
+  "security": [],
+  "paths": {
+    "/check": {
+      "get": {
+        "summary": "Check one email address or domain",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Batch-check emails or domains",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BatchEmailsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BatchDomainsRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch check results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "results"
+                  ],
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/CheckResult"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Error"
+          },
+          "405": {
+            "$ref": "#/components/responses/Error"
+          },
+          "413": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "summary": "Return bloom-filter metadata",
+        "responses": {
+          "200": {
+            "description": "Filter stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stats"
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Return service version",
+        "responses": {
+          "200": {
+            "description": "Health result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "version"
+                  ],
+                  "properties": {
+                    "version": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "Error": {
+        "description": "Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "CheckResult": {
+        "type": "object",
+        "required": [
+          "domain",
+          "valid_tld",
+          "has_mx",
+          "disposable",
+          "should_reject"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "domain": {
+            "type": "string"
+          },
+          "valid_tld": {
+            "type": "boolean"
+          },
+          "has_mx": {
+            "type": "boolean"
+          },
+          "dns_blocked": {
+            "type": "boolean"
+          },
+          "dns_blocked_category": {
+            "type": "string",
+            "enum": [
+              "malware",
+              "family",
+              "unknown"
+            ]
+          },
+          "disposable": {
+            "type": "boolean"
+          },
+          "should_reject": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BatchEmailsRequest": {
+        "type": "object",
+        "required": [
+          "emails"
+        ],
+        "properties": {
+          "emails": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        }
+      },
+      "BatchDomainsRequest": {
+        "type": "object",
+        "required": [
+          "domains"
+        ],
+        "properties": {
+          "domains": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Stats": {
+        "type": "object",
+        "required": [
+          "itemCount",
+          "bitCount",
+          "hashCount",
+          "byteSize",
+          "falsePositiveRate"
+        ],
+        "properties": {
+          "itemCount": {
+            "type": "integer"
+          },
+          "bitCount": {
+            "type": "integer"
+          },
+          "hashCount": {
+            "type": "integer"
+          },
+          "byteSize": {
+            "type": "integer"
+          },
+          "falsePositiveRate": {
+            "type": "number"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

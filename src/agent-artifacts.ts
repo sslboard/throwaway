@@ -1,7 +1,6 @@
 import { version } from "../package.json";
 import { BASE_URL } from "./http";
-import llmsTxt from "./llms.txt";
-import { MAX_BATCH_SIZE, MAX_BODY_SIZE } from "./email-check";
+import { MAX_BATCH_SIZE } from "./limits";
 
 const json = (value: unknown) => JSON.stringify(value, null, 2);
 
@@ -79,20 +78,6 @@ ${sitemapUrls
 </urlset>
 `;
 
-export const AUTH_MD = `# Authentication for throwaway
-
-Throwaway has **no authentication**.
-
-- No API key is required.
-- No OAuth authorization server is available.
-- No protected resources or user-specific data exist.
-- CORS is open for browser-based integrations.
-- Current request limits: request bodies are capped at ${MAX_BODY_SIZE} bytes and batch requests are capped at ${MAX_BATCH_SIZE} emails or domains.
-- No formal rate limit is currently enforced, but abusive traffic may be blocked or rate-limited in the future.
-
-Use the public REST API or MCP tools only for email/domain validation and abuse-prevention workflows. The service does not send emails, create accounts, make purchases, or perform authenticated user actions.
-`;
-
 export const HOME_MARKDOWN = `# throwaway
 
 Disposable and invalid email detector hosted at ${BASE_URL}.
@@ -117,27 +102,6 @@ Disposable and invalid email detector hosted at ${BASE_URL}.
 - \`/.well-known/agent-skills.json\` agent usage skill manifest.
 
 Use \`should_reject\` as the coarse accept/reject signal, or inspect \`valid_tld\`, \`has_mx\`, \`dns_blocked\`, and \`disposable\` for explanation.
-`;
-
-export const LLMS_FULL_TXT = `${llmsTxt}
-
-## Agent discovery resources
-
-- Homepage markdown: ${BASE_URL}/?format=markdown or \`Accept: text/markdown\`.
-- Authentication policy: ${BASE_URL}/auth.md (no auth, no OAuth, no commerce).
-- OpenAPI: ${BASE_URL}/openapi.json.
-- API catalog: ${BASE_URL}/api-catalog.json.
-- MCP server card: ${BASE_URL}/.well-known/mcp-server.json.
-- MCP endpoint: ${BASE_URL}/mcp.
-- WebMCP metadata: ${BASE_URL}/.well-known/webmcp.
-- Agent skills: ${BASE_URL}/.well-known/agent-skills.json.
-- Agent card: ${BASE_URL}/.well-known/agent-card.json.
-- Sitemap: ${BASE_URL}/sitemap.xml.
-- Robots policy: ${BASE_URL}/robots.txt.
-
-## Limits and safety
-
-No API key is required. Request bodies are capped at ${MAX_BODY_SIZE} bytes and batch requests are capped at ${MAX_BATCH_SIZE} emails or domains. Disposable email detection is an abuse-prevention signal, not proof of malicious intent.
 `;
 
 export const OPENAPI = {
@@ -334,7 +298,11 @@ export const WEBMCP_MANIFEST = {
 		{
 			name: "check_email",
 			description: "Validate one email address.",
-			inputSchema: { type: "object", required: ["email"], properties: { email: { type: "string" } } },
+			inputSchema: {
+				type: "object",
+				required: ["email"],
+				properties: { email: { type: "string" } },
+			},
 		},
 		{
 			name: "check_domain",
@@ -351,7 +319,9 @@ export const WEBMCP_MANIFEST = {
 			inputSchema: {
 				type: "object",
 				required: ["emails"],
-				properties: { emails: { type: "array", items: { type: "string" }, maxItems: MAX_BATCH_SIZE } },
+				properties: {
+					emails: { type: "array", items: { type: "string" }, maxItems: MAX_BATCH_SIZE },
+				},
 			},
 		},
 		{
@@ -360,7 +330,9 @@ export const WEBMCP_MANIFEST = {
 			inputSchema: {
 				type: "object",
 				required: ["domains"],
-				properties: { domains: { type: "array", items: { type: "string" }, maxItems: MAX_BATCH_SIZE } },
+				properties: {
+					domains: { type: "array", items: { type: "string" }, maxItems: MAX_BATCH_SIZE },
+				},
 			},
 		},
 		{

@@ -11,7 +11,8 @@
 	"license": "MIT",
 	"scripts": {
 		"build:filter": "tsx scripts/build-filter.ts",
-		"build": "npm run build:filter && tsc --noEmit",
+		"build:agent-artifacts": "tsx scripts/build-agent-artifacts.ts",
+		"build": "npm run build:filter && npm run build:agent-artifacts && tsc --noEmit",
 		"dev": "wrangler dev",
 		"deploy": "npm run build && wrangler deploy",
 		"test": "vitest run",
@@ -20,17 +21,21 @@
 		"format:check": "prettier --check ."
 	},
 	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.16.15",
 		"@emnapi/core": "1.10.0",
 		"@emnapi/runtime": "1.10.0",
-		"@cloudflare/vitest-pool-workers": "^0.15.1",
 		"@playwright/test": "^1.59.1",
 		"prettier": "^3.8.3",
-		"tsx": "^4.19.0",
+		"tsx": "^4.22.4",
 		"typescript": "^5.9.3",
 		"vitest": "^4.1.5",
-		"wrangler": "^4.86.0"
+		"wrangler": "^4.100.0"
 	},
 	"dependencies": {
+		"hono": "^4.12.25",
 		"tldts": "^7.0.29"
+	},
+	"overrides": {
+		"esbuild": "0.28.1"
 	}
 }

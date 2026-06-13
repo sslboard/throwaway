@@ -1,117 +1,88 @@
+import { Hono } from "hono";
 import { handleCheck, handleHealth, handleStats } from "./routes/api";
 import {
-	handleAgentCard,
-	handleAgentSkills,
-	handleApiCatalog,
 	handleAuth,
 	handleHome,
+	handleJsonArtifact,
 	handleLlms,
 	handleLlmsFull,
-	handleMcpServerCard,
 	handleOpenApi,
 	handleRobots,
 	handleSitemap,
-	handleWebMcp,
 } from "./routes/discovery";
 import { handleMcp } from "./routes/mcp";
 import { CORS_HEADERS, errorResponse } from "./http";
+
+type AppBindings = {
+	Bindings: Env;
+};
 
 function methodNotAllowed(): Response {
 	return errorResponse("Method not allowed", 405);
 }
 
-export default {
-	async fetch(request: Request, env: Env): Promise<Response> {
-		const url = new URL(request.url);
-		const path = url.pathname;
+const app = new Hono<AppBindings>();
 
-		if (request.method === "OPTIONS") {
-			return new Response(null, { status: 204, headers: CORS_HEADERS });
-		}
+app.on("OPTIONS", "*", () => new Response(null, { status: 204, headers: CORS_HEADERS }));
 
-		if (path === "/check") {
-			if (request.method !== "GET" && request.method !== "POST") return methodNotAllowed();
-			return handleCheck(request);
-		}
+app.on(["GET", "POST"], "/check", (c) => handleCheck(c.req.raw));
+app.all("/check", methodNotAllowed);
 
-		if (path === "/stats") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleStats();
-		}
+app.get("/stats", handleStats);
+app.all("/stats", methodNotAllowed);
 
-		if (path === "/health") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleHealth();
-		}
+app.get("/health", handleHealth);
+app.all("/health", methodNotAllowed);
 
-		if (path === "/mcp") {
-			if (request.method !== "GET" && request.method !== "POST") return methodNotAllowed();
-			return handleMcp(request);
-		}
+app.on(["GET", "POST"], "/mcp", (c) => handleMcp(c.req.raw));
+app.all("/mcp", methodNotAllowed);
 
-		if (path === "/llms.txt") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleLlms();
-		}
+app.on(["GET", "HEAD"], "/llms.txt", (c) => handleLlms(c.req.raw, c.env));
+app.all("/llms.txt", methodNotAllowed);
 
-		if (path === "/llms-full.txt") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleLlmsFull();
-		}
+app.on(["GET", "HEAD"], "/llms-full.txt", (c) => handleLlmsFull(c.req.raw, c.env));
+app.all("/llms-full.txt", methodNotAllowed);
 
-		if (path === "/auth.md") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleAuth();
-		}
+app.on(["GET", "HEAD"], "/auth.md", (c) => handleAuth(c.req.raw, c.env));
+app.all("/auth.md", methodNotAllowed);
 
-		if (path === "/robots.txt") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleRobots();
-		}
+app.get("/robots.txt", handleRobots);
+app.all("/robots.txt", methodNotAllowed);
 
-		if (path === "/sitemap.xml") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleSitemap();
-		}
+app.get("/sitemap.xml", handleSitemap);
+app.all("/sitemap.xml", methodNotAllowed);
 
-		if (path === "/openapi.json") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleOpenApi();
-		}
+app.on(["GET", "HEAD"], "/openapi.json", (c) => handleOpenApi(c.req.raw, c.env));
+app.all("/openapi.json", methodNotAllowed);
 
-		if (path === "/api-catalog.json") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleApiCatalog();
-		}
+app.on(["GET", "HEAD"], "/api-catalog.json", (c) => handleJsonArtifact(c.req.raw, c.env));
+app.all("/api-catalog.json", methodNotAllowed);
 
-		if (path === "/.well-known/mcp-server.json") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleMcpServerCard();
-		}
+app.on(["GET", "HEAD"], "/.well-known/mcp-server.json", (c) =>
+	handleJsonArtifact(c.req.raw, c.env),
+);
+app.all("/.well-known/mcp-server.json", methodNotAllowed);
 
-		if (path === "/.well-known/webmcp") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleWebMcp();
-		}
+app.on(["GET", "HEAD"], "/.well-known/webmcp", (c) => handleJsonArtifact(c.req.raw, c.env));
+app.all("/.well-known/webmcp", methodNotAllowed);
 
-		if (path === "/.well-known/agent-skills.json") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleAgentSkills();
-		}
+app.on(["GET", "HEAD"], "/.well-known/agent-skills.json", (c) =>
+	handleJsonArtifact(c.req.raw, c.env),
+);
+app.all("/.well-known/agent-skills.json", methodNotAllowed);
 
-		if (path === "/.well-known/agent-card.json") {
-			if (request.method !== "GET") return methodNotAllowed();
-			return handleAgentCard();
-		}
+app.on(["GET", "HEAD"], "/.well-known/agent-card.json", (c) =>
+	handleJsonArtifact(c.req.raw, c.env),
+);
+app.all("/.well-known/agent-card.json", methodNotAllowed);
 
-		if (path === "/" && (request.method === "GET" || request.method === "HEAD")) {
-			return handleHome(request, env);
-		}
+app.on(["GET", "HEAD"], "/", (c) => handleHome(c.req.raw, c.env));
 
-		if (request.method === "GET" || request.method === "HEAD") {
-			return env.ASSETS.fetch(request);
-		}
+app.notFound((c) => {
+	if (c.req.method === "GET" || c.req.method === "HEAD") {
+		return c.env.ASSETS.fetch(c.req.raw);
+	}
+	return errorResponse("Not found", 404);
+});
 
-		return errorResponse("Not found", 404);
-	},
-};
+export default app;

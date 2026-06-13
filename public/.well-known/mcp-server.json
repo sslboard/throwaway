@@ -1,0 +1,20 @@
+{
+  "name": "throwaway",
+  "description": "Read-only disposable email/domain validation tools.",
+  "url": "https://throwaway.sslboard.com",
+  "transport": {
+    "type": "streamable-http",
+    "url": "https://throwaway.sslboard.com/mcp"
+  },
+  "authentication": {
+    "type": "none",
+    "documentation": "https://throwaway.sslboard.com/auth.md"
+  },
+  "tools": [
+    "check_email",
+    "check_domain",
+    "batch_check_emails",
+    "batch_check_domains",
+    "get_stats"
+  ]
+}

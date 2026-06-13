@@ -2,11 +2,11 @@ import { parse as parseTld } from "tldts";
 import { BloomFilter } from "./bloom";
 import { BIT_COUNT, HASH_COUNT, ITEM_COUNT } from "./generated/filter-meta";
 import filterData from "./generated/filter.bin";
+import { MAX_BATCH_SIZE, MAX_BODY_SIZE } from "./limits";
 
 const filter = new BloomFilter(BIT_COUNT, HASH_COUNT, new Uint8Array(filterData));
 
-export const MAX_BODY_SIZE = 100_000;
-export const MAX_BATCH_SIZE = 1000;
+export { MAX_BATCH_SIZE, MAX_BODY_SIZE };
 
 export type DnsBlockedCategory = "malware" | "family" | "unknown";
 

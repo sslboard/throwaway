@@ -1,39 +1,42 @@
-import llmsTxt from "../llms.txt";
-import { textResponse, jsonResponse, wantsMarkdown } from "../http";
-import {
-	AGENT_CARD,
-	AGENT_SKILLS,
-	API_CATALOG,
-	AUTH_MD,
-	HOME_MARKDOWN,
-	jsonArtifact,
-	LLMS_FULL_TXT,
-	MCP_SERVER_CARD,
-	OPENAPI,
-	ROBOTS_TXT,
-	SITEMAP_XML,
-	WEBMCP_MANIFEST,
-} from "../agent-artifacts";
+import { textResponse, wantsMarkdown } from "../http";
+import { HOME_MARKDOWN, ROBOTS_TXT, SITEMAP_XML } from "../agent-artifacts";
 
 export async function handleHome(request: Request, env: Env): Promise<Response> {
 	if (wantsMarkdown(request)) return textResponse(HOME_MARKDOWN, "text/markdown; charset=utf-8");
 	return env.ASSETS.fetch(request);
 }
 
-export function handleLlms(): Response {
-	return textResponse(llmsTxt, "text/plain; charset=utf-8", 200, {
+async function staticAssetResponse(
+	request: Request,
+	env: Env,
+	contentType: string,
+	headers: Record<string, string> = {},
+): Promise<Response> {
+	const response = await env.ASSETS.fetch(request);
+	const responseHeaders = new Headers(response.headers);
+	responseHeaders.set("Content-Type", contentType);
+	for (const [name, value] of Object.entries(headers)) responseHeaders.set(name, value);
+	return new Response(response.body, {
+		status: response.status,
+		statusText: response.statusText,
+		headers: responseHeaders,
+	});
+}
+
+export function handleLlms(request: Request, env: Env): Promise<Response> {
+	return staticAssetResponse(request, env, "text/plain; charset=utf-8", {
 		"Access-Control-Allow-Origin": "*",
 	});
 }
 
-export function handleLlmsFull(): Response {
-	return textResponse(LLMS_FULL_TXT, "text/plain; charset=utf-8", 200, {
+export function handleLlmsFull(request: Request, env: Env): Promise<Response> {
+	return staticAssetResponse(request, env, "text/plain; charset=utf-8", {
 		"Access-Control-Allow-Origin": "*",
 	});
 }
 
-export function handleAuth(): Response {
-	return textResponse(AUTH_MD, "text/markdown; charset=utf-8");
+export function handleAuth(request: Request, env: Env): Promise<Response> {
+	return staticAssetResponse(request, env, "text/markdown; charset=utf-8");
 }
 
 export function handleRobots(): Response {
@@ -48,30 +51,10 @@ export function handleSitemap(): Response {
 	});
 }
 
-export function handleOpenApi(): Response {
-	return jsonResponse(OPENAPI, 200, { "Content-Type": "application/openapi+json" });
+export function handleJsonArtifact(request: Request, env: Env): Promise<Response> {
+	return staticAssetResponse(request, env, "application/json; charset=utf-8");
 }
 
-export function handleApiCatalog(): Response {
-	return jsonResponse(API_CATALOG);
-}
-
-export function handleMcpServerCard(): Response {
-	return jsonResponse(MCP_SERVER_CARD);
-}
-
-export function handleWebMcp(): Response {
-	return jsonResponse(WEBMCP_MANIFEST);
-}
-
-export function handleAgentSkills(): Response {
-	return jsonResponse(AGENT_SKILLS);
-}
-
-export function handleAgentCard(): Response {
-	return jsonResponse(AGENT_CARD);
-}
-
-export function rawOpenApiJson(): string {
-	return jsonArtifact(OPENAPI);
+export function handleOpenApi(request: Request, env: Env): Promise<Response> {
+	return staticAssetResponse(request, env, "application/openapi+json; charset=utf-8");
 }

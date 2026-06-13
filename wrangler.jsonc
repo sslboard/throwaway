@@ -7,15 +7,12 @@
 	"assets": {
 		"directory": "./public",
 		"binding": "ASSETS",
-		"run_worker_first": true
+		"run_worker_first": true,
 	},
 	"routes": [
 		{ "pattern": "throwaway.sslboard.com", "custom_domain": true },
 		{ "pattern": "throwaway.happysouls.app", "custom_domain": true },
-		{ "pattern": "throwaway.chris-hartwig.com", "custom_domain": true }
+		{ "pattern": "throwaway.chris-hartwig.com", "custom_domain": true },
 	],
-	"rules": [
-		{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": true },
-		{ "type": "Text", "globs": ["**/*.txt"], "fallthrough": true },
-	],
+	"rules": [{ "type": "Data", "globs": ["**/*.bin"], "fallthrough": true }],
 }

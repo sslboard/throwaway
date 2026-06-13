@@ -1,22 +1,46 @@
-# throwaway
+# throwaway full agent reference
 
-> Disposable & invalid email detector - bloom filter API on Cloudflare Workers
-
-## What it does
-
-Given an email address or domain, returns whether the TLD is a real ICANN-recognized suffix, whether the domain has MX records (can receive mail), whether Cloudflare family DNS appears to block the domain, and whether the domain is a known disposable/temporary email provider (mailinator, guerrillamail, etc). Uses the [disposable/disposable](https://github.com/disposable/disposable) list (72K+ domains) compiled into a bloom filter for fast O(1) lookups.
-
-Use this before sending signup emails, creating accounts, or accepting form submissions to block throwaway addresses, non-existent domains, and syntactically invalid domains.
-
-## API
+> Fast no-auth API for deciding whether an email address or domain should be rejected as disposable, but also invalid, non-deliverable, malware, adult content.
 
 Base URL: `https://throwaway.sslboard.com`
 
-### Check a single email
+Short entry point: `GET /llms.txt`
 
-```
+## What it does
+
+Given an email address or domain, throwaway returns whether:
+
+- the domain is a known disposable/temporary email provider;
+- the domain ends in a real ICANN-recognized public suffix/TLD;
+- the domain has MX records and can receive email;
+- Cloudflare family DNS appears to block the domain;
+- the address or domain should be rejected by a coarse validation gate.
+
+The disposable-domain check uses the [disposable/disposable](https://github.com/disposable/disposable) list plus supplemental domains compiled into a bloom filter for fast lookups.
+
+Use this before sending signup emails, creating accounts, accepting form submissions, importing leads, or running abuse-prevention checks. Disposable-email detection is a signal, not proof of malicious intent.
+
+## Authentication and access
+
+No authentication is required.
+
+- No API key.
+- No OAuth.
+- No protected resources.
+- No user-specific data.
+- CORS is open for browser-based integrations.
+
+See `GET /auth.md` for the explicit no-auth policy.
+
+## REST API
+
+### Check one email address
+
+```http
 GET /check?email=user@example.com
 ```
+
+Example disposable result:
 
 ```json
 {
@@ -30,11 +54,19 @@ GET /check?email=user@example.com
 }
 ```
 
-### Check a single domain
+Invalid email syntax returns an error:
 
+```json
+{ "error": "Invalid email address" }
 ```
+
+### Check one domain
+
+```http
 GET /check?domain=example.com
 ```
+
+Example accepted result:
 
 ```json
 {
@@ -47,9 +79,9 @@ GET /check?domain=example.com
 }
 ```
 
-### Batch check emails
+### Batch check email addresses
 
-```
+```http
 POST /check
 Content-Type: application/json
 
@@ -59,16 +91,39 @@ Content-Type: application/json
 ```json
 {
   "results": [
-    { "email": "a@mailinator.com", "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": true, "should_reject": true },
-    { "email": "b@gmail.com", "domain": "gmail.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": false, "should_reject": false },
-    { "email": "c@fake.notarealtld", "domain": "fake.notarealtld", "valid_tld": false, "has_mx": false, "disposable": false, "should_reject": true }
+    {
+      "email": "a@mailinator.com",
+      "domain": "mailinator.com",
+      "valid_tld": true,
+      "has_mx": true,
+      "dns_blocked": false,
+      "disposable": true,
+      "should_reject": true
+    },
+    {
+      "email": "b@gmail.com",
+      "domain": "gmail.com",
+      "valid_tld": true,
+      "has_mx": true,
+      "dns_blocked": false,
+      "disposable": false,
+      "should_reject": false
+    },
+    {
+      "email": "c@fake.notarealtld",
+      "domain": "fake.notarealtld",
+      "valid_tld": false,
+      "has_mx": false,
+      "disposable": false,
+      "should_reject": true
+    }
   ]
 }
 ```
 
 ### Batch check domains
 
-```
+```http
 POST /check
 Content-Type: application/json
 
@@ -78,15 +133,29 @@ Content-Type: application/json
 ```json
 {
   "results": [
-    { "domain": "mailinator.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": true, "should_reject": true },
-    { "domain": "yahoo.com", "valid_tld": true, "has_mx": true, "dns_blocked": false, "disposable": false, "should_reject": false }
+    {
+      "domain": "mailinator.com",
+      "valid_tld": true,
+      "has_mx": true,
+      "dns_blocked": false,
+      "disposable": true,
+      "should_reject": true
+    },
+    {
+      "domain": "yahoo.com",
+      "valid_tld": true,
+      "has_mx": true,
+      "dns_blocked": false,
+      "disposable": false,
+      "should_reject": false
+    }
   ]
 }
 ```
 
 ### Filter stats
 
-```
+```http
 GET /stats
 ```
 
@@ -100,61 +169,275 @@ GET /stats
 }
 ```
 
+### Health
+
+```http
+GET /health
+```
+
+```json
+{ "version": "1.2.3" }
+```
+
+## Request rules
+
+`GET /check` accepts exactly one of `email` or `domain`.
+
+`POST /check` accepts exactly one of:
+
+```json
+{ "emails": ["user@example.com"] }
+```
+
+or:
+
+```json
+{ "domains": ["example.com"] }
+```
+
+Do not send both `emails` and `domains` in the same request. Batch arrays are capped at 1000 strings. Request bodies are capped at 100000 bytes.
+
 ## Response fields
 
-| Field | Type | Meaning |
-|---|---|---|
-| `valid_tld` | boolean | `true` if the domain ends in a real ICANN-recognized TLD (`.com`, `.co.uk`, etc). `false` means the address can't possibly receive mail. |
-| `has_mx` | boolean | `true` if the domain has MX records (can receive email). `false` means the domain doesn't exist or has no mail server. |
-| `dns_blocked` | boolean | `true` if Cloudflare family DNS appeared to block an otherwise email-capable domain. Omitted when `has_mx` is `false` because filtered-DNS checks are skipped. |
-| `dns_blocked_category` | string | Optional when `dns_blocked` is `true`: `malware`, `family`, or `unknown`, inferred by comparing Cloudflare family DNS with malware-only DNS. |
-| `disposable` | boolean | `true` if the domain is in the disposable-email blocklist. Only meaningful when `valid_tld` is `true`. |
-| `should_reject` | boolean | `true` when the rules below say to reject (invalid TLD, no MX, disposable, or filtered-DNS blocked). |
+| Field | Type | Present on | Meaning |
+|---|---:|---|---|
+| `email` | string | Email checks | Normalized or echoed email address that was checked. |
+| `domain` | string | All checks | Domain extracted from the email or supplied directly. |
+| `valid_tld` | boolean | All checks | `true` when the domain ends in a real ICANN-recognized suffix such as `.com` or `.co.uk`. `false` means the address cannot receive mail on the public Internet. |
+| `has_mx` | boolean | All checks | `true` when the domain has MX records. `false` means the domain does not exist, has no mail server, or cannot receive email. |
+| `dns_blocked` | boolean | Usually when MX checks succeed | `true` when Cloudflare family DNS appeared to block an otherwise email-capable domain. Omitted when filtered-DNS checks are skipped. |
+| `dns_blocked_category` | string | Only when available | Optional category: `malware`, `family`, or `unknown`, inferred by comparing Cloudflare family DNS with malware-only DNS. |
+| `disposable` | boolean | All checks | `true` when the domain is in the disposable-email bloom filter. Only meaningful when `valid_tld` is `true`. |
+| `should_reject` | boolean | All checks | Coarse accept/reject recommendation. `true` for invalid TLD, no MX, disposable provider, or filtered-DNS block. |
 
 ## How to interpret results
 
-Use **`should_reject`** for a single accept/reject gate, or read the fields individually:
+Use `should_reject` for a simple gate. Inspect the other fields for user-facing explanations, logging, or risk scoring.
 
-1. **`valid_tld: false`** -> reject. The domain is not real.
-2. **`has_mx: false`** -> reject. The domain has no mail server and can't receive email.
-3. **`valid_tld: true`, `has_mx: true`, `disposable: true`** -> reject. Known throwaway provider.
-4. **`valid_tld: true`, `has_mx: true`, `dns_blocked: true`** -> reject. Blocked by filtered DNS.
-5. **`valid_tld: true`, `has_mx: true`, `disposable: false`, `dns_blocked: false`** -> accept.
+Recommended interpretation:
 
-No API key needed. No rate limits currently enforced.
+1. `valid_tld: false` → reject. The domain suffix is not real.
+2. `has_mx: false` → reject. The domain cannot receive email.
+3. `valid_tld: true`, `has_mx: true`, `disposable: true` → reject, block, or add friction. This is a known temporary-email provider.
+4. `valid_tld: true`, `has_mx: true`, `dns_blocked: true` → reject or review. The domain appears blocked by filtered DNS.
+5. `valid_tld: true`, `has_mx: true`, `disposable: false`, `dns_blocked: false` → accept.
 
-## About
+Avoid treating `disposable: true` as proof of abuse. It is best used as an abuse-prevention or quality-control signal.
+
+## Error behavior
+
+Errors are JSON objects with an `error` string.
+
+Common statuses:
+
+- `400` — missing parameters, conflicting parameters, invalid email, invalid JSON, wrong body shape, or invalid tool arguments.
+- `405` — unsupported HTTP method.
+- `413` — request body too large.
+
+Example:
+
+```json
+{ "error": "Expected exactly one of emails or domains" }
+```
+
+## OpenAPI
+
+The REST API contract is available at:
+
+- `GET /openapi.json`
+
+It is OpenAPI 3.1 and declares no security schemes because the API is public and unauthenticated.
+
+Documented REST paths:
+
+- `/check` — `GET` and `POST` validation endpoint.
+- `/stats` — `GET` bloom-filter metadata.
+- `/health` — `GET` service version.
+
+Use the OpenAPI file when generating clients, validating response schemas, or integrating with tools that prefer REST contracts over MCP.
+
+## MCP server
+
+Discovery card:
+
+- `GET /.well-known/mcp-server.json`
+
+Endpoint:
+
+- `GET /mcp` — returns service/tool metadata.
+- `POST /mcp` — accepts JSON-RPC calls.
+
+Transport: streamable HTTP. Authentication: none.
+
+Supported JSON-RPC methods:
+
+- `tools/list`
+- `tools/call`
+
+Tools:
+
+### `check_email`
+
+Validate one email address.
+
+Input:
+
+```json
+{ "email": "user@example.com" }
+```
+
+Result content contains a JSON `CheckResult`.
+
+### `check_domain`
+
+Validate one domain.
+
+Input:
+
+```json
+{ "domain": "example.com" }
+```
+
+### `batch_check_emails`
+
+Validate up to 1000 email addresses.
+
+Input:
+
+```json
+{ "emails": ["a@example.com", "b@example.com"] }
+```
+
+### `batch_check_domains`
+
+Validate up to 1000 domains.
+
+Input:
+
+```json
+{ "domains": ["example.com", "mailinator.com"] }
+```
+
+### `get_stats`
+
+Return bloom-filter metadata.
+
+Input:
+
+```json
+{}
+```
+
+Example MCP call:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "check_email",
+    "arguments": { "email": "user@mailinator.com" }
+  }
+}
+```
+
+Example MCP response shape:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "json",
+        "json": {
+          "email": "user@mailinator.com",
+          "domain": "mailinator.com",
+          "valid_tld": true,
+          "has_mx": true,
+          "dns_blocked": false,
+          "disposable": true,
+          "should_reject": true
+        }
+      }
+    ]
+  }
+}
+```
+
+## WebMCP and agent metadata
+
+WebMCP-compatible metadata:
+
+- `GET /.well-known/webmcp`
+
+Agent usage guidance:
+
+- `GET /.well-known/agent-skills.json`
+
+Stateless validation agent card:
+
+- `GET /.well-known/agent-card.json`
+
+API catalog metadata:
+
+- `GET /api-catalog.json`
+
+These resources advertise the same core validation capabilities for clients that discover services through well-known URLs rather than OpenAPI alone.
+
+## Text-first and crawler resources
+
+- `GET /llms.txt` — concise agent entry point.
+- `GET /llms-full.txt` — this full reference.
+- `GET /auth.md` — no-auth and access policy.
+- `GET /sitemap.xml` — sitemap for discovery.
+- `GET /robots.txt` — crawler allowances and content-signal policy.
+
+The homepage supports text-first clients through either:
+
+- `GET /?format=markdown`
+- `Accept: text/markdown`
+
+## Limits and operational guidance
+
+Current limits:
+
+- Request bodies: 100000 bytes max.
+- Batch size: 1000 emails or domains max.
+- Authentication: none.
+- Formal rate limits: none currently enforced.
+
+Abusive traffic may be blocked or rate-limited in the future. High-volume clients should send a descriptive `User-Agent` with a contact email, for example:
+
+```text
+ExampleSignupChecker/1.0 (ops@example.com)
+```
+
+Avoid logging full email addresses unless your application requires it. If logging validation failures, consider storing only the domain and rejection reason.
+
+## Recommended client behavior
+
+For signup or lead forms:
+
+1. Call `GET /check?email=...` or the `check_email` MCP tool.
+2. If `should_reject` is `false`, continue.
+3. If `should_reject` is `true`, show a generic message such as “Please use a valid email address that can receive mail.”
+4. If you need a more specific explanation, map fields to reasons:
+   - invalid TLD → “The email domain is not valid.”
+   - no MX → “The email domain cannot receive mail.”
+   - disposable → “Temporary email addresses are not accepted.”
+   - DNS blocked → “The email domain could not be validated.”
+
+For batches:
+
+1. Use `POST /check` with either `emails` or `domains`.
+2. Keep batches below 1000 items.
+3. Retry only transient network failures. Do not retry validation errors without changing input.
+
+## Provider
 
 Built by the people at [SSLBoard](https://sslboard.com).
 
-## Agent discovery
-
-- `GET /llms-full.txt` - expanded machine-readable documentation with discovery links.
-- `GET /auth.md` - explicit no-auth policy. No API key, OAuth, protected resources, or commerce flow exists.
-- `GET /openapi.json` - OpenAPI 3.1 contract for the REST API.
-- `GET /api-catalog.json` - API catalog metadata.
-- `GET /.well-known/mcp-server.json` - MCP server card for validation tools.
-- `GET /.well-known/webmcp` - WebMCP-compatible discovery metadata.
-- `GET /mcp` - lightweight JSON-RPC endpoint supporting `tools/list` and `tools/call` for `check_email`, `check_domain`, `batch_check_emails`, `batch_check_domains`, and `get_stats`.
-- `GET /.well-known/agent-skills.json` - agent usage guidance.
-- `GET /.well-known/agent-card.json` - stateless validation agent card.
-
-The homepage supports `Accept: text/markdown` and `?format=markdown` for text-first clients.
-
-## Agent discovery resources
-
-- Homepage markdown: https://throwaway.sslboard.com/?format=markdown or `Accept: text/markdown`.
-- Authentication policy: https://throwaway.sslboard.com/auth.md (no auth, no OAuth, no commerce).
-- OpenAPI: https://throwaway.sslboard.com/openapi.json.
-- API catalog: https://throwaway.sslboard.com/api-catalog.json.
-- MCP server card: https://throwaway.sslboard.com/.well-known/mcp-server.json.
-- MCP endpoint: https://throwaway.sslboard.com/mcp.
-- WebMCP metadata: https://throwaway.sslboard.com/.well-known/webmcp.
-- Agent skills: https://throwaway.sslboard.com/.well-known/agent-skills.json.
-- Agent card: https://throwaway.sslboard.com/.well-known/agent-card.json.
-- Sitemap: https://throwaway.sslboard.com/sitemap.xml.
-- Robots policy: https://throwaway.sslboard.com/robots.txt.
-
-## Limits and safety
-
-No API key is required. Request bodies are capped at 100000 bytes and batch requests are capped at 1000 emails or domains. Disposable email detection is an abuse-prevention signal, not proof of malicious intent.
+License: MIT.

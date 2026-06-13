@@ -11,6 +11,7 @@ import {
 	handleOpenApi,
 	handleRobots,
 	handleSitemap,
+	handleWebMcp,
 } from "./routes/discovery";
 import { handleMcp } from "./routes/mcp";
 import { CORS_HEADERS, errorResponse } from "./http";
@@ -86,6 +87,11 @@ export default {
 		if (path === "/.well-known/mcp-server.json") {
 			if (request.method !== "GET") return methodNotAllowed();
 			return handleMcpServerCard();
+		}
+
+		if (path === "/.well-known/webmcp") {
+			if (request.method !== "GET") return methodNotAllowed();
+			return handleWebMcp();
 		}
 
 		if (path === "/.well-known/agent-skills.json") {

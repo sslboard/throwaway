@@ -12,6 +12,7 @@ import {
 	OPENAPI,
 	ROBOTS_TXT,
 	SITEMAP_XML,
+	WEBMCP_MANIFEST,
 } from "../agent-artifacts";
 
 export async function handleHome(request: Request, env: Env): Promise<Response> {
@@ -57,6 +58,10 @@ export function handleApiCatalog(): Response {
 
 export function handleMcpServerCard(): Response {
 	return jsonResponse(MCP_SERVER_CARD);
+}
+
+export function handleWebMcp(): Response {
+	return jsonResponse(WEBMCP_MANIFEST);
 }
 
 export function handleAgentSkills(): Response {

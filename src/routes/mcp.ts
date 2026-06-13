@@ -4,6 +4,7 @@ import {
 	checkDomain,
 	checkEmail,
 	getStats,
+	MAX_BATCH_SIZE,
 } from "../email-check";
 import { errorResponse, jsonResponse } from "../http";
 
@@ -26,20 +27,20 @@ const tools = [
 	},
 	{
 		name: "batch_check_emails",
-		description: "Check up to 1000 email addresses.",
+		description: `Check up to ${MAX_BATCH_SIZE} email addresses.`,
 		inputSchema: {
 			type: "object",
 			required: ["emails"],
-			properties: { emails: { type: "array", items: { type: "string" }, maxItems: 1000 } },
+			properties: { emails: { type: "array", items: { type: "string" }, maxItems: MAX_BATCH_SIZE } },
 		},
 	},
 	{
 		name: "batch_check_domains",
-		description: "Check up to 1000 domains.",
+		description: `Check up to ${MAX_BATCH_SIZE} domains.`,
 		inputSchema: {
 			type: "object",
 			required: ["domains"],
-			properties: { domains: { type: "array", items: { type: "string" }, maxItems: 1000 } },
+			properties: { domains: { type: "array", items: { type: "string" }, maxItems: MAX_BATCH_SIZE } },
 		},
 	},
 	{
@@ -58,6 +59,17 @@ function mcpError(id: unknown, code: number, message: string): Response {
 		{ jsonrpc: "2.0", id, error: { code, message } },
 		code === -32600 ? 400 : 200,
 	);
+}
+
+function isStringArray(value: unknown): value is string[] {
+	return Array.isArray(value) && value.every((item) => typeof item === "string");
+}
+
+function validateBatch(id: unknown, value: unknown, label: string): string[] | Response {
+	if (!isStringArray(value)) return mcpError(id, -32602, `${label} must be an array of strings`);
+	if (value.length > MAX_BATCH_SIZE)
+		return mcpError(id, -32602, `Batch size exceeds ${MAX_BATCH_SIZE}`);
+	return value;
 }
 
 export async function handleMcp(request: Request): Promise<Response> {
@@ -91,18 +103,18 @@ export async function handleMcp(request: Request): Promise<Response> {
 			content: [{ type: "json", json: await checkDomain(args.domain) }],
 		});
 	}
-	if (name === "batch_check_emails" && Array.isArray(args.emails)) {
+	if (name === "batch_check_emails") {
+		const emails = validateBatch(payload.id, args.emails, "emails");
+		if (emails instanceof Response) return emails;
 		return mcpResult(payload.id, {
-			content: [
-				{ type: "json", json: { results: await batchCheckEmails(args.emails as string[]) } },
-			],
+			content: [{ type: "json", json: { results: await batchCheckEmails(emails) } }],
 		});
 	}
-	if (name === "batch_check_domains" && Array.isArray(args.domains)) {
+	if (name === "batch_check_domains") {
+		const domains = validateBatch(payload.id, args.domains, "domains");
+		if (domains instanceof Response) return domains;
 		return mcpResult(payload.id, {
-			content: [
-				{ type: "json", json: { results: await batchCheckDomains(args.domains as string[]) } },
-			],
+			content: [{ type: "json", json: { results: await batchCheckDomains(domains) } }],
 		});
 	}
 	if (name === "get_stats")

@@ -1,7 +1,7 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Link: <https://throwaway.sslboard.com/llms.txt>; rel="llms", <https://throwaway.sslboard.com/openapi.json>; rel="service-desc"; type="application/openapi+json", <https://throwaway.sslboard.com/api-catalog.json>; rel="service-meta"; type="application/json", <https://throwaway.sslboard.com/auth.md>; rel="authorization"; type="text/markdown", <https://throwaway.sslboard.com/.well-known/mcp-server.json>; rel="mcp-server"; type="application/json", <https://throwaway.sslboard.com/sitemap.xml>; rel="sitemap"; type="application/xml"
+  Link: <https://throwaway.sslboard.com/llms.txt>; rel="llms", <https://throwaway.sslboard.com/llms-full.txt>; rel="alternate"; type="text/plain", <https://throwaway.sslboard.com/openapi.json>; rel="service-desc"; type="application/openapi+json", <https://throwaway.sslboard.com/api-catalog.json>; rel="service-meta"; type="application/json", <https://throwaway.sslboard.com/auth.md>; rel="authorization"; type="text/markdown", <https://throwaway.sslboard.com/.well-known/mcp-server.json>; rel="mcp-server"; type="application/json", <https://throwaway.sslboard.com/.well-known/webmcp>; rel="webmcp"; type="application/json", <https://throwaway.sslboard.com/.well-known/agent-skills.json>; rel="service-meta"; type="application/json", <https://throwaway.sslboard.com/.well-known/agent-card.json>; rel="service-meta"; type="application/json", <https://throwaway.sslboard.com/sitemap.xml>; rel="sitemap"; type="application/xml"
 
 /
   Strict-Transport-Security: max-age=63072000; includeSubDomains

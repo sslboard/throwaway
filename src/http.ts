@@ -21,7 +21,9 @@ export const DISCOVERY_LINKS = [
 	`<${BASE_URL}/api-catalog.json>; rel="service-meta"; type="application/json"`,
 	`<${BASE_URL}/auth.md>; rel="authorization"; type="text/markdown"`,
 	`<${BASE_URL}/.well-known/mcp-server.json>; rel="mcp-server"; type="application/json"`,
+	`<${BASE_URL}/.well-known/webmcp>; rel="webmcp"; type="application/json"`,
 	`<${BASE_URL}/.well-known/agent-skills.json>; rel="service-meta"; type="application/json"`,
+	`<${BASE_URL}/.well-known/agent-card.json>; rel="service-meta"; type="application/json"`,
 	`<${BASE_URL}/sitemap.xml>; rel="sitemap"; type="application/xml"`,
 ];
 

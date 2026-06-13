@@ -16,6 +16,7 @@ export async function handleCheck(request: Request): Promise<Response> {
 	if (request.method === "GET") {
 		const email = url.searchParams.get("email");
 		const domain = url.searchParams.get("domain");
+		if (email && domain) return errorResponse('Use either "email" or "domain", not both', 400);
 		if (email) {
 			const payload = await checkEmail(email);
 			if (!payload) return errorResponse("Invalid email address", 400);
@@ -40,6 +41,9 @@ export async function handleCheck(request: Request): Promise<Response> {
 	}
 
 	const obj = parsed as Record<string, unknown>;
+	if (Array.isArray(obj.emails) && Array.isArray(obj.domains)) {
+		return errorResponse('Request body must contain either "emails" or "domains", not both', 400);
+	}
 	if (Array.isArray(obj.emails)) {
 		if (obj.emails.length > MAX_BATCH_SIZE)
 			return errorResponse(`Batch size exceeds ${MAX_BATCH_SIZE}`, 413);

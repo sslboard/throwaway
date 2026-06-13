@@ -126,3 +126,16 @@ No API key needed. No rate limits currently enforced.
 ## About
 
 Built by the people at [SSLBoard](https://sslboard.com).
+
+## Agent discovery
+
+- `GET /llms-full.txt` — expanded machine-readable documentation with discovery links.
+- `GET /auth.md` — explicit no-auth policy. No API key, OAuth, protected resources, or commerce flow exists.
+- `GET /openapi.json` — OpenAPI 3.1 contract for the REST API.
+- `GET /api-catalog.json` — API catalog metadata.
+- `GET /.well-known/mcp-server.json` — MCP server card for validation tools.
+- `GET /mcp` — lightweight JSON-RPC endpoint supporting `tools/list` and `tools/call` for `check_email`, `check_domain`, `batch_check_emails`, `batch_check_domains`, and `get_stats`.
+- `GET /.well-known/agent-skills.json` — agent usage guidance.
+- `GET /.well-known/agent-card.json` — stateless validation agent card.
+
+The homepage supports `Accept: text/markdown` and `?format=markdown` for text-first clients.

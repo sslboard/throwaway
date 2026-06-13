@@ -4,32 +4,64 @@ This repository does not currently manage Cloudflare DNS records as code, so DNS
 
 ## Goal
 
-Expose machine-readable pointers to the same public agent resources served by the Worker:
+Expose machine-readable pointers to the same public agent resources served by the Worker, using the [DNS for AI Discovery (DNS-AID)](https://isitagentready.com/.well-known/agent-skills/dns-aid/SKILL.md) convention.
+
+Agent resources:
 
 - `https://throwaway.sslboard.com/llms.txt`
 - `https://throwaway.sslboard.com/openapi.json`
 - `https://throwaway.sslboard.com/api-catalog.json`
 - `https://throwaway.sslboard.com/.well-known/mcp-server.json`
 
-## Proposed TXT records
+## Records
 
-Verify the current DNS-AID convention before creating these records. If the scanner documents a different owner name or value format, prefer the scanner/spec format over this draft.
+### HTTPS service records (SVCB type 65)
 
-| Owner name                      | Type | Draft value                                                      | Purpose                  |
-| ------------------------------- | ---- | ---------------------------------------------------------------- | ------------------------ |
-| `_agent.throwaway.sslboard.com` | TXT  | `llms=https://throwaway.sslboard.com/llms.txt`                   | Concise LLM instructions |
-| `_agent.throwaway.sslboard.com` | TXT  | `openapi=https://throwaway.sslboard.com/openapi.json`            | REST API schema          |
-| `_agent.throwaway.sslboard.com` | TXT  | `catalog=https://throwaway.sslboard.com/api-catalog.json`        | API catalog metadata     |
-| `_agent.throwaway.sslboard.com` | TXT  | `mcp=https://throwaway.sslboard.com/.well-known/mcp-server.json` | MCP discovery card       |
+Per the DNS-AID spec, the scanner looks for `HTTPS` records under `_agents` (plural) subdomains of the target domain.
+
+| Owner name                                    | Type   | Priority | Target                         | Value params |
+| --------------------------------------------- | ------ | -------- | ------------------------------ | ------------ |
+| `_index._agents.throwaway.sslboard.com`       | HTTPS  | 1        | `throwaway.sslboard.com.`      | `alpn=h2`   |
+| `_mcp._agents.throwaway.sslboard.com`         | HTTPS  | 1        | `throwaway.sslboard.com.`      | `alpn=h2`   |
+| `_a2a._agents.throwaway.sslboard.com`         | HTTPS  | 1        | `throwaway.sslboard.com.`      | `alpn=h2`   |
+
+### TXT index record
+
+A single TXT record on `_index._agents` carries a human-readable manifest of all agent endpoints:
+
+| Owner name                                    | Type | Value                                                                                                                                                           |
+| --------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_index._agents.throwaway.sslboard.com`       | TXT  | `v=dnsaid1; llms=https://throwaway.sslboard.com/llms.txt; openapi=https://throwaway.sslboard.com/openapi.json; catalog=https://throwaway.sslboard.com/api-catalog.json; mcp=https://throwaway.sslboard.com/.well-known/mcp-server.json` |
 
 ## Verification
 
+### DoH (authoritative)
+
 ```bash
-dig +short TXT _agent.throwaway.sslboard.com
+# HTTPS records — dig doesn't display type 65 natively; use DoH:
+curl -sH 'Accept: application/dns-json' \
+  'https://cloudflare-dns.com/dns-query?name=_index._agents.throwaway.sslboard.com&type=HTTPS' | jq '.Answer[].data'
+
+# TXT index record
+curl -sH 'Accept: application/dns-json' \
+  'https://cloudflare-dns.com/dns-query?name=_index._agents.throwaway.sslboard.com&type=TXT' | jq '.Answer[].data'
 ```
 
-Expected output should include each configured URL. Then re-run `https://isitagentready.com/throwaway.sslboard.com` and confirm the DNS discovery check passes.
+### isitagentready.com scanner
+
+```bash
+curl -s -X POST https://isitagentready.com/api/scan \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://throwaway.sslboard.com"}' | jq '.checks.discoverability.dnsAid.status'
+# Expected: "pass"
+```
+
+### Automated test
+
+```bash
+npx vitest run src/dns-discovery.test.ts
+```
 
 ## Rollback
 
-Remove the TXT records from DNS. The HTTPS discovery endpoints remain available through `robots.txt`, `sitemap.xml`, Link headers, and the homepage `<link>` metadata.
+Remove the HTTPS and TXT records from DNS. The HTTPS discovery endpoints remain available through `robots.txt`, `sitemap.xml`, Link headers, and the homepage `<link>` metadata.

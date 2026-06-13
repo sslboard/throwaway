@@ -1,13 +1,13 @@
 {
-	"name": "throwaway-email-validation",
-	"description": "Validate whether emails or domains should be rejected as invalid, non-deliverable, filtered-DNS blocked, or disposable.",
-	"api": "https://throwaway.sslboard.com/openapi.json",
-	"mcp": "https://throwaway.sslboard.com/.well-known/mcp-server.json",
-	"guidance": [
-		"Call check_email for a signup email address.",
-		"Use should_reject as the coarse gate.",
-		"Inspect valid_tld, has_mx, dns_blocked, and disposable for explanations.",
-		"Do not treat disposable=true as proof of malicious intent.",
-		"Avoid logging full email addresses unless your application requires it."
-	]
+  "name": "throwaway-email-validation",
+  "description": "Validate whether emails or domains should be rejected as invalid, non-deliverable, filtered-DNS blocked, or disposable.",
+  "api": "https://throwaway.sslboard.com/openapi.json",
+  "mcp": "https://throwaway.sslboard.com/.well-known/mcp-server.json",
+  "guidance": [
+    "Call check_email for a signup email address.",
+    "Use should_reject as the coarse gate.",
+    "Inspect valid_tld, has_mx, dns_blocked, and disposable for explanations.",
+    "Do not treat disposable=true as proof of malicious intent.",
+    "Avoid logging full email addresses unless your application requires it."
+  ]
 }

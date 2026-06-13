@@ -53,7 +53,6 @@ lulujewels.shop
 damzfa.id
 minhminclone.io.vn
 # Internxt Temp Mail / Mail.tm generated domain, verified 2026-06-09
-web-library.net
 
 # Added 2026-06-09 — weekly temp email domain check
 cometclear.com
@@ -69,3 +68,18 @@ encg.edu.pl
 ofppt.edu.pl
 zenvex.edu.pl
 znvx.me
+
+# Added 2026-06-13 — weekly temp email domain check
+# 10minemail.com / temp-mail.org (generated email: nofafeb309@aratrin.com, noparo3237@aratrin.com)
+aratrin.com
+# mails.org (generated email: ari.7@mailcinder.com)
+mailcinder.com
+# fake-email.pro (generated email: andi.acevedo83@radiant-flow.org)
+radiant-flow.org
+# temp-inbox.me exposed domain dropdown (usable temp-email domains)
+dropmaily.xyz
+inboxvia.online
+nexmaila.xyz
+plumdrop.live
+vumi.rest
+vumi.xyz

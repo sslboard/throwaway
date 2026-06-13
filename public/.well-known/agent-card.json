@@ -1,49 +1,49 @@
 {
-	"name": "throwaway",
-	"version": "1.2.3",
-	"description": "Stateless validation agent for disposable email, invalid TLD, MX, and filtered-DNS signals.",
-	"provider": {
-		"organization": "SSLBoard",
-		"url": "https://sslboard.com"
-	},
-	"url": "https://throwaway.sslboard.com",
-	"capabilities": {
-		"streaming": false,
-		"pushNotifications": false,
-		"stateTransitionHistory": false
-	},
-	"supportedInterfaces": [
-		{
-			"url": "https://throwaway.sslboard.com/mcp",
-			"transport": "streamable-http",
-			"protocol": "mcp"
-		},
-		{
-			"url": "https://throwaway.sslboard.com/openapi.json",
-			"transport": "https",
-			"protocol": "openapi"
-		}
-	],
-	"skills": [
-		{
-			"id": "email-validation",
-			"name": "Email validation",
-			"description": "Check one email address for invalid TLD, missing MX, filtered-DNS blocking, and disposable-domain status."
-		},
-		{
-			"id": "domain-validation",
-			"name": "Domain validation",
-			"description": "Check one domain for invalid TLD, missing MX, filtered-DNS blocking, and disposable-domain status."
-		},
-		{
-			"id": "batch-validation",
-			"name": "Batch validation",
-			"description": "Check up to 1000 emails or domains in one request."
-		}
-	],
-	"authentication": "none",
-	"endpoints": {
-		"rest": "https://throwaway.sslboard.com/openapi.json",
-		"mcp": "https://throwaway.sslboard.com/mcp"
-	}
+  "name": "throwaway",
+  "version": "1.2.4",
+  "description": "Stateless validation agent for disposable email, invalid TLD, MX, and filtered-DNS signals.",
+  "provider": {
+    "organization": "SSLBoard",
+    "url": "https://sslboard.com"
+  },
+  "url": "https://throwaway.sslboard.com",
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "stateTransitionHistory": false
+  },
+  "supportedInterfaces": [
+    {
+      "url": "https://throwaway.sslboard.com/mcp",
+      "transport": "streamable-http",
+      "protocol": "mcp"
+    },
+    {
+      "url": "https://throwaway.sslboard.com/openapi.json",
+      "transport": "https",
+      "protocol": "openapi"
+    }
+  ],
+  "skills": [
+    {
+      "id": "email-validation",
+      "name": "Email validation",
+      "description": "Check one email address for invalid TLD, missing MX, filtered-DNS blocking, and disposable-domain status."
+    },
+    {
+      "id": "domain-validation",
+      "name": "Domain validation",
+      "description": "Check one domain for invalid TLD, missing MX, filtered-DNS blocking, and disposable-domain status."
+    },
+    {
+      "id": "batch-validation",
+      "name": "Batch validation",
+      "description": "Check up to 1000 emails or domains in one request."
+    }
+  ],
+  "authentication": "none",
+  "endpoints": {
+    "rest": "https://throwaway.sslboard.com/openapi.json",
+    "mcp": "https://throwaway.sslboard.com/mcp"
+  }
 }

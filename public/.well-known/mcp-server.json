@@ -1,25 +1,31 @@
 {
-	"name": "throwaway",
-	"description": "Read-only disposable email/domain validation tools.",
-	"url": "https://throwaway.sslboard.com",
-	"serverInfo": {
-		"name": "throwaway",
-		"version": "1.2.3"
-	},
-	"transport": {
-		"type": "streamable-http",
-		"url": "https://throwaway.sslboard.com/mcp"
-	},
-	"authentication": {
-		"type": "none",
-		"documentation": "https://throwaway.sslboard.com/auth.md"
-	},
-	"capabilities": {
-		"tools": {
-			"listChanged": false
-		},
-		"resources": {},
-		"prompts": {}
-	},
-	"tools": ["check_email", "check_domain", "batch_check_emails", "batch_check_domains", "get_stats"]
+  "name": "throwaway",
+  "description": "Read-only disposable email/domain validation tools.",
+  "url": "https://throwaway.sslboard.com",
+  "serverInfo": {
+    "name": "throwaway",
+    "version": "1.2.4"
+  },
+  "transport": {
+    "type": "streamable-http",
+    "url": "https://throwaway.sslboard.com/mcp"
+  },
+  "authentication": {
+    "type": "none",
+    "documentation": "https://throwaway.sslboard.com/auth.md"
+  },
+  "capabilities": {
+    "tools": {
+      "listChanged": false
+    },
+    "resources": {},
+    "prompts": {}
+  },
+  "tools": [
+    "check_email",
+    "check_domain",
+    "batch_check_emails",
+    "batch_check_domains",
+    "get_stats"
+  ]
 }

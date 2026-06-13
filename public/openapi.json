@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "throwaway API",
-    "version": "1.2.3",
+    "version": "1.2.4",
     "description": "Public no-auth API for disposable email, TLD, MX, and filtered-DNS checks.",
     "license": {
       "name": "MIT"

@@ -1,0 +1,19 @@
+{
+  "name": "throwaway",
+  "description": "Stateless validation agent for disposable email, invalid TLD, MX, and filtered-DNS signals.",
+  "provider": {
+    "organization": "SSLBoard",
+    "url": "https://sslboard.com"
+  },
+  "url": "https://throwaway.sslboard.com",
+  "capabilities": [
+    "email_validation",
+    "domain_validation",
+    "batch_validation"
+  ],
+  "authentication": "none",
+  "endpoints": {
+    "rest": "https://throwaway.sslboard.com/openapi.json",
+    "mcp": "https://throwaway.sslboard.com/mcp"
+  }
+}

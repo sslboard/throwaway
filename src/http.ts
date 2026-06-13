@@ -19,10 +19,13 @@ export const DISCOVERY_LINKS = [
 	`<${BASE_URL}/llms-full.txt>; rel="alternate"; type="text/plain"`,
 	`<${BASE_URL}/openapi.json>; rel="service-desc"; type="application/openapi+json"`,
 	`<${BASE_URL}/api-catalog.json>; rel="service-meta"; type="application/json"`,
+	`<${BASE_URL}/.well-known/api-catalog>; rel="service-meta"; type="application/linkset+json"`,
 	`<${BASE_URL}/auth.md>; rel="authorization"; type="text/markdown"`,
 	`<${BASE_URL}/.well-known/mcp-server.json>; rel="mcp-server"; type="application/json"`,
+	`<${BASE_URL}/.well-known/mcp/server-card.json>; rel="mcp-server"; type="application/json"`,
 	`<${BASE_URL}/.well-known/webmcp>; rel="webmcp"; type="application/json"`,
 	`<${BASE_URL}/.well-known/agent-skills.json>; rel="service-meta"; type="application/json"`,
+	`<${BASE_URL}/.well-known/agent-skills/index.json>; rel="service-meta"; type="application/json"`,
 	`<${BASE_URL}/.well-known/agent-card.json>; rel="service-meta"; type="application/json"`,
 	`<${BASE_URL}/sitemap.xml>; rel="sitemap"; type="application/xml"`,
 ];

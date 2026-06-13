@@ -1,0 +1,31 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://throwaway.sslboard.com/",
+      "service-desc": [
+        {
+          "href": "https://throwaway.sslboard.com/openapi.json",
+          "type": "application/openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://throwaway.sslboard.com/llms-full.txt",
+          "type": "text/plain"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://throwaway.sslboard.com/health",
+          "type": "application/json"
+        }
+      ],
+      "service-meta": [
+        {
+          "href": "https://throwaway.sslboard.com/api-catalog.json",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

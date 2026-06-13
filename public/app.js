@@ -5,6 +5,56 @@ const resultPills =
 	document.getElementById("resultPills") ?? document.getElementById("resultPill")?.parentElement;
 const resultError = document.getElementById("resultError");
 
+async function callJson(url, options) {
+	const res = await fetch(url, options);
+	const data = await res.json();
+	if (!res.ok || data.error) throw new Error(data.error || `Request failed: ${res.status}`);
+	return data;
+}
+
+function registerWebMcpTools() {
+	if (!("modelContext" in navigator) || !navigator.modelContext?.registerTool) return;
+
+	const readOnlyHint = true;
+	const tools = [
+		{
+			name: "check_email",
+			description:
+				"Check one email address for valid TLD, MX deliverability, filtered-DNS blocking, and disposable-domain status.",
+			inputSchema: {
+				type: "object",
+				required: ["email"],
+				properties: { email: { type: "string" } },
+			},
+			execute: ({ email }) => callJson(`/check?email=${encodeURIComponent(email)}`),
+			annotations: { readOnlyHint },
+		},
+		{
+			name: "check_domain",
+			description:
+				"Check one domain for valid TLD, MX deliverability, filtered-DNS blocking, and disposable-domain status.",
+			inputSchema: {
+				type: "object",
+				required: ["domain"],
+				properties: { domain: { type: "string" } },
+			},
+			execute: ({ domain }) => callJson(`/check?domain=${encodeURIComponent(domain)}`),
+			annotations: { readOnlyHint },
+		},
+		{
+			name: "get_stats",
+			description: "Return bloom-filter metadata.",
+			inputSchema: { type: "object", properties: {} },
+			execute: () => callJson("/stats"),
+			annotations: { readOnlyHint },
+		},
+	];
+
+	for (const tool of tools) navigator.modelContext.registerTool(tool);
+}
+
+registerWebMcpTools();
+
 // Prefix API doc URLs with the current origin
 const origin = location.origin;
 document.getElementById("apiEmail").textContent = origin + "/check?email=user@mailinator.com";

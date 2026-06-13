@@ -453,7 +453,9 @@ describe("agent-readiness discovery", () => {
 	it("serves no-auth documentation", async () => {
 		const res = await env.fetch(new Request("http://localhost/auth.md"));
 		expect(res.status).toBe(200);
-		expect(await res.text()).toContain("No API key is required");
+		const body = await res.text();
+		expect(body).toContain("# Auth.md");
+		expect(body).toContain("No API key is required");
 	});
 
 	it("serves OpenAPI and API catalog metadata", async () => {
@@ -465,12 +467,25 @@ describe("agent-readiness discovery", () => {
 		const catalog = await env.fetch(new Request("http://localhost/api-catalog.json"));
 		expect(catalog.status).toBe(200);
 		expect(await catalog.json()).toHaveProperty("authentication", "none");
+
+		const wellKnownCatalog = await env.fetch(
+			new Request("http://localhost/.well-known/api-catalog"),
+		);
+		expect(wellKnownCatalog.status).toBe(200);
+		expect(wellKnownCatalog.headers.get("Content-Type")).toContain("application/linkset+json");
+		expect(await wellKnownCatalog.json()).toHaveProperty("linkset");
 	});
 
 	it("serves MCP, skill, and agent discovery metadata", async () => {
 		const mcp = await env.fetch(new Request("http://localhost/.well-known/mcp-server.json"));
 		expect(mcp.status).toBe(200);
 		expect(await mcp.json()).toHaveProperty("authentication.type", "none");
+
+		const mcpServerCard = await env.fetch(
+			new Request("http://localhost/.well-known/mcp/server-card.json"),
+		);
+		expect(mcpServerCard.status).toBe(200);
+		expect(await mcpServerCard.json()).toHaveProperty("serverInfo.name", "throwaway");
 
 		const webmcp = await env.fetch(new Request("http://localhost/.well-known/webmcp"));
 		expect(webmcp.status).toBe(200);
@@ -480,9 +495,31 @@ describe("agent-readiness discovery", () => {
 		expect(skills.status).toBe(200);
 		expect(await skills.text()).toContain("should_reject");
 
+		const skillsIndex = await env.fetch(
+			new Request("http://localhost/.well-known/agent-skills/index.json"),
+		);
+		expect(skillsIndex.status).toBe(200);
+		const skillsIndexBody = await skillsIndex.json<{ skills: { sha256: string; url: string }[] }>();
+		expect(skillsIndexBody.skills[0].url).toContain("/.well-known/agent-skills/");
+		expect(skillsIndexBody.skills[0].sha256).toMatch(/^[a-f0-9]{64}$/);
+
+		const skillMd = await env.fetch(
+			new Request("http://localhost/.well-known/agent-skills/throwaway-email-validation/SKILL.md"),
+		);
+		expect(skillMd.status).toBe(200);
+		expect(skillMd.headers.get("Content-Type")).toContain("text/markdown");
+		expect(await skillMd.text()).toContain("# throwaway email validation");
+
 		const card = await env.fetch(new Request("http://localhost/.well-known/agent-card.json"));
 		expect(card.status).toBe(200);
-		expect(await card.text()).toContain("email_validation");
+		const cardBody = await card.json<{
+			version: string;
+			skills: unknown[];
+			supportedInterfaces: unknown[];
+		}>();
+		expect(cardBody.version).toMatch(/^\d+\.\d+\.\d+$/);
+		expect(cardBody.skills.length).toBeGreaterThan(0);
+		expect(cardBody.supportedInterfaces.length).toBeGreaterThan(0);
 	});
 
 	it("advertises discovery resources in robots, sitemap, and Link headers", async () => {
@@ -495,10 +532,14 @@ describe("agent-readiness discovery", () => {
 		const sitemapBody = await sitemap.text();
 		expect(sitemapBody).toContain("https://throwaway.sslboard.com/openapi.json");
 		expect(sitemapBody).toContain("https://throwaway.sslboard.com/.well-known/webmcp");
+		expect(sitemapBody).toContain(
+			"https://throwaway.sslboard.com/.well-known/mcp/server-card.json",
+		);
 
 		const stats = await env.fetch(new Request("http://localhost/stats"));
 		expect(stats.headers.get("Link")).toContain("/openapi.json");
 		expect(stats.headers.get("Link")).toContain("/.well-known/webmcp");
+		expect(stats.headers.get("Link")).toContain("/.well-known/agent-skills/index.json");
 	});
 
 	it("lists MCP tools", async () => {

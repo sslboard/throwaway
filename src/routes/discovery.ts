@@ -62,6 +62,14 @@ export function handleJsonArtifact(request: Request, env: Env): Promise<Response
 	return staticAssetResponse(request, env, "application/json; charset=utf-8");
 }
 
+export function handleLinksetArtifact(request: Request, env: Env): Promise<Response> {
+	return staticAssetResponse(request, env, "application/linkset+json; charset=utf-8");
+}
+
+export function handleMarkdownArtifact(request: Request, env: Env): Promise<Response> {
+	return staticAssetResponse(request, env, "text/markdown; charset=utf-8");
+}
+
 export function handleOpenApi(request: Request, env: Env): Promise<Response> {
 	return staticAssetResponse(request, env, "application/openapi+json; charset=utf-8");
 }

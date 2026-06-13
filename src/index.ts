@@ -4,8 +4,10 @@ import {
 	handleAuth,
 	handleHome,
 	handleJsonArtifact,
+	handleLinksetArtifact,
 	handleLlms,
 	handleLlmsFull,
+	handleMarkdownArtifact,
 	handleOpenApi,
 	handleRobots,
 	handleSitemap,
@@ -58,10 +60,18 @@ app.all("/openapi.json", methodNotAllowed);
 app.on(["GET", "HEAD"], "/api-catalog.json", (c) => handleJsonArtifact(c.req.raw, c.env));
 app.all("/api-catalog.json", methodNotAllowed);
 
+app.on(["GET", "HEAD"], "/.well-known/api-catalog", (c) => handleLinksetArtifact(c.req.raw, c.env));
+app.all("/.well-known/api-catalog", methodNotAllowed);
+
 app.on(["GET", "HEAD"], "/.well-known/mcp-server.json", (c) =>
 	handleJsonArtifact(c.req.raw, c.env),
 );
 app.all("/.well-known/mcp-server.json", methodNotAllowed);
+
+app.on(["GET", "HEAD"], "/.well-known/mcp/server-card.json", (c) =>
+	handleJsonArtifact(c.req.raw, c.env),
+);
+app.all("/.well-known/mcp/server-card.json", methodNotAllowed);
 
 app.on(["GET", "HEAD"], "/.well-known/webmcp", (c) => handleJsonArtifact(c.req.raw, c.env));
 app.all("/.well-known/webmcp", methodNotAllowed);
@@ -70,6 +80,16 @@ app.on(["GET", "HEAD"], "/.well-known/agent-skills.json", (c) =>
 	handleJsonArtifact(c.req.raw, c.env),
 );
 app.all("/.well-known/agent-skills.json", methodNotAllowed);
+
+app.on(["GET", "HEAD"], "/.well-known/agent-skills/index.json", (c) =>
+	handleJsonArtifact(c.req.raw, c.env),
+);
+app.all("/.well-known/agent-skills/index.json", methodNotAllowed);
+
+app.on(["GET", "HEAD"], "/.well-known/agent-skills/throwaway-email-validation/SKILL.md", (c) =>
+	handleMarkdownArtifact(c.req.raw, c.env),
+);
+app.all("/.well-known/agent-skills/throwaway-email-validation/SKILL.md", methodNotAllowed);
 
 app.on(["GET", "HEAD"], "/.well-known/agent-card.json", (c) =>
 	handleJsonArtifact(c.req.raw, c.env),

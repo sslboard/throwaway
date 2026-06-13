@@ -1,0 +1,45 @@
+# throwaway allows crawlers and interactive agents to discover public docs and use the public API at reasonable volume.
+# As a condition of accessing this website, you agree to abide by the following content signals:
+# search: building a search index and providing search results with links or short excerpts.
+# ai-input: using public documentation and examples as input for real-time AI answers and tool-use planning.
+# ai-train: training or fine-tuning AI models.
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
+Allow: /
+Allow: /check
+Allow: /stats
+Allow: /health
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /auth.md
+Allow: /openapi.json
+Allow: /api-catalog.json
+Allow: /.well-known/
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+LLMS: https://throwaway.sslboard.com/llms.txt
+Sitemap: https://throwaway.sslboard.com/sitemap.xml
+Host: throwaway.sslboard.com

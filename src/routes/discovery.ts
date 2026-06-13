@@ -1,8 +1,15 @@
 import { textResponse, wantsMarkdown } from "../http";
-import { HOME_MARKDOWN, ROBOTS_TXT, SITEMAP_XML } from "../agent-artifacts";
+import { SITEMAP_XML } from "../agent-artifacts";
 
 export async function handleHome(request: Request, env: Env): Promise<Response> {
-	if (wantsMarkdown(request)) return textResponse(HOME_MARKDOWN, "text/markdown; charset=utf-8");
+	if (wantsMarkdown(request)) {
+		const markdownUrl = new URL("/index.md", request.url);
+		return staticAssetResponse(
+			new Request(markdownUrl, request),
+			env,
+			"text/markdown; charset=utf-8",
+		);
+	}
 	return env.ASSETS.fetch(request);
 }
 
@@ -39,8 +46,8 @@ export function handleAuth(request: Request, env: Env): Promise<Response> {
 	return staticAssetResponse(request, env, "text/markdown; charset=utf-8");
 }
 
-export function handleRobots(): Response {
-	return textResponse(ROBOTS_TXT, "text/plain; charset=utf-8", 200, {
+export function handleRobots(request: Request, env: Env): Promise<Response> {
+	return staticAssetResponse(request, env, "text/plain; charset=utf-8", {
 		"Cache-Control": "public, max-age=86400",
 	});
 }

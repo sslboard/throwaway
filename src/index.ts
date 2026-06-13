@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { handleCheck, handleHealth, handleStats } from "./routes/api";
 import {
 	handleAuth,
@@ -21,7 +21,7 @@ function methodNotAllowed(): Response {
 	return errorResponse("Method not allowed", 405);
 }
 
-const app = new Hono<AppBindings>();
+const app = new OpenAPIHono<AppBindings>();
 
 app.on("OPTIONS", "*", () => new Response(null, { status: 204, headers: CORS_HEADERS }));
 
@@ -46,7 +46,7 @@ app.all("/llms-full.txt", methodNotAllowed);
 app.on(["GET", "HEAD"], "/auth.md", (c) => handleAuth(c.req.raw, c.env));
 app.all("/auth.md", methodNotAllowed);
 
-app.get("/robots.txt", handleRobots);
+app.on(["GET", "HEAD"], "/robots.txt", (c) => handleRobots(c.req.raw, c.env));
 app.all("/robots.txt", methodNotAllowed);
 
 app.get("/sitemap.xml", handleSitemap);

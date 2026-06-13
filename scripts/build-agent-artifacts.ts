@@ -6,17 +6,17 @@ import {
 	AGENT_SKILLS,
 	API_CATALOG,
 	MCP_SERVER_CARD,
-	OPENAPI,
 	WEBMCP_MANIFEST,
 	jsonArtifact,
 } from "../src/agent-artifacts";
+import { buildOpenApiDocument } from "../src/openapi";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const publicDir = resolve(__dirname, "../public");
 const wellKnownDir = resolve(publicDir, ".well-known");
 
 const files = [
-	["openapi.json", OPENAPI],
+	["openapi.json", buildOpenApiDocument()],
 	["api-catalog.json", API_CATALOG],
 	[".well-known/mcp-server.json", MCP_SERVER_CARD],
 	[".well-known/webmcp", WEBMCP_MANIFEST],

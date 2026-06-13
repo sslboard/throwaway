@@ -14,171 +14,10 @@
     }
   ],
   "security": [],
-  "paths": {
-    "/check": {
-      "get": {
-        "summary": "Check one email address or domain",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "email"
-            }
-          },
-          {
-            "name": "domain",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Check result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CheckResult"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/Error"
-          },
-          "405": {
-            "$ref": "#/components/responses/Error"
-          }
-        }
-      },
-      "post": {
-        "summary": "Batch-check emails or domains",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/BatchEmailsRequest"
-                  },
-                  {
-                    "$ref": "#/components/schemas/BatchDomainsRequest"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Batch check results",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "results"
-                  ],
-                  "properties": {
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/CheckResult"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/Error"
-          },
-          "405": {
-            "$ref": "#/components/responses/Error"
-          },
-          "413": {
-            "$ref": "#/components/responses/Error"
-          }
-        }
-      }
-    },
-    "/stats": {
-      "get": {
-        "summary": "Return bloom-filter metadata",
-        "responses": {
-          "200": {
-            "description": "Filter stats",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Stats"
-                }
-              }
-            }
-          },
-          "405": {
-            "$ref": "#/components/responses/Error"
-          }
-        }
-      }
-    },
-    "/health": {
-      "get": {
-        "summary": "Return service version",
-        "responses": {
-          "200": {
-            "description": "Health result",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "version"
-                  ],
-                  "properties": {
-                    "version": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "405": {
-            "$ref": "#/components/responses/Error"
-          }
-        }
-      }
-    }
-  },
   "components": {
-    "responses": {
-      "Error": {
-        "description": "Error",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            }
-          }
-        }
-      }
-    },
     "schemas": {
       "CheckResult": {
         "type": "object",
-        "required": [
-          "domain",
-          "valid_tld",
-          "has_mx",
-          "disposable",
-          "should_reject"
-        ],
         "properties": {
           "email": {
             "type": "string"
@@ -209,48 +48,73 @@
           "should_reject": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "domain",
+          "valid_tld",
+          "has_mx",
+          "disposable",
+          "should_reject"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "BatchResult": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CheckResult"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
       },
       "BatchEmailsRequest": {
         "type": "object",
-        "required": [
-          "emails"
-        ],
         "properties": {
           "emails": {
             "type": "array",
-            "maxItems": 1000,
             "items": {
               "type": "string",
               "format": "email"
-            }
+            },
+            "maxItems": 1000
           }
-        }
+        },
+        "required": [
+          "emails"
+        ]
       },
       "BatchDomainsRequest": {
         "type": "object",
-        "required": [
-          "domains"
-        ],
         "properties": {
           "domains": {
             "type": "array",
-            "maxItems": 1000,
             "items": {
               "type": "string"
-            }
+            },
+            "maxItems": 1000
           }
-        }
+        },
+        "required": [
+          "domains"
+        ]
       },
       "Stats": {
         "type": "object",
-        "required": [
-          "itemCount",
-          "bitCount",
-          "hashCount",
-          "byteSize",
-          "falsePositiveRate"
-        ],
         "properties": {
           "itemCount": {
             "type": "integer"
@@ -267,19 +131,202 @@
           "falsePositiveRate": {
             "type": "number"
           }
+        },
+        "required": [
+          "itemCount",
+          "bitCount",
+          "hashCount",
+          "byteSize",
+          "falsePositiveRate"
+        ]
+      },
+      "Health": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "version"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/check": {
+      "get": {
+        "summary": "Check one email address or domain",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "required": false,
+            "name": "email",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "required": false,
+            "name": "domain",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       },
-      "Error": {
-        "type": "object",
-        "required": [
-          "error"
-        ],
-        "properties": {
-          "error": {
-            "type": "string"
+      "post": {
+        "summary": "Batch-check emails or domains",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/BatchEmailsRequest"
+                  },
+                  {
+                    "$ref": "#/components/schemas/BatchDomainsRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch check results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "summary": "Return bloom-filter metadata",
+        "responses": {
+          "200": {
+            "description": "Filter stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stats"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Return service version",
+        "responses": {
+          "200": {
+            "description": "Health result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
           }
         }
       }
     }
-  }
+  },
+  "webhooks": {}
 }

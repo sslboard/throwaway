@@ -374,12 +374,32 @@ describe("Error handling", () => {
 		expect(body.error).toBeDefined();
 	});
 
+	it("400 for conflicting params on GET /check", async () => {
+		const res = await env.fetch(
+			new Request("http://localhost/check?email=user@example.com&domain=example.com"),
+		);
+		expect(res.status).toBe(400);
+		const body = await res.json<{ error: string }>();
+		expect(body.error).toContain("either");
+	});
+
 	it("400 for POST /check with empty body", async () => {
 		const res = await env.fetch(
 			new Request("http://localhost/check", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({}),
+			}),
+		);
+		expect(res.status).toBe(400);
+	});
+
+	it("400 for POST /check with both emails and domains", async () => {
+		const res = await env.fetch(
+			new Request("http://localhost/check", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ emails: ["user@example.com"], domains: ["example.com"] }),
 			}),
 		);
 		expect(res.status).toBe(400);
@@ -452,6 +472,10 @@ describe("agent-readiness discovery", () => {
 		expect(mcp.status).toBe(200);
 		expect(await mcp.json()).toHaveProperty("authentication.type", "none");
 
+		const webmcp = await env.fetch(new Request("http://localhost/.well-known/webmcp"));
+		expect(webmcp.status).toBe(200);
+		expect(await webmcp.text()).toContain("/mcp");
+
 		const skills = await env.fetch(new Request("http://localhost/.well-known/agent-skills.json"));
 		expect(skills.status).toBe(200);
 		expect(await skills.text()).toContain("should_reject");
@@ -463,13 +487,18 @@ describe("agent-readiness discovery", () => {
 
 	it("advertises discovery resources in robots, sitemap, and Link headers", async () => {
 		const robots = await env.fetch(new Request("http://localhost/robots.txt"));
-		expect(await robots.text()).toContain("LLMS: https://throwaway.sslboard.com/llms.txt");
+		const robotsBody = await robots.text();
+		expect(robotsBody).toContain("LLMS: https://throwaway.sslboard.com/llms.txt");
+		expect(robotsBody).toContain("Content-Signal: search=yes, ai-input=yes, ai-train=no");
 
 		const sitemap = await env.fetch(new Request("http://localhost/sitemap.xml"));
-		expect(await sitemap.text()).toContain("https://throwaway.sslboard.com/openapi.json");
+		const sitemapBody = await sitemap.text();
+		expect(sitemapBody).toContain("https://throwaway.sslboard.com/openapi.json");
+		expect(sitemapBody).toContain("https://throwaway.sslboard.com/.well-known/webmcp");
 
 		const stats = await env.fetch(new Request("http://localhost/stats"));
 		expect(stats.headers.get("Link")).toContain("/openapi.json");
+		expect(stats.headers.get("Link")).toContain("/.well-known/webmcp");
 	});
 
 	it("lists MCP tools", async () => {
@@ -482,5 +511,23 @@ describe("agent-readiness discovery", () => {
 		);
 		expect(res.status).toBe(200);
 		expect(await res.text()).toContain("check_email");
+	});
+
+	it("rejects oversized MCP batches", async () => {
+		const emails = Array.from({ length: 1001 }, (_, i) => `user${i}@example.com`);
+		const res = await env.fetch(
+			new Request("http://localhost/mcp", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					jsonrpc: "2.0",
+					id: 1,
+					method: "tools/call",
+					params: { name: "batch_check_emails", arguments: { emails } },
+				}),
+			}),
+		);
+		expect(res.status).toBe(200);
+		expect(await res.text()).toContain("Batch size exceeds 1000");
 	});
 });

@@ -83,3 +83,14 @@ nexmaila.xyz
 plumdrop.live
 vumi.rest
 vumi.xyz
+# Added 2026-06-16 — weekly temp email domain check
+10-minutes.email
+babyfun.fun
+boommail.online
+beaconwarp.com
+flashemail.site
+ingam.online
+nondon.site
+oegmail.store
+speedlooking.fun
+vsmailpro.live

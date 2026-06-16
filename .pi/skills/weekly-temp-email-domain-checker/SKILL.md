@@ -162,7 +162,7 @@ Treat adapter statuses as follows:
 - `not-disposable-service` → add/update `service-exclusions.json` with the host, reason, evidence, and date.
 - `needs-implementation` / `failed` → update the adapter or report as incomplete; do not add domains and do not exclude unless inspection proves it is not a service.
 
-Run the adapter queue runner so each service in the final deduplicated queue is attempted exactly once:
+Run the adapter queue runner once so each service in the final deduplicated queue is attempted exactly once:
 
 ```bash
 node .pi/skills/weekly-temp-email-domain-checker/scripts/run-service-adapters.mjs \
@@ -173,15 +173,15 @@ node .pi/skills/weekly-temp-email-domain-checker/scripts/run-service-adapters.mj
 
 The runner maps each queued host to `.pi/skills/weekly-temp-email-domain-checker/service-adapters/<host-slug>.py`, runs it with `SERVICE_URL` set to the queued URL, writes one JSON file per service, and writes a combined result file. Use `/tmp/throwaway-adapter-results.json` as the canonical harvesting evidence for detector checks and the report.
 
-For any `missing-adapter`, `needs-implementation`, or stale/failing adapter result:
+If the combined run produces `missing-adapter`, `needs-implementation`, or stale/failing adapter results, do **not** rerun the full queue. Instead:
 
-1. Inspect the service with browser-harness.
+1. Inspect the affected service with browser-harness.
 2. Create or update the deterministic adapter.
-3. Rerun `run-service-adapters.mjs` for the queue, or rerun the specific adapter for verification and save the JSON evidence.
+3. Rerun only that specific adapter for verification and save the JSON evidence.
 4. Record the service name, queued URL, adapter status, generated email/domain evidence, and exact domain after `@`.
 5. If the service exposes a visible domain dropdown/list, collect every visible domain, but only label them verified if the adapter evidence shows the site presents them as usable temp-email domains.
 
-Do **not** replace the queue with a hand-picked subset unless you first rewrite the saved queue and explain the filtering decision in the report. Do not use manual browser inspection as a substitute for adapter output except while creating or repairing an adapter.
+Do **not** rerun the full queue after the initial pass unless the user explicitly asks. Do not use manual browser inspection as a substitute for adapter output except while creating or repairing an adapter.
 
 Useful browser-harness patterns:
 

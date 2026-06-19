@@ -11,3 +11,14 @@ src/generated/filter-meta.ts
 /blob-report/
 /playwright/.cache/
 reports
+
+# Generated discovery artifacts
+public/api-catalog.json
+public/.well-known/agent-card.json
+public/.well-known/agent-skills.json
+public/.well-known/agent-skills/index.json
+public/.well-known/agent-skills/throwaway-email-validation/SKILL.md
+public/.well-known/api-catalog
+public/.well-known/mcp-server.json
+public/.well-known/mcp/server-card.json
+public/.well-known/webmcp

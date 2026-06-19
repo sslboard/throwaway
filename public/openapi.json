@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "throwaway API",
-    "version": "1.2.4",
-    "description": "Public no-auth API for disposable email, TLD, MX, and filtered-DNS checks.",
+    "version": "1.2.5",
+    "description": "Read-only API for deciding whether an email address or domain should be rejected because the TLD is invalid, the domain has no MX records, filtered DNS blocks it, or it appears in the disposable-domain set.",
     "license": {
       "name": "MIT"
     }
@@ -20,22 +20,28 @@
         "type": "object",
         "properties": {
           "email": {
-            "type": "string"
+            "type": "string",
+            "description": "The original email address that was checked. Present for email-based checks; omitted for domain-only checks."
           },
           "domain": {
-            "type": "string"
+            "type": "string",
+            "description": "The normalized domain that was evaluated."
           },
           "valid_tld": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the domain ends in a real ICANN-recognized public suffix."
           },
           "has_mx": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the domain has MX records and can receive email."
           },
           "dns_blocked": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when filtered Cloudflare DNS appears to block an otherwise email-capable domain. Omitted when MX checks fail."
           },
           "dns_blocked_category": {
             "type": "string",
+            "description": "Best-effort category inferred from filtered-DNS results.",
             "enum": [
               "malware",
               "family",
@@ -43,10 +49,12 @@
             ]
           },
           "disposable": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "True when the domain matches the disposable-email blocklist."
           },
           "should_reject": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Coarse decision flag. True when the address or domain is invalid, non-deliverable, DNS-blocked, or disposable."
           }
         },
         "required": [
@@ -61,7 +69,8 @@
         "type": "object",
         "properties": {
           "error": {
-            "type": "string"
+            "type": "string",
+            "description": "Human-readable error message."
           }
         },
         "required": [
@@ -73,6 +82,7 @@
         "properties": {
           "results": {
             "type": "array",
+            "description": "One result per input value, in the same order as the request.",
             "items": {
               "$ref": "#/components/schemas/CheckResult"
             }
@@ -87,6 +97,7 @@
         "properties": {
           "emails": {
             "type": "array",
+            "description": "Email addresses to check. Maximum 1000 items.",
             "items": {
               "type": "string",
               "format": "email"
@@ -103,6 +114,7 @@
         "properties": {
           "domains": {
             "type": "array",
+            "description": "Domains to check. Maximum 1000 items.",
             "items": {
               "type": "string"
             },
@@ -117,19 +129,24 @@
         "type": "object",
         "properties": {
           "itemCount": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of domains inserted into the bloom filter."
           },
           "bitCount": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Bloom filter size in bits."
           },
           "hashCount": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Number of hash probes used per lookup."
           },
           "byteSize": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Bloom filter size in bytes."
           },
           "falsePositiveRate": {
-            "type": "number"
+            "type": "number",
+            "description": "Estimated bloom-filter false-positive rate."
           }
         },
         "required": [
@@ -144,7 +161,8 @@
         "type": "object",
         "properties": {
           "version": {
-            "type": "string"
+            "type": "string",
+            "description": "Deployed service version."
           }
         },
         "required": [
@@ -157,13 +175,15 @@
   "paths": {
     "/check": {
       "get": {
-        "summary": "Check one email address or domain",
+        "summary": "Check one email address or one domain",
+        "description": "Pass exactly one query parameter: `email` or `domain`. The response includes both the detailed signals and the coarse `should_reject` decision.",
         "parameters": [
           {
             "schema": {
               "type": "string",
               "format": "email"
             },
+            "description": "Email address to validate. Do not send this together with `domain`.",
             "required": false,
             "name": "email",
             "in": "query"
@@ -172,6 +192,7 @@
             "schema": {
               "type": "string"
             },
+            "description": "Domain to validate. Do not send this together with `email`.",
             "required": false,
             "name": "domain",
             "in": "query"
@@ -179,17 +200,43 @@
         ],
         "responses": {
           "200": {
-            "description": "Check result",
+            "description": "Validation result for the supplied email address or domain.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CheckResult"
+                },
+                "examples": {
+                  "accept": {
+                    "summary": "Deliverable non-disposable email",
+                    "value": {
+                      "email": "user@gmail.com",
+                      "domain": "gmail.com",
+                      "valid_tld": true,
+                      "has_mx": true,
+                      "dns_blocked": false,
+                      "disposable": false,
+                      "should_reject": false
+                    }
+                  },
+                  "reject": {
+                    "summary": "Disposable domain",
+                    "value": {
+                      "email": "user@mailinator.com",
+                      "domain": "mailinator.com",
+                      "valid_tld": true,
+                      "has_mx": true,
+                      "dns_blocked": false,
+                      "disposable": true,
+                      "should_reject": true
+                    }
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Error",
+            "description": "Missing input, conflicting parameters, invalid email format, or malformed request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -211,7 +258,8 @@
         }
       },
       "post": {
-        "summary": "Batch-check emails or domains",
+        "summary": "Batch-check email addresses or domains",
+        "description": "Send exactly one array: `emails` or `domains`. Mixed payloads are rejected.",
         "requestBody": {
           "required": true,
           "content": {
@@ -231,17 +279,44 @@
         },
         "responses": {
           "200": {
-            "description": "Batch check results",
+            "description": "Validation results in the same order as the request.",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/BatchResult"
+                },
+                "examples": {
+                  "emails": {
+                    "summary": "Two email results",
+                    "value": {
+                      "results": [
+                        {
+                          "email": "user@gmail.com",
+                          "domain": "gmail.com",
+                          "valid_tld": true,
+                          "has_mx": true,
+                          "dns_blocked": false,
+                          "disposable": false,
+                          "should_reject": false
+                        },
+                        {
+                          "email": "user@mailinator.com",
+                          "domain": "mailinator.com",
+                          "valid_tld": true,
+                          "has_mx": true,
+                          "dns_blocked": false,
+                          "disposable": true,
+                          "should_reject": true
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Error",
+            "description": "Invalid JSON, missing array, mixed arrays, or invalid payload shape.",
             "content": {
               "application/json": {
                 "schema": {
@@ -261,7 +336,7 @@
             }
           },
           "413": {
-            "description": "Error",
+            "description": "Request body too large or batch size exceeds the service limit.",
             "content": {
               "application/json": {
                 "schema": {
@@ -276,9 +351,10 @@
     "/stats": {
       "get": {
         "summary": "Return bloom-filter metadata",
+        "description": "Returns the current bloom-filter size, hash count, and estimated false-positive rate.",
         "responses": {
           "200": {
-            "description": "Filter stats",
+            "description": "Bloom-filter metadata.",
             "content": {
               "application/json": {
                 "schema": {
@@ -303,9 +379,10 @@
     "/health": {
       "get": {
         "summary": "Return service version",
+        "description": "Minimal health endpoint used to confirm the deployed version.",
         "responses": {
           "200": {
-            "description": "Health result",
+            "description": "Current service version.",
             "content": {
               "application/json": {
                 "schema": {

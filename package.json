@@ -1,6 +1,6 @@
 {
 	"name": "throwaway-worker",
-	"version": "1.2.5",
+	"version": "1.2.6",
 	"description": "Detect disposable email domains via a bloom filter — Cloudflare Worker JSON API",
 	"type": "module",
 	"private": true,
@@ -32,10 +32,8 @@
 		"wrangler": "^4.100.0"
 	},
 	"dependencies": {
-		"@hono/zod-openapi": "^1.4.0",
 		"hono": "^4.12.25",
-		"tldts": "^7.0.29",
-		"zod": "^4.4.3"
+		"tldts": "^7.0.29"
 	},
 	"overrides": {
 		"esbuild": "0.28.1"

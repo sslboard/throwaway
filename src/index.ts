@@ -1,4 +1,4 @@
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { Hono } from "hono";
 import { handleCheck, handleHealth, handleStats } from "./routes/api";
 import {
 	handleAuth,
@@ -23,7 +23,7 @@ function methodNotAllowed(): Response {
 	return errorResponse("Method not allowed", 405);
 }
 
-const app = new OpenAPIHono<AppBindings>();
+const app = new Hono<AppBindings>();
 
 app.on("OPTIONS", "*", () => new Response(null, { status: 204, headers: CORS_HEADERS }));
 

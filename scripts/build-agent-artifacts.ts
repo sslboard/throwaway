@@ -13,7 +13,6 @@ import {
 	agentSkillsIndex,
 	jsonArtifact,
 } from "../src/agent-artifacts";
-import { buildOpenApiDocument } from "../src/openapi";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const publicDir = resolve(__dirname, "../public");
@@ -23,7 +22,6 @@ const mcpDir = resolve(wellKnownDir, "mcp");
 const skillSha256 = createHash("sha256").update(AGENT_SKILL_MD).digest("hex");
 
 const files = [
-	["openapi.json", buildOpenApiDocument()],
 	["api-catalog.json", API_CATALOG],
 	[".well-known/api-catalog", API_CATALOG_LINKSET],
 	[".well-known/mcp-server.json", MCP_SERVER_CARD],

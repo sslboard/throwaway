@@ -77,7 +77,9 @@ kill $DEV_PID 2>/dev/null
 
 Use browser-harness for browser work. If the `browser-harness` skill is available and not already loaded, read it before interacting with Chrome.
 
-The SERP collector manages its own dedicated agent tab and closes it when finished. For service harvesting, each deterministic adapter manages its own browser tab. Only use a manually reused browser tab when inspecting/debugging a service adapter.
+The SERP collector manages its own dedicated agent tab and closes it when finished. For service harvesting, each deterministic adapter manages its own browser tab and must close it in `finally`. When manually inspecting/debugging a service adapter, reuse a single inspection tab instead of opening a fresh tab for each click/check.
+
+**Tab-management rule:** do not leave the current script's tab open. Each browser-harness script/adapter must close the tab it opened before exiting. For manual debugging, keep at most one reusable inspection tab per service, and close that inspection tab before moving to a different service. Never accumulate tabs across services or retries.
 
 Search multiple related queries and de-duplicate service URLs **before harvesting** so the same SERP result/service is not tested more than once.
 
@@ -114,7 +116,7 @@ At minimum, the saved queue/audit must record:
 
 Filter obvious non-service results **before** building the final queue. Exclude pages whose primary purpose is articles, reviews, forums, app-store listings, docs, GitHub repos, Wikipedia, or security-product content. Keep only hosts that appear to offer a live temp/disposable inbox generator. The SERP collector also reads `.pi/skills/weekly-temp-email-domain-checker/service-exclusions.json`; update that file when an adapter or inspection proves a host is not a disposable email generator.
 
-If a browser-harness script creates temporary tabs, close them before finishing by calling Chrome's target close command:
+If a browser-harness script creates a temporary tab, close that tab before finishing by calling Chrome's target close command:
 
 ```python
 try:
@@ -133,7 +135,7 @@ Use deterministic per-service adapters, not a generic operational harvester. For
 
 1. Look for an adapter in `.pi/skills/weekly-temp-email-domain-checker/service-adapters/<host-slug>.py`.
 2. If the adapter exists, run it with `browser-harness` and save its JSON output.
-3. If no adapter exists, create one from `.pi/skills/weekly-temp-email-domain-checker/templates/service-adapter-template.py`, inspect the service with browser-harness, implement the service-specific extraction steps, then rerun the adapter to verify it returns structured evidence.
+3. If no adapter exists, create one from `.pi/skills/weekly-temp-email-domain-checker/templates/service-adapter-template.py`, inspect the service with browser-harness using one reusable inspection tab, implement the service-specific extraction steps, then rerun the adapter to verify it returns structured evidence.
 4. If inspection proves the host is not a disposable email generator, the adapter should return `status: "not-disposable-service"` with evidence. Add that host and reason to `.pi/skills/weekly-temp-email-domain-checker/service-exclusions.json` so future SERP collection skips it. Prefer the helper:
 
    ```bash
@@ -175,11 +177,12 @@ The runner maps each queued host to `.pi/skills/weekly-temp-email-domain-checker
 
 If the combined run produces `missing-adapter`, `needs-implementation`, or stale/failing adapter results, do **not** rerun the full queue. Instead:
 
-1. Inspect the affected service with browser-harness.
+1. Inspect the affected service with browser-harness, reusing one inspection tab for that service instead of opening multiple tabs.
 2. Create or update the deterministic adapter.
 3. Rerun only that specific adapter for verification and save the JSON evidence.
 4. Record the service name, queued URL, adapter status, generated email/domain evidence, and exact domain after `@`.
 5. If the service exposes a visible domain dropdown/list, collect every visible domain, but only label them verified if the adapter evidence shows the site presents them as usable temp-email domains.
+6. Close the inspection tab before moving on to the next service.
 
 Do **not** rerun the full queue after the initial pass unless the user explicitly asks. Do not use manual browser inspection as a substitute for adapter output except while creating or repairing an adapter.
 
@@ -195,7 +198,7 @@ Array.from(document.body.innerText.matchAll(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2
 """))'
 ```
 
-If a site is JS-heavy, inspect the DOM first; use coordinates only when needed. If a site blocks automation with CAPTCHA/anti-bot interstitials, stop and report it as untested.
+If a site is JS-heavy, inspect the DOM first; use coordinates only when needed. If a site blocks automation with CAPTCHA/anti-bot interstitials, stop and report it as untested. After any manual inspection, close the inspection tab so browser-harness does not accumulate stale tabs.
 
 ## 5. Test candidates against the local detector
 

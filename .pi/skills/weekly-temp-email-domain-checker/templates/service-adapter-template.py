@@ -7,7 +7,8 @@ Run with:
 Contract: create/observe one live temp email address and/or parse service-exposed
 usable domains. If the site is clearly not a disposable email generator, return
 status "not-disposable-service" with evidence so the host can be added to the
-service exclusion list. Do not bypass CAPTCHA/auth/rate limits. Print one JSON object.
+service exclusion list. Do not bypass CAPTCHA/auth/rate limits. Open one tab,
+reuse that tab for the whole adapter run, and close that tab in `finally`. Print one JSON object.
 """
 
 import json
@@ -39,6 +40,8 @@ try:
     # - click generate/copy/reload controls by stable selectors
     # - read specific input/value/text nodes that contain the generated address
     # - parse known domain dropdown/options if the service exposes them
+    # - reuse this single tab for the entire adapter; do not open extra tabs unless
+    #   absolutely required, and close any temporary tab immediately after use
     # - never solve/bypass CAPTCHA, auth, or anti-bot flows
     #
     # If inspection proves this host is not a disposable-email generator, use:

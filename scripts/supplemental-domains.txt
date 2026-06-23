@@ -94,3 +94,7 @@ nondon.site
 oegmail.store
 speedlooking.fun
 vsmailpro.live
+
+# Added 2026-06-23 — weekly temp email domain check
+# tempmail.la (generated email: sobriquet483971364@wplacetools.com)
+wplacetools.com

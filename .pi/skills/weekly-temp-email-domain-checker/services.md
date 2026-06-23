@@ -50,6 +50,8 @@ This file tracks services discovered from Google SERPs during weekly temp-email 
 | `fake-email.pro` | https://fake-email.pro/10-minute-mail | adapter-ok | Adapter: `service-adapters/fake-email-pro.py`; extracts generated email from the address button. Verified 2026-06-09; generated `averiewalsh.0@quiet-branch.com`. |
 | `tmailor.com` | https://tmailor.com/th/10-minute-mail | adapter-ok | Adapter: `service-adapters/tmailor-com.py`; reads generated address from `input[name="currentEmailAddress"]`. |
 | `scribd.com` | https://www.scribd.com/document/395283787/10-Minute-Mail | excluded | False positive: document/article result, not a temp-mail generator. Added to `service-exclusions.json`. |
+| `lroid.com` | https://lroid.com/ | adapter-ok | Adapter: `service-adapters/lroid-com.py`; extracts generated address from rendered page text. Verified 2026-06-23; generated `holtaher@yevme.com` (already covered; `has_mx: false` anomaly). |
+| `tempmail.so` | https://tempmail.so/ | adapter-ok | Adapter: `service-adapters/tempmail-so.py`; reads generated address from `span.text-base.truncate` (no exposed domain dropdown). Verified 2026-06-23; generated `booby89464220@aminating.com` (already covered). |
 
 ## Maintenance notes
 

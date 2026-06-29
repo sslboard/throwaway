@@ -55,7 +55,6 @@ minhminclone.io.vn
 # Internxt Temp Mail / Mail.tm generated domain, verified 2026-06-09
 
 # Added 2026-06-09 — weekly temp email domain check
-cometclear.com
 quiet-branch.com
 
 # Added 2026-06-09 — weekly temp email domain check adapter follow-up
@@ -71,7 +70,6 @@ znvx.me
 
 # Added 2026-06-13 — weekly temp email domain check
 # 10minemail.com / temp-mail.org (generated email: nofafeb309@aratrin.com, noparo3237@aratrin.com)
-aratrin.com
 # mails.org (generated email: ari.7@mailcinder.com)
 mailcinder.com
 # fake-email.pro (generated email: andi.acevedo83@radiant-flow.org)
@@ -85,16 +83,16 @@ vumi.rest
 vumi.xyz
 # Added 2026-06-16 — weekly temp email domain check
 10-minutes.email
-babyfun.fun
-boommail.online
 beaconwarp.com
-flashemail.site
-ingam.online
-nondon.site
 oegmail.store
-speedlooking.fun
 vsmailpro.live
 
 # Added 2026-06-23 — weekly temp email domain check
 # tempmail.la (generated email: sobriquet483971364@wplacetools.com)
 wplacetools.com
+
+# Added 2026-06-29 — weekly temp email domain check
+dropoffs.org
+tg.gardianwaves.org
+sorawatermarkadder.org
+skatingion.com

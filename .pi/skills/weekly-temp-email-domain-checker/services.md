@@ -17,18 +17,18 @@ This file tracks services discovered from Google SERPs during weekly temp-email 
 | `temp-mail.io` | https://temp-mail.io/en | adapter-ok | Adapter: `service-adapters/temp-mail-io.py`; reads generated address from `input#email`. |
 | `internxt.com` | https://internxt.com/temporary-email | adapter-ok | Adapter: `service-adapters/internxt-com.py`; reads generated address from temporary-email widget button text. |
 | `tempmailo.com` | https://tempmailo.com/ | adapter-ok | Adapter: `service-adapters/tempmailo-com.py`; reads generated address from `input#i-email`. |
-| `emailondeck.com` | https://www.emailondeck.com/ | adapter-ok | Adapter: `service-adapters/emailondeck-com.py`; reports `blocked` because generation is gated by hCaptcha. |
+| `emailondeck.com` | https://www.emailondeck.com/ | adapter-ok | Adapter: `service-adapters/emailondeck-com.py`; reports `blocked` because generation is gated by hCaptcha. Manual user check 2026-06-29 generated `yohanna45@skatingion.com` (added). |
 | `tempail.com` | https://tempail.com/ | adapter-ok | Adapter: `service-adapters/tempail-com.py`; reads generated address from `input#eposta_adres`. |
 | `guerrillamail.com` | https://www.guerrillamail.com/ | adapter-ok | Adapter: `service-adapters/guerrillamail-com.py`; extracts generated body email and parses `select#gm-host-select` exposed domains. |
 | `mail.tm` | https://mail.tm/en/ | adapter-ok | Adapter: `service-adapters/mail-tm.py`; reads generated address from `input#Dont_use_WEB_use_API_OK`. |
-| `tempmail.la` | https://tempmail.la/ | adapter-ok | Adapter: `service-adapters/tempmail-la.py`; clicks Create Temp Email and extracts rendered generated address. |
+| `tempmail.la` | https://tempmail.la/ | adapter-ok | Adapter: `service-adapters/tempmail-la.py`; extracts dropdown domains and generated address after manual Turnstile success. Verified 2026-06-29; generated `jules02733525248@deshnetarchadacalculator.one`; exposed domains included `sorawatermarkadder.org` (added). |
 | `temp-inbox.me` | https://temp-inbox.me/ | adapter-ok | Adapter: `service-adapters/temp-inbox-me.py`; extracts inbox link email and parses `select#selected_domain` exposed domains. |
 | `disposablemail.com` | https://www.disposablemail.com/ | adapter-ok | Adapter: `service-adapters/disposablemail-com.py`; extracts generated address from rendered page text. |
 | `maildrop.cc` | https://maildrop.cc/ | adapter-ok | Adapter: `service-adapters/maildrop-cc.py`; extracts suggested disposable address from rendered page text. |
 | `yopmail.com` | https://yopmail.com/en/ | adapter-ok | Adapter: `service-adapters/yopmail-com.py`; forces `/email-generator` when the SERP queue URL is `/en/` and extracts generated address from `#egen`/`#geny`. Fixed and verified 2026-06-09; generated `nocrikoureiro-3376@yopmail.com`. |
 | `mails.org` | https://mails.org/ | adapter-ok | Adapter: `service-adapters/mails-org.py`; reads generated address from `input#generatedEmail`. Verified 2026-06-09; generated `devon.j@cometclear.com`. 2026-06-16 run hit CAPTCHA after clicking generate. |
 | `emailtemp.org` | https://emailtemp.org/en | adapter-ok | Adapter: `service-adapters/emailtemp-org.py`; reads generated address from `input#trsh_mail`. Verified 2026-06-16; generated `hithxnd966@tormails.com` (already covered). |
-| `mailporary.com` | https://mailporary.com/10minutemail | adapter-ok | Adapter: `service-adapters/mailporary-com.py`; reads generated address from the visible email input. Verified 2026-06-16; generated `kamvuahp8p@disefl.com` (already covered). |
+| `mailporary.com` | https://mailporary.com/10minutemail | adapter-ok | Adapter: `service-adapters/mailporary-com.py`; reads generated address from the visible email input. Verified 2026-06-29; generated `vbgvd.com` (already covered). |
 | `tempmailg.com` | https://tempmailg.com/en | adapter-ok | Adapter: `service-adapters/tempmailg-com.py`; reads generated address from `input#mainEmail` and parses `#name_domain option` values. Verified 2026-06-16; generated `kxi10@nondon.site`; exposed domains: `vsmailpro.live`, `jazzvip.site`, `oegmail.store`, `boommail.online`, `babyfun.fun`, `speedlooking.fun`, `flashemail.site`, `nondon.site`, `ingam.online`. |
 | `throwaway-email.temp-mail-world.com` | https://throwaway-email.temp-mail-world.com/en/ | adapter-ok | Adapter: `service-adapters/throwaway-email-temp-mail-world-com.py`; reads generated address from `input#mainEmail` and parses `#name_domain option` values. Verified 2026-06-16; generated `kkb56@10-minutes.email`; exposed domain: `10-minutes.email`. |
 | `temp-email.io` | https://temp-email.io/ | adapter-ok | Adapter: `service-adapters/temp-email-io.py`; reads generated address from `input#mainEmail`. Verified 2026-06-09; generated `rqi05@mroxis.com`. |
@@ -52,6 +52,10 @@ This file tracks services discovered from Google SERPs during weekly temp-email 
 | `scribd.com` | https://www.scribd.com/document/395283787/10-Minute-Mail | excluded | False positive: document/article result, not a temp-mail generator. Added to `service-exclusions.json`. |
 | `lroid.com` | https://lroid.com/ | adapter-ok | Adapter: `service-adapters/lroid-com.py`; extracts generated address from rendered page text. Verified 2026-06-23; generated `holtaher@yevme.com` (already covered; `has_mx: false` anomaly). |
 | `tempmail.so` | https://tempmail.so/ | adapter-ok | Adapter: `service-adapters/tempmail-so.py`; reads generated address from `span.text-base.truncate` (no exposed domain dropdown). Verified 2026-06-23; generated `booby89464220@aminating.com` (already covered). |
+| `xeramail.com` | https://xeramail.com/ | adapter-ok | Adapter: `service-adapters/xeramail-com.py`; reads generated address from `input#email`. Verified 2026-06-29; generated `phuturemail.com` (already covered). |
+| `facebook.com` | https://www.facebook.com/ogunrinu.adesina/posts/you-can-open-temporary-disposable-emails-email-content/10234358729575682/ | excluded | False positive: social post/video about temporary email, not a generator. Added to `service-exclusions.json`. |
+| `tempmaillab.com` | https://tempmaillab.com/ | adapter-ok | Adapter: `service-adapters/tempmaillab-com.py`; extracts generated address from rendered body text. Verified 2026-06-29; generated `chatgptmail.shop` (already covered). |
+| `tempmail.lol` | https://tempmail.lol/en/ | adapter-ok | Adapter: `service-adapters/tempmail-lol.py`; extracts generated address from rendered body text. Verified 2026-06-29; generated `tg.gardianwaves.org` (added). |
 
 ## Maintenance notes
 

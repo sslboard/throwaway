@@ -15,6 +15,11 @@
       "reason": "article",
       "evidence": "SERP result is an article about creating throwaway email accounts, not a disposable email generator",
       "added": "2026-06-13"
+    },
+    "facebook.com": {
+      "reason": "social-media-post",
+      "evidence": "SERP result is a Facebook post/video about temporary email, not a disposable email generator",
+      "added": "2026-06-29"
     }
   }
 }

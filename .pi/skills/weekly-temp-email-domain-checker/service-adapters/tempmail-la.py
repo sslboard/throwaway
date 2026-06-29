@@ -19,7 +19,7 @@ EXTRACT_QUERY = r"""
   add('generated-email-body', document.body ? document.body.innerText : '', 'document.body.innerText');
 
   const emails = uniq(sources.flatMap(s => s.value.match(EMAIL_RE) || []));
-  const exposed_domains = uniq(sources.filter(s => s.kind === 'exposed-domain-option').map(s => s.value).filter(v => DOMAIN_RE.test(v)));
+  const exposed_domains = uniq((window.__tempmailLaDomains || []).filter(v => DOMAIN_RE.test(v)));
   return {location: location.href, title: document.title, readyState: document.readyState, emails, exposed_domains, evidence: sources.filter(s => EMAIL_RE.test(s.value)).slice(0, 20)};
 })()
 """
@@ -29,8 +29,21 @@ agent_tab = None
 try:
     agent_tab = new_tab(URL)
     wait_for_load(30)
-    # tempmail.la requires clicking the visible create button before it renders an address.
     wait(5)
+    js(r'''(() => {
+        const domainBtn = [...document.querySelectorAll('button')].find(b => /\.[a-z]{2,}/i.test(b.innerText || ''));
+        if (domainBtn) { domainBtn.scrollIntoView({block: 'center'}); domainBtn.click(); }
+        return !!domainBtn;
+    })()''')
+    wait(1)
+    js(r'''(() => {
+        window.__tempmailLaDomains = [...document.querySelectorAll('[role="option"]')]
+          .map(el => (el.innerText || el.textContent || '').trim().toLowerCase())
+          .filter(text => /^[a-z0-9][a-z0-9-]*(?:\.[a-z0-9][a-z0-9-]*)+$/.test(text));
+        document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+        return window.__tempmailLaDomains;
+    })()''')
+    # tempmail.la requires clicking the visible create button before it renders an address.
     js(r'''(() => {
         const btn = [...document.querySelectorAll('button')].find(b => !b.disabled && /Create (a )?Temp Email/i.test(b.innerText || ''));
         if (btn) { btn.scrollIntoView({block: 'center'}); btn.click(); }

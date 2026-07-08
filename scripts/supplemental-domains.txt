@@ -31,7 +31,6 @@ priyotv.net
 priyoapk.com
 priyodown.com
 priyomail.org
-priyomail.nl
 priyo.edu.pl
 # Added 2026-05-23 — weekly temp email domain check
 # temp-mail.org (newly rotated domains, May 2026)
@@ -92,7 +91,8 @@ vsmailpro.live
 wplacetools.com
 
 # Added 2026-06-29 — weekly temp email domain check
-dropoffs.org
 tg.gardianwaves.org
 sorawatermarkadder.org
-skatingion.com
+
+# Added 2026-07-08 — weekly temp email domain check
+inboxopen.space

@@ -20,6 +20,11 @@
       "reason": "social-media-post",
       "evidence": "SERP result is a Facebook post/video about temporary email, not a disposable email generator",
       "added": "2026-06-29"
+    },
+    "mailify.org": {
+      "reason": "unreachable-nxdomain",
+      "evidence": "Chrome reports DNS_PROBE_FINISHED_NXDOMAIN for mailify.org during weekly check.",
+      "added": "2026-07-08"
     }
   }
 }

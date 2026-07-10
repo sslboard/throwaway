@@ -125,7 +125,8 @@ SERP_LINK_QUERY = r"""
 })()
 """
 
-agent_tab = new_tab(f"https://www.google.com/search?q={quote_plus(queries[0])}")
+ensure_real_tab()
+goto_url(f"https://www.google.com/search?q={quote_plus(queries[0])}")
 wait_for_load(20)
 
 queue = []
@@ -137,7 +138,6 @@ audit = []
 
 try:
     for query in queries:
-        switch_tab(agent_tab)
         goto_url(f"https://www.google.com/search?q={quote_plus(query)}")
         wait_for_load(20)
         wait(1.5)
@@ -182,10 +182,7 @@ try:
                 queued_by_host[host] = queued
                 queued_by_url[normalized] = queued
 finally:
-    try:
-        cdp("Target.closeTarget", targetId=agent_tab)
-    except Exception as e:
-        print(f"Failed to close agent tab: {e}")
+    pass
 
 payload = {
     "queries": queries,

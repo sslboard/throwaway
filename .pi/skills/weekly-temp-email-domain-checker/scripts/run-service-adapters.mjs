@@ -103,8 +103,23 @@ for (const item of queue) {
   }
 
   const started = Date.now();
+  // Reuse the harness's current tab. `new_tab()` is shimmed for legacy
+  // adapters, and close requests are ignored so the next service navigates
+  // the same tab instead of creating a tab/blank-tab pair.
+  const adapterProgram = `
+_original_cdp = cdp
+def new_tab(url):
+    ensure_real_tab()
+    goto_url(url)
+    wait_for_load()
+    return "reused-current-tab"
+def cdp(method, **kwargs):
+    if method == "Target.closeTarget":
+        return {"success": True}
+    return _original_cdp(method, **kwargs)
+${adapterSource}`;
   const child = spawnSync(browserHarnessBin, [], {
-    input: adapterSource,
+    input: adapterProgram,
     encoding: "utf8",
     env: { ...process.env, SERVICE_URL: url },
     maxBuffer: 20 * 1024 * 1024,

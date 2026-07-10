@@ -77,7 +77,7 @@ kill $DEV_PID 2>/dev/null
 
 Use browser-harness for browser work. If the `browser-harness` skill is available and not already loaded, read it before interacting with Chrome.
 
-The SERP collector manages its own dedicated agent tab and closes it when finished. For service harvesting, each deterministic adapter manages its own browser tab and must close it in `finally`. When manually inspecting/debugging a service adapter, reuse a single inspection tab instead of opening a fresh tab for each click/check.
+Use one existing browser tab throughout the workflow. Navigate with `goto_url()`; do not call `new_tab()` for each service. `run-service-adapters.mjs` shims legacy adapters to reuse the current tab and ignores their old close requests. Do not close the shared tab between services. When manually inspecting/debugging a service adapter, reuse the same tab and navigate between sites.
 
 **Tab-management rule:** do not leave the current script's tab open. Each browser-harness script/adapter must close the tab it opened before exiting. For manual debugging, keep at most one reusable inspection tab per service, and close that inspection tab before moving to a different service. Never accumulate tabs across services or retries.
 
@@ -116,15 +116,14 @@ At minimum, the saved queue/audit must record:
 
 Filter obvious non-service results **before** building the final queue. Exclude pages whose primary purpose is articles, reviews, forums, app-store listings, docs, GitHub repos, Wikipedia, or security-product content. Keep only hosts that appear to offer a live temp/disposable inbox generator. The SERP collector also reads `.pi/skills/weekly-temp-email-domain-checker/service-exclusions.json`; update that file when an adapter or inspection proves a host is not a disposable email generator.
 
-If a browser-harness script creates a temporary tab, close that tab before finishing by calling Chrome's target close command:
+If a one-off browser-harness script must create a temporary tab, close that tab before finishing by calling Chrome's target close command. The operational harvesting loop must not create temporary tabs:
 
 ```python
 try:
-    agent_tab = new_tab("https://www.google.com/search?q=temp+email")
+    ensure_real_tab()
+    goto_url("https://www.google.com/search?q=temp+email")
     wait_for_load()
-    # collect/search SERP links, preferably with goto_url(...) in this tab
-finally:
-    cdp("Target.closeTarget", targetId=agent_tab)
+    # collect/search SERP links, then use goto_url(...) in this same tab
 ```
 
 Review the first page of results for each query. Prioritize major services that actually generate inboxes/addresses, plus newly discovered services not seen in earlier queries. Ignore blog posts, review pages, and VPN/security product landing pages unless they provide a live temp email generator.

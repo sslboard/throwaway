@@ -2,13 +2,13 @@
 
 Run with:
   SERVICE_URL=https://example.com/ \
-  browser-harness -c "$(cat .pi/skills/weekly-temp-email-domain-checker/service-adapters/SERVICE_SLUG.py)"
+  browser-harness < .pi/skills/weekly-temp-email-domain-checker/service-adapters/SERVICE_SLUG.py
 
 Contract: create/observe one live temp email address and/or parse service-exposed
 usable domains. If the site is clearly not a disposable email generator, return
 status "not-disposable-service" with evidence so the host can be added to the
-service exclusion list. Do not bypass CAPTCHA/auth/rate limits. Open one tab,
-reuse that tab for the whole adapter run, and close that tab in `finally`. Print one JSON object.
+service exclusion list. Do not bypass CAPTCHA/auth/rate limits. Reuse the current
+browser tab and navigate with `goto_url()`. Print one JSON object.
 """
 
 import json
@@ -29,9 +29,9 @@ result = {
     "exclude_recommendation": None,
 }
 
-agent_tab = None
 try:
-    agent_tab = new_tab(URL)
+    ensure_real_tab()
+    goto_url(URL)
     wait_for_load(25)
     wait(3)
 
@@ -57,10 +57,6 @@ except Exception as e:
     result["status"] = "failed"
     result["notes"].append(str(e))
 finally:
-    if agent_tab is not None:
-        try:
-            cdp("Target.closeTarget", targetId=agent_tab)
-        except Exception:
-            pass
+    pass
 
 print(json.dumps(result, indent=2, ensure_ascii=False))

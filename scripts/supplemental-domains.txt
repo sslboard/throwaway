@@ -96,3 +96,6 @@ sorawatermarkadder.org
 
 # Added 2026-07-08 — weekly temp email domain check
 inboxopen.space
+
+# Added 2026-07-10 — weekly temp email domain check
+beamscalar.com

@@ -103,7 +103,8 @@ for (const item of queue) {
   }
 
   const started = Date.now();
-  const child = spawnSync(browserHarnessBin, ["-c", adapterSource], {
+  const child = spawnSync(browserHarnessBin, [], {
+    input: adapterSource,
     encoding: "utf8",
     env: { ...process.env, SERVICE_URL: url },
     maxBuffer: 20 * 1024 * 1024,

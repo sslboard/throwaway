@@ -21,19 +21,19 @@
 		"format:check": "prettier --check ."
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.16.15",
-		"@emnapi/core": "1.10.0",
-		"@emnapi/runtime": "1.10.0",
-		"@playwright/test": "^1.59.1",
-		"prettier": "^3.8.3",
-		"tsx": "^4.22.4",
+		"@cloudflare/vitest-pool-workers": "^0.18.4",
+		"@emnapi/core": "^1.11.2",
+		"@emnapi/runtime": "^1.11.2",
+		"@playwright/test": "^1.61.1",
+		"prettier": "^3.9.5",
+		"tsx": "^4.23.0",
 		"typescript": "^5.9.3",
-		"vitest": "^4.1.5",
-		"wrangler": "^4.100.0"
+		"vitest": "^4.1.10",
+		"wrangler": "^4.110.0"
 	},
 	"dependencies": {
-		"hono": "^4.12.25",
-		"tldts": "^7.0.29"
+		"hono": "^4.12.28",
+		"tldts": "^7.4.8"
 	},
 	"overrides": {
 		"esbuild": "0.28.1"

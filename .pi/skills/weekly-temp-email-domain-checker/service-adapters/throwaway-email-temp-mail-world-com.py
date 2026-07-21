@@ -28,8 +28,7 @@ EXTRACT_QUERY = r"""
     }
   }
 
-  add('body.innerText', document.body ? document.body.innerText : '', 'document.body.innerText');
-  const emails = uniq(sources.flatMap(s => s.value.match(EMAIL_RE) || []));
+  const emails = uniq(sources.filter(s => s.kind === 'generated-email-input').flatMap(s => s.value.match(EMAIL_RE) || []));
   const exposed_domains = uniq(sources.filter(s => s.kind === 'domain-option').map(s => s.value).filter(v => DOMAIN_RE.test(v)));
   return {location: location.href, title: document.title, readyState: document.readyState, emails, exposed_domains, evidence: sources.filter(s => EMAIL_RE.test(s.value) || s.kind === 'domain-option').slice(0, 30)};
 })()

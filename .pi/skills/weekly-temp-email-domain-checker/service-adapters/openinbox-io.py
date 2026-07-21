@@ -22,9 +22,10 @@ try:
         if data.get("emails"):
             break
     result["url"] = (data or {}).get("location", URL)
-    result["emails"] = [e for e in (data or {}).get("emails", []) if not e.startswith(("support@", "help@"))]
+    excluded = {"you@yourdomain.com", "yourname@yourdomain.com", "billing@acme.io"}
+    result["emails"] = [e for e in (data or {}).get("emails", []) if e not in excluded and not e.startswith(("support@", "help@"))][:1]
     result["domains_from_emails"] = sorted({e.split("@",1)[1] for e in result["emails"]})
-    result["evidence"] = [{"kind":"body.innerText", "value": e, "selector":"body"} for e in result["emails"]]
+    result["evidence"] = [{"kind":"generated-email-body", "value": e, "selector":"body"} for e in result["emails"]]
     result["status"] = "ok" if result["emails"] else "failed"
     if not result["emails"]: result["notes"].append("No generated email found on landing page.")
 except Exception as e:

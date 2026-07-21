@@ -59,6 +59,11 @@ This file tracks services discovered from Google SERPs during weekly temp-email 
 | `mailify.org` | https://mailify.org/ | excluded | Chrome reported DNS_PROBE_FINISHED_NXDOMAIN on 2026-07-08. Added to `service-exclusions.json`. |
 | `openinbox.io` | https://openinbox.io/ | adapter-ok | Adapter: `service-adapters/openinbox-io.py`; extracts generated landing-page address. Verified 2026-07-08; generated `inboxopen.space` (added). |
 | `tempmail.plus` | https://tempmail.plus/en/ | adapter-ok | Adapter: `service-adapters/tempmail-plus.py`; combines `#pre_button` local part with selected `#domain` and enumerates dropdown domains. Verified 2026-07-08; generated `mailto.plus` (already covered). |
+| `temp.tf` | https://temp.tf/ | adapter-ok | Adapter: `service-adapters/temp-tf.py`; reads the generated address from the rendered page. Verified 2026-07-21; generated `high.edu.pl` (added). |
+| `freecustom.email` | https://www.freecustom.email/en | adapter-ok | Adapter: `service-adapters/freecustom-email.py`; reads the current generated address from rendered page text. Verified 2026-07-21; generated `ditube.info` (added; no MX). |
+| `mail.cx` | https://mail.cx/ | adapter-ok | Adapter: `service-adapters/mail-cx.py`; reads the generated address from rendered page text. Verified 2026-07-21; generated `9k3r.com` (added). |
+| `vanishinbox.com` | https://vanishinbox.com/10-minute-email | adapter-ok | Adapter: `service-adapters/vanishinbox-com.py`; reports `blocked` by Cloudflare security verification on 2026-07-21. |
+| `temp-mail.app` | https://temp-mail.app/ | adapter-ok | Adapter: `service-adapters/temp-mail-app.py`; reads the generated address from rendered page text. Verified 2026-07-21; generated `minitts.net` (already covered). |
 
 ## Maintenance notes
 

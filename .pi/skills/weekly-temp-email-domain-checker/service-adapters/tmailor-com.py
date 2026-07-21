@@ -15,6 +15,14 @@ EXTRACT_QUERY = r"""
   const input = document.querySelector('input[name="currentEmailAddress"], input[aria-label="Your temporary email address"]');
   if (input) add('generated-email-input', input.value || input.getAttribute('value') || '', input.name ? 'input[name="currentEmailAddress"]' : 'input[aria-label="Your temporary email address"]');
 
+  const inboxEmail = document.querySelector('.js-inbox-email');
+  if (inboxEmail) add('generated-email-element', inboxEmail.textContent || '', '.js-inbox-email');
+
+  try {
+    const saved = JSON.parse(localStorage.getItem('currentEmail') || '{}');
+    if (saved.email) add('generated-email-local-storage', saved.email, 'localStorage.currentEmail.email');
+  } catch (_) {}
+
   const emails = uniq(sources.flatMap(s => s.value.match(EMAIL_RE) || []));
   return {location: location.href, title: document.title, readyState: document.readyState, emails, evidence: sources.filter(s => EMAIL_RE.test(s.value)).slice(0, 20)};
 })()

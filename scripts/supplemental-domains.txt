@@ -99,3 +99,24 @@ inboxopen.space
 
 # Added 2026-07-10 — weekly temp email domain check
 beamscalar.com
+
+# Added 2026-07-17 — manual addition
+private.7k7.org
+
+# Added 2026-07-21 — weekly temp email domain check
+9k3r.com
+ditube.info
+high.edu.pl
+
+# Added 2026-07-21 — human-confirmed weekly temp email check
+# EmailOnDeck generated ameera@racavor.com
+racavor.com
+# VanishInbox visible usable domain list from screenshot
+fommie.com
+whoopza.org
+fommie.online
+fommie.store
+whoopza.store
+reason.edu.pl
+realize.edu.pl
+remind.edu.pl

@@ -95,7 +95,6 @@ tg.gardianwaves.org
 sorawatermarkadder.org
 
 # Added 2026-07-08 — weekly temp email domain check
-inboxopen.space
 
 # Added 2026-07-10 — weekly temp email domain check
 beamscalar.com
@@ -110,7 +109,6 @@ high.edu.pl
 
 # Added 2026-07-21 — human-confirmed weekly temp email check
 # EmailOnDeck generated ameera@racavor.com
-racavor.com
 # VanishInbox visible usable domain list from screenshot
 fommie.com
 whoopza.org
@@ -120,3 +118,10 @@ whoopza.store
 reason.edu.pl
 realize.edu.pl
 remind.edu.pl
+
+# Added 2026-08-01 — weekly temp email domain check
+applamos.com
+metaradar.net
+
+# Added 2026-08-01 — manual follow-up
+# User-provided generated address: madeline00@kehine.com

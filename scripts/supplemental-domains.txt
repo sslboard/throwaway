@@ -120,8 +120,10 @@ realize.edu.pl
 remind.edu.pl
 
 # Added 2026-08-01 — weekly temp email domain check
-applamos.com
 metaradar.net
 
 # Added 2026-08-01 — manual follow-up
 # User-provided generated address: madeline00@kehine.com
+
+# Added 2026-08-05 — manual addition
+tmpwebmail.com

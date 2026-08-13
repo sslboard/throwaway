@@ -64,6 +64,10 @@ This file tracks services discovered from Google SERPs during weekly temp-email 
 | `mail.cx` | https://mail.cx/ | adapter-ok | Adapter: `service-adapters/mail-cx.py`; reads the generated address from rendered page text. Verified 2026-07-21; generated `9k3r.com` (added). |
 | `vanishinbox.com` | https://vanishinbox.com/10-minute-email | adapter-ok | Adapter: `service-adapters/vanishinbox-com.py`; reports `blocked` by Cloudflare security verification on 2026-07-21. |
 | `temp-mail.app` | https://temp-mail.app/ | adapter-ok | Adapter: `service-adapters/temp-mail-app.py`; reads the generated address from rendered page text. Verified 2026-07-21; generated `minitts.net` (already covered). |
+| `tmaily.com` | https://tmaily.com/ | adapter-ok | Adapter: `service-adapters/tmaily-com.py`; extracts generated address from rendered body text. Verified 2026-08-13; generated `2048unblocked.com` (already covered). |
+| `10minutemail.now` | https://10minutemail.now/ | adapter-ok | Adapter: `service-adapters/10minutemail-now.py`; reads generated address from `input#temp-email`. Verified 2026-08-13; generated `morningsun.lol` (added). |
+| `dustmail.net` | https://dustmail.net/temp-mail/10-minutes | adapter-ok | Adapter: `service-adapters/dustmail-net.py`; extracts generated address from rendered body text. Verified 2026-08-13; generated `dustmail.net` (added). |
+| `internxt.com` | https://internxt.com/temporary-email | adapter-blocked | Adapter: `service-adapters/internxt-com.py`; widget stuck on "Generating random email..." under automation on 2026-08-13 (likely anti-bot-gated); reported `blocked`, no bypass. |
 
 ## Maintenance notes
 

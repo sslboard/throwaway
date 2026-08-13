@@ -127,3 +127,11 @@ metaradar.net
 
 # Added 2026-08-05 — manual addition
 tmpwebmail.com
+
+# Added 2026-08-13 — weekly temp email domain check
+# mails.org generated quinn.f@microember.com
+# 10minutemail.now generated c2m9f8wcbm@morningsun.lol
+# dustmail.net generated polarmeteor7329@dustmail.net
+microember.com
+morningsun.lol
+dustmail.net

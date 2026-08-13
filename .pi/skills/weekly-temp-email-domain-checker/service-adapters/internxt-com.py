@@ -50,7 +50,7 @@ try:
     agent_tab = new_tab(URL)
     wait_for_load(30)
     data = None
-    for _ in range(12):
+    for _ in range(15):
         wait(2)
         data = js(EXTRACT_QUERY) or {}
         emails = data.get("emails") or []
@@ -73,6 +73,12 @@ try:
         if "captcha" in lowered or "verify you are human" in lowered or "cloudflare" in lowered:
             result["status"] = "blocked"
             result["notes"].append("Page appears to require anti-bot verification; no bypass attempted.")
+        elif "generating random email" in lowered:
+            # The temp-mail widget never advances past its async generator under
+            # automation (likely gated behind a turnstile/anti-bot token). We do
+            # not bypass it; report as not fully tested.
+            result["status"] = "blocked"
+            result["notes"].append("Temp-mail widget stuck on 'Generating random email...' under automation; address never rendered. No bypass attempted.")
         else:
             result["status"] = "failed"
             result["notes"].append("Loaded service but did not find a generated email at the expected selector(s).")

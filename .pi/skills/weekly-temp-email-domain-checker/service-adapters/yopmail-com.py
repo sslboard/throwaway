@@ -18,8 +18,19 @@ EXTRACT_QUERY = r"""
   const generated = document.querySelector('#egen, #geny');
   if (generated) add('generated-email-selector', generated.innerText || generated.textContent || '', generated.id ? `#${generated.id}` : '#egen/#geny');
 
+  const domainFrame = document.querySelector('#ifdoms');
+  const domainSelect = domainFrame?.contentDocument?.querySelector('select#seldom');
+  const exposed_domains = domainSelect
+    ? uniq(Array.from(domainSelect.options || []).map(option => option.value || option.textContent || '').map(value => value.replace(/^@/, '')))
+    : [];
+  if (domainSelect) {
+    for (const option of Array.from(domainSelect.options || [])) {
+      add('exposed-domain-option', option.value || option.textContent || '', '#ifdoms #seldom option');
+    }
+  }
+
   const emails = uniq(sources.flatMap(s => s.value.match(EMAIL_RE) || []));
-  return {location: location.href, title: document.title, readyState: document.readyState, emails, evidence: sources.filter(s => EMAIL_RE.test(s.value)).slice(0, 20)};
+  return {location: location.href, title: document.title, readyState: document.readyState, emails, exposed_domains, evidence: sources.filter(s => EMAIL_RE.test(s.value)).slice(0, 20)};
 })()
 """
 result = {"service": SERVICE, "url": URL, "status": "started", "emails": [], "domains_from_emails": [], "exposed_domains": [], "evidence": [], "notes": [], "exclude_recommendation": None}
@@ -33,12 +44,13 @@ try:
         data = js(EXTRACT_QUERY) or {}
         emails = data.get("emails") or []
         generated = [e for e in emails if not e.startswith(("support@", "no-reply@", "noreply@", "hello@"))]
-        if generated:
+        if generated and data.get("exposed_domains"):
             break
     emails = data.get("emails") if data else []
     filtered = [e for e in emails if not e.startswith(("support@", "no-reply@", "noreply@", "hello@"))]
     result["emails"] = filtered or emails or []
     result["domains_from_emails"] = sorted({email.split("@", 1)[1].lower() for email in result["emails"] if "@" in email})
+    result["exposed_domains"] = (data or {}).get("exposed_domains", [])
     result["evidence"] = (data or {}).get("evidence", [])
     result["url"] = (data or {}).get("location", URL)
     if result["emails"]:

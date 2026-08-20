@@ -31,7 +31,6 @@ priyotv.net
 priyoapk.com
 priyodown.com
 priyomail.org
-priyo.edu.pl
 # Added 2026-05-23 — weekly temp email domain check
 # temp-mail.org (newly rotated domains, May 2026)
 # emailondeck.com (newly rotated domains, 2026)
@@ -135,3 +134,25 @@ tmpwebmail.com
 microember.com
 morningsun.lol
 dustmail.net
+
+# Added 2026-08-20 — weekly temp email domain check
+# tmaily.com generated dsbiiz67001@amgld.com
+amgld.com
+
+# Added 2026-08-20 — YOPmail #seldom alternate domains
+# Verified by YOPmail's live alternate-domain iframe and local detector
+y.w80.it
+yop.kd2.org
+mai.25u.com
+get.vpn64.de
+elmail.4pu.com
+get.route64.de
+ggamess.42web.io
+
+# Added 2026-08-20 — manual live-service evidence supplied during weekly check
+# Internxt generated diannia@visitedity.com
+visitedity.com
+# Additional manually observed generated addresses
+bigemail.fun
+nexuspost.store
+fastreply.shop

@@ -151,8 +151,35 @@ ggamess.42web.io
 
 # Added 2026-08-20 — manual live-service evidence supplied during weekly check
 # Internxt generated diannia@visitedity.com
-visitedity.com
 # Additional manually observed generated addresses
 bigemail.fun
 nexuspost.store
 fastreply.shop
+
+# Added 2026-08-20 — manually observed disposable address
+# Generated address: sean908@10minutes.email
+10minutes.email
+
+# Added 2026-08-20 — manually observed disposable address
+# Generated address: baden.uneven.shark@x-box.in
+x-box.in
+
+# Added 2026-07-21 — weekly temp email domain check
+prorises.com
+manglgih.com
+temp-mail-world.com
+slotbeer.com
+copypastalove.click
+nobinbox.com
+fox.jazzvip.site
+hello.nondon.site
+fun.ingam.online
+fast.speedlooking.fun
+post.boommail.online
+go.jazzvip.site
+
+# Added 2026-07-21 — back-catalog adapter sweep (2026-08-28)
+deep-mail.com
+vrf.totalgamehub.net
+souss.dev
+gigacalulate.xyz

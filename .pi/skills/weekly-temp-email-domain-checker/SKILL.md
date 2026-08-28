@@ -10,6 +10,8 @@ Use this workflow to keep `throwaway-worker` current with domains used by dispos
 
 The goal is to add only **verified, live disposable email domains** that the freshly rebuilt local detector does not already mark as disposable.
 
+Every run sweeps the **entire adapter catalog**; the Google SERP pass exists to discover services that do not yet have adapters.
+
 ## Repository assumptions
 
 Run from the `throwaway-worker` repository root. If the current directory is wrong, locate the repo by finding `package.json` with `"name": "throwaway-worker"`.
@@ -73,7 +75,18 @@ If port 8787 is busy, choose another port and keep `BASE_URL` accurate. Stop the
 kill $DEV_PID 2>/dev/null
 ```
 
-## 3. Search Google and choose services
+## 3. Run the full adapter catalog
+
+Every run starts by sweeping all known services. Build the full-catalog queue from the adapters directory (minus hosts in `service-exclusions.json`):
+
+```bash
+node .pi/skills/weekly-temp-email-domain-checker/scripts/build-full-queue.mjs --out /tmp/throwaway-full-queue.json
+node -e 'require("/tmp/throwaway-full-queue.json").queue.forEach(q => console.log(q.host, q.url))'
+```
+
+Inspect the printed list so the sweep is auditable. Adapters added during previous runs are exercised again even when their hosts no longer appear in search results — services rotate domains, and the sweep is what catches that.
+
+## 4. Search Google for new services
 
 Use browser-harness for browser work. If the `browser-harness` skill is available and not already loaded, read it before interacting with Chrome.
 
@@ -83,7 +96,7 @@ Use one existing browser tab throughout the workflow. Navigate with `goto_url()`
 
 Search multiple related queries and de-duplicate service URLs **before harvesting** so the same SERP result/service is not tested more than once.
 
-**Critical bug-avoidance rule:** after SERP collection, persist one canonical `service_urls` queue and harvest **only from that queue**. Do not re-search, manually swap in a different ad hoc subset, or retest a host already present in the queue unless the report explicitly says why. The harvesting loop must consume the previously collected queue directly, one host at most once.
+**Critical bug-avoidance rule:** after SERP collection, persist one canonical merged queue (full catalog + SERP-only new hosts) and harvest **only from that queue**. Do not re-search, manually swap in a different ad hoc subset, or retest a host already present in the queue unless the report explicitly says why. The harvesting loop must consume the merged queue directly, one host at most once.
 
 Recommended queries:
 
@@ -128,7 +141,7 @@ try:
 
 Review the first page of results for each query. Prioritize major services that actually generate inboxes/addresses, plus newly discovered services not seen in earlier queries. Ignore blog posts, review pages, and VPN/security product landing pages unless they provide a live temp email generator.
 
-## 4. Harvest live email domains
+## 5. Harvest live email domains
 
 Use deterministic per-service adapters, not a generic operational harvester. For each queued service host:
 
@@ -163,11 +176,19 @@ Treat adapter statuses as follows:
 - `not-disposable-service` → add/update `service-exclusions.json` with the host, reason, evidence, and date.
 - `needs-implementation` / `failed` → update the adapter or report as incomplete; do not add domains and do not exclude unless inspection proves it is not a service.
 
-Run the adapter queue runner once so each service in the final deduplicated queue is attempted exactly once:
+Merge the full-catalog queue with the SERP queue (the runner dedupes by host, SERP entries win for hosts in both) and run the adapter queue runner once so each service in the merged queue is attempted exactly once:
 
 ```bash
+node -e 'const fs=require("fs");
+const full=require("/tmp/throwaway-full-queue.json").queue;
+const serp=require("/tmp/throwaway-serp-services.json").queue;
+const seen=new Set(); const merged=[];
+for (const q of [...serp, ...full]) { if (seen.has(q.host)) continue; seen.add(q.host); merged.push(q); }
+fs.writeFileSync("/tmp/throwaway-merged-queue.json", JSON.stringify({queue: merged}, null, 2));
+console.log("merged queue:", merged.length, "hosts");'
+
 node .pi/skills/weekly-temp-email-domain-checker/scripts/run-service-adapters.mjs \
-  --queue /tmp/throwaway-serp-services.json \
+  --queue /tmp/throwaway-merged-queue.json \
   --out /tmp/throwaway-adapter-results.json \
   --results-dir /tmp/throwaway-adapter-results
 ```
@@ -199,7 +220,7 @@ Array.from(document.body.innerText.matchAll(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2
 
 If a site is JS-heavy, inspect the DOM first; use coordinates only when needed. If a site blocks automation with CAPTCHA/anti-bot interstitials, stop and report it as untested. After any manual inspection, close the inspection tab so browser-harness does not accumulate stale tabs.
 
-## 5. Test candidates against the local detector
+## 6. Test candidates against the local detector
 
 Prefer the API documented in `src/llms.txt` over the UI.
 
@@ -232,7 +253,7 @@ Interpretation:
 
 The UI can be used as a cross-check at the local base URL. Enter the address in `#emailInput`, press Enter, then read `#resultVerdict`. Expected text is lowercase in the current UI: `disposable`, `legitimate`, `invalid`, or `no MX records`.
 
-## 6. Update supplemental domains
+## 7. Update supplemental domains
 
 For every verified missed domain:
 
@@ -255,7 +276,7 @@ npm run build:filter
 
 Then rerun checks for the newly added domains and confirm `disposable: true` locally.
 
-## 7. Validate and summarize changes
+## 8. Validate and summarize changes
 
 Run at least:
 
@@ -271,7 +292,7 @@ git diff -- scripts/supplemental-domains.txt src/generated/filter-meta.ts src/ge
 
 Do not commit unless the user asks.
 
-## 8. Write the report
+## 9. Write the report
 
 Create `reports/weekly-temp-email-check-YYYY-MM-DD.md` with this structure:
 

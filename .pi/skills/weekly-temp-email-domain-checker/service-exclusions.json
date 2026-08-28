@@ -25,6 +25,16 @@
       "reason": "unreachable-nxdomain",
       "evidence": "Chrome reports DNS_PROBE_FINISHED_NXDOMAIN for mailify.org during weekly check.",
       "added": "2026-07-08"
+    },
+    "usercheck.com": {
+      "reason": "tool",
+      "evidence": "SERP result is a signup-protection/disposable-email-checker SaaS tool, not a temp email generator",
+      "added": "2026-08-28"
+    },
+    "zerobounce.net": {
+      "reason": "article",
+      "evidence": "SERP result is an email-marketer guide on blocking disposable emails, not a generator",
+      "added": "2026-08-28"
     }
   }
 }

@@ -78,3 +78,8 @@ This file tracks services discovered from Google SERPs during weekly temp-email 
 - When an adapter is written and verified, mark the service `adapter-ok` and link the adapter path in notes.
 - When a host is proven not to be a disposable email generator, mark it `excluded` here and add it to `service-exclusions.json` with evidence.
 - Avoid treating generic harvester output as sufficient proof. Use it only as diagnostics while authoring service-specific adapters.
+| `instanttempemail.com` | https://instanttempemail.com | adapter-ok | Adapter: `service-adapters/instanttempemail-com.py`; reads generated address from input/body text. Verified 2026-09-21; generated `fpklm.com` (added). |
+| `tmail.pk` | https://tmail.pk | adapter-ok | Adapter: `service-adapters/tmail-pk.py`; reads generated address from input/body text. Verified 2026-09-21; generated `mevday.com` (added). |
+| `sandvpn.com` | https://sandvpn.com/mailbox | adapter-ok | 2026-09-21 run generated `tempyx.com` (added). |
+| `temp-email.io` | https://temp-email.io | adapter-ok | 2026-09-21 run generated `temp-email.io` (added). |
+| `tempmail.lol` | https://tempmail.lol/en/ | adapter-ok | 2026-09-21 run generated `gw.auroracovia.com` (added). |

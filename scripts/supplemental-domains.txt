@@ -133,7 +133,6 @@ tmpwebmail.com
 # dustmail.net generated polarmeteor7329@dustmail.net
 microember.com
 morningsun.lol
-dustmail.net
 
 # Added 2026-08-20 — weekly temp email domain check
 # tmaily.com generated dsbiiz67001@amgld.com
@@ -185,3 +184,10 @@ gigacalulate.xyz
 # Added 2026-09-09 — kolsea.com: no website, MX → mail.wabblywabble.com/mail.wallywatts.com (live SMTP, same burner network)
 wabblywabble.com
 wallywatts.com
+
+# Added 2026-09-21 — weekly temp email domain check
+fpklm.com
+mevday.com
+gw.auroracovia.com
+temp-email.io
+tempyx.com

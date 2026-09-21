@@ -165,10 +165,8 @@ fastreply.shop
 x-box.in
 
 # Added 2026-07-21 — weekly temp email domain check
-prorises.com
 manglgih.com
 temp-mail-world.com
-slotbeer.com
 copypastalove.click
 nobinbox.com
 fox.jazzvip.site
@@ -183,3 +181,7 @@ deep-mail.com
 vrf.totalgamehub.net
 souss.dev
 gigacalulate.xyz
+
+# Added 2026-09-09 — kolsea.com: no website, MX → mail.wabblywabble.com/mail.wallywatts.com (live SMTP, same burner network)
+wabblywabble.com
+wallywatts.com

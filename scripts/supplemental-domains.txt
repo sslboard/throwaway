@@ -1,51 +1,24 @@
 # Supplemental disposable email domains not (yet) in the upstream list.
 # One domain per line, lowercase. Lines starting with # are ignored.
 # Added 2026-05-08 — weekly temp email domain check
-mailwave.dev
 aula.edu.pl
 edud.site
 globalcampus.edu.pl
 hayatsh.com
-radeshop.com
 skola.edu.pl
 volkai.cloud
 # Added 2026-05-11 — manual additions
 collegevs.edu.pl
-phuturemail.com
-xeramail.com
-tempforward.com
 # Added 2026-05-15 — weekly temp email domain check
-lottery-sambad.site
-priyomail.site
 ytpremium.store
-dpl.ovh
-iplv.ovh
-kpl.ovh
-bpl.ovh
-priyo.email
 emailtemp.org
-bpl-tv.com
-bpltv.com
-priyomail.ovh
-priyotv.net
-priyoapk.com
-priyodown.com
-priyomail.org
 # Added 2026-05-23 — weekly temp email domain check
 # temp-mail.org (newly rotated domains, May 2026)
 # emailondeck.com (newly rotated domains, 2026)
-scolore.com
-tsespren.com
 # tmailor.com
 srfigservices.in
 # Added 2026-06-09 — weekly temp email domain check
 # temp-mail.org (newly rotated domains, June 2026)
-xbsees.com
-retreze.com
-mistark.com
-tixpad.com
-xemtop.com
-snocv.com
 # tmailor.com (newly rotated domains, June 2026)
 lulujewels.shop
 damzfa.id
@@ -53,37 +26,25 @@ minhminclone.io.vn
 # Internxt Temp Mail / Mail.tm generated domain, verified 2026-06-09
 
 # Added 2026-06-09 — weekly temp email domain check
-quiet-branch.com
 
 # Added 2026-06-09 — weekly temp email domain check adapter follow-up
-mroxis.com
-deep-mail.org
 ensam.edu.pl
 
 # Added 2026-06-09 — zenvex.dev exposed domain dropdown
 encg.edu.pl
-ofppt.edu.pl
-zenvex.edu.pl
-znvx.me
 
 # Added 2026-06-13 — weekly temp email domain check
 # 10minemail.com / temp-mail.org (generated email: nofafeb309@aratrin.com, noparo3237@aratrin.com)
 # mails.org (generated email: ari.7@mailcinder.com)
 mailcinder.com
 # fake-email.pro (generated email: andi.acevedo83@radiant-flow.org)
-radiant-flow.org
 # temp-inbox.me exposed domain dropdown (usable temp-email domains)
 dropmaily.xyz
-inboxvia.online
-nexmaila.xyz
-plumdrop.live
-vumi.rest
 vumi.xyz
 # Added 2026-06-16 — weekly temp email domain check
 10-minutes.email
 beaconwarp.com
 oegmail.store
-vsmailpro.live
 
 # Added 2026-06-23 — weekly temp email domain check
 # tempmail.la (generated email: sobriquet483971364@wplacetools.com)
@@ -91,7 +52,6 @@ wplacetools.com
 
 # Added 2026-06-29 — weekly temp email domain check
 tg.gardianwaves.org
-sorawatermarkadder.org
 
 # Added 2026-07-08 — weekly temp email domain check
 
@@ -102,24 +62,14 @@ beamscalar.com
 private.7k7.org
 
 # Added 2026-07-21 — weekly temp email domain check
-9k3r.com
 ditube.info
 high.edu.pl
 
 # Added 2026-07-21 — human-confirmed weekly temp email check
 # EmailOnDeck generated ameera@racavor.com
 # VanishInbox visible usable domain list from screenshot
-fommie.com
-whoopza.org
-fommie.online
-fommie.store
-whoopza.store
-reason.edu.pl
-realize.edu.pl
-remind.edu.pl
 
 # Added 2026-08-01 — weekly temp email domain check
-metaradar.net
 
 # Added 2026-08-01 — manual follow-up
 # User-provided generated address: madeline00@kehine.com
@@ -132,7 +82,6 @@ tmpwebmail.com
 # 10minutemail.now generated c2m9f8wcbm@morningsun.lol
 # dustmail.net generated polarmeteor7329@dustmail.net
 microember.com
-morningsun.lol
 
 # Added 2026-08-20 — weekly temp email domain check
 # tmaily.com generated dsbiiz67001@amgld.com
@@ -140,24 +89,15 @@ amgld.com
 
 # Added 2026-08-20 — YOPmail #seldom alternate domains
 # Verified by YOPmail's live alternate-domain iframe and local detector
-y.w80.it
-yop.kd2.org
-mai.25u.com
-get.vpn64.de
-elmail.4pu.com
-get.route64.de
-ggamess.42web.io
 
 # Added 2026-08-20 — manual live-service evidence supplied during weekly check
 # Internxt generated diannia@visitedity.com
 # Additional manually observed generated addresses
 bigemail.fun
 nexuspost.store
-fastreply.shop
 
 # Added 2026-08-20 — manually observed disposable address
 # Generated address: sean908@10minutes.email
-10minutes.email
 
 # Added 2026-08-20 — manually observed disposable address
 # Generated address: baden.uneven.shark@x-box.in
@@ -166,8 +106,6 @@ x-box.in
 # Added 2026-07-21 — weekly temp email domain check
 manglgih.com
 temp-mail-world.com
-copypastalove.click
-nobinbox.com
 fox.jazzvip.site
 hello.nondon.site
 fun.ingam.online
@@ -189,5 +127,15 @@ wallywatts.com
 fpklm.com
 mevday.com
 gw.auroracovia.com
-temp-email.io
-tempyx.com
+
+# Added 2026-10-01 — weekly temp email domain check
+betterr.org
+ca.auroracovia.com
+deepmail.info
+tmailedu.com
+zen.flashemail.site
+personalmail.fun
+disposablemail.dev
+webboxcloud.com
+toboxes.com
+mailmehere.cc

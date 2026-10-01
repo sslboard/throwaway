@@ -27,12 +27,15 @@ try:
     agent_tab = new_tab(URL)
     wait_for_load(25)
     data = {}
-    for _ in range(12):
+    for attempt in range(12):
         wait(2)
         data = js(EXTRACT_QUERY) or {}
         if data.get("emails"):
             break
-    result["emails"] = data.get("emails") or []
+        if attempt == 1:
+            # #email stays empty until "Generate Random Email" is clicked.
+            js("(() => { const b = [...document.querySelectorAll('button')].find(b => /generate random email/i.test(b.innerText || '')); if (b) { b.scrollIntoView({block: 'center'}); b.click(); return true; } return false; })()")
+    result["emails"] = [e for e in (data.get("emails") or []) if not e.endswith("@gmail.com") and e != "myproject@xeramail.com"]
     result["domains_from_emails"] = sorted({e.split("@", 1)[1].lower() for e in result["emails"] if "@" in e})
     result["evidence"] = data.get("evidence", [])
     result["url"] = data.get("location", URL)

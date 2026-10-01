@@ -35,6 +35,11 @@
       "reason": "article",
       "evidence": "SERP result is an email-marketer guide on blocking disposable emails, not a generator",
       "added": "2026-08-28"
+    },
+    "businessinsider.com": {
+      "reason": "article",
+      "evidence": "SERP result is a Business Insider reference article about throwaway email, not a temp email generator",
+      "added": "2026-10-01"
     }
   }
 }

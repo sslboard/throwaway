@@ -8,7 +8,7 @@ EXTRACT_QUERY=r"""
  const sources=[]; const add=(kind,value,selector)=>{const text=String(value||'').replace(/\s+/g,' ').trim(); if(text) sources.push({kind,value:text,selector});};
  add('body', document.body?.innerText || '', 'document.body.innerText');
  for (const el of Array.from(document.querySelectorAll('input,span,div,button,[aria-label],[title]')).slice(0,200)) add('control',[el.value,el.innerText,el.textContent,el.getAttribute('aria-label'),el.getAttribute('title')].filter(Boolean).join(' '),el.id?'#'+el.id:el.tagName.toLowerCase());
- const bodyEmails=(document.body?.innerText||'').match(EMAIL_RE)||[];
+ const bodyEmails=((document.body?.innerText||'').replace(/\n\s*(@[A-Z0-9.-]+\.[A-Z]{2,})/gi,'$1')).match(EMAIL_RE)||[];
  const emails=[...new Set(bodyEmails.map(e=>e.toLowerCase()))];
  return {location:location.href,title:document.title,emails,evidence:sources.filter(s=>EMAIL_RE.test(s.value)).slice(0,10),text:(document.body?.innerText||'').slice(0,1000)};
 })()
@@ -33,7 +33,11 @@ try:
  result['domains_from_emails']=sorted({e.split('@',1)[1] for e in result['emails'] if '@' in e})
  result['evidence']=data.get('evidence') or []
  result['url']=data.get('location') or URL
- if result['emails']: result['status']='ok'
+ if result['emails']: 
+  result['status']='ok'
+  doms={e.split('@',1)[1] for e in result['emails']}
+  if doms & {'gmail.com','googlemail.com','outlook.com','hotmail.com','yahoo.com'}:
+   result['notes'].append('Generates aliases on REAL provider domains (%s). Do NOT add these to the disposable filter.' % ','.join(sorted(doms)))
  else:
   text=(data.get('text') or '').lower()
   result['status']='blocked' if 'captcha' in text or 'verify you are human' in text else 'failed'

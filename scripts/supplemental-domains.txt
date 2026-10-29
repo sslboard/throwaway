@@ -3,7 +3,6 @@
 # Added 2026-05-08 — weekly temp email domain check
 aula.edu.pl
 edud.site
-globalcampus.edu.pl
 hayatsh.com
 skola.edu.pl
 volkai.cloud
@@ -104,19 +103,15 @@ nexuspost.store
 x-box.in
 
 # Added 2026-07-21 — weekly temp email domain check
-manglgih.com
 temp-mail-world.com
 fox.jazzvip.site
-hello.nondon.site
 fun.ingam.online
-fast.speedlooking.fun
 post.boommail.online
 go.jazzvip.site
 
 # Added 2026-07-21 — back-catalog adapter sweep (2026-08-28)
 deep-mail.com
 vrf.totalgamehub.net
-souss.dev
 gigacalulate.xyz
 
 # Added 2026-09-09 — kolsea.com: no website, MX → mail.wabblywabble.com/mail.wallywatts.com (live SMTP, same burner network)
@@ -124,18 +119,20 @@ wabblywabble.com
 wallywatts.com
 
 # Added 2026-09-21 — weekly temp email domain check
-fpklm.com
 mevday.com
 gw.auroracovia.com
 
 # Added 2026-10-01 — weekly temp email domain check
-betterr.org
 ca.auroracovia.com
 deepmail.info
 tmailedu.com
 zen.flashemail.site
 personalmail.fun
-disposablemail.dev
 webboxcloud.com
 toboxes.com
 mailmehere.cc
+
+# Added 2026-10-29 — weekly temp email domain check
+litedl.com
+hj.paxeluni.com
+vgmale.com

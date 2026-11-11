@@ -40,6 +40,16 @@
       "reason": "article",
       "evidence": "SERP result is a Business Insider reference article about throwaway email, not a temp email generator",
       "added": "2026-10-01"
+    },
+    "tempmail.la": {
+      "reason": "expired-domain",
+      "evidence": "Domain expired and is listed for sale at Porkbun auction; no service exists (verified 2026-11-11)",
+      "added": "2026-11-11"
+    },
+    "throwaway-email.temp-mail-world.com": {
+      "reason": "dead-domain",
+      "evidence": "DNS_PROBE_FINISHED_NXDOMAIN; subdomain no longer resolves (verified 2026-11-11)",
+      "added": "2026-11-11"
     }
   }
 }

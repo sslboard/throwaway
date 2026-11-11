@@ -47,8 +47,14 @@ result = {
 
 agent_tab = None
 try:
-    agent_tab = new_tab(URL)
-    wait_for_load(30)
+    try:
+        agent_tab = new_tab(URL)
+        wait_for_load(30)
+    except Exception as nav_error:
+        # First CDP navigation to internxt.com often times out while the page
+        # keeps loading; poll for content instead of failing.
+        result["notes"].append(f"navigation timeout, kept polling: {nav_error}")
+        agent_tab = None
     data = None
     for _ in range(15):
         wait(2)

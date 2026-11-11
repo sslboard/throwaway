@@ -12,8 +12,9 @@ EXTRACT_QUERY = r"""
     const text = String(value || '').replace(/\s+/g, ' ').trim();
     if (text) sources.push({kind, value: text, selector});
   };
-  const input = document.querySelector('input#fe_text');
-  if (input) add('generated-email-input', input.value || input.getAttribute('value') || '', '#fe_text');
+  // Desktop UI puts the address in #fe_text; the mobile page (queued URL) uses #txt_mail.
+  const input = document.querySelector('input#fe_text') || document.querySelector('input#txt_mail');
+  if (input) add('generated-email-input', input.value || input.getAttribute('value') || '', input.id ? `#${input.id}` : 'input');
 
   const emails = uniq(sources.flatMap(s => s.value.match(EMAIL_RE) || []));
   return {location: location.href, title: document.title, readyState: document.readyState, emails, evidence: sources.filter(s => EMAIL_RE.test(s.value)).slice(0, 20)};

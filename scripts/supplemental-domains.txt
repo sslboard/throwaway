@@ -100,7 +100,6 @@ nexuspost.store
 
 # Added 2026-08-20 — manually observed disposable address
 # Generated address: baden.uneven.shark@x-box.in
-x-box.in
 
 # Added 2026-07-21 — weekly temp email domain check
 temp-mail-world.com
@@ -125,14 +124,30 @@ gw.auroracovia.com
 # Added 2026-10-01 — weekly temp email domain check
 ca.auroracovia.com
 deepmail.info
-tmailedu.com
-zen.flashemail.site
 personalmail.fun
 webboxcloud.com
 toboxes.com
 mailmehere.cc
 
 # Added 2026-10-29 — weekly temp email domain check
-litedl.com
 hj.paxeluni.com
-vgmale.com
+
+# Added 2026-11-11 — weekly temp email domain check
+# Generated addresses: issacromero.2@silent-meadow.org (fake-email.pro), ftqn8lb@vyno.me (zenvex.dev)
+silent-meadow.org
+vyno.me
+# Dropdown options presented as usable temp domains: tempmailg.com, yopmail.com, tempmail.cloud
+easymailer.shop
+jetable.org
+tempmail.cloud
+inbox.tempmail.cloud
+digital.tempmail.cloud
+ulitmtehub.store
+gurmerly.online
+hydood.gurmerly.online
+sponserme.store
+displayme.store
+rankme.site
+pemoteme.online
+maker.buyaitools.site
+ielan.displayme.store

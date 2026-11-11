@@ -30,7 +30,10 @@ EXTRACT_QUERY = r"""
   }
 
   const emails = uniq(sources.flatMap(s => s.value.match(EMAIL_RE) || []));
-  return {location: location.href, title: document.title, readyState: document.readyState, emails, exposed_domains, evidence: sources.filter(s => EMAIL_RE.test(s.value)).slice(0, 20)};
+  // Keep email-bearing evidence plus per-option domain evidence; bare
+  // domains never match EMAIL_RE and were being dropped.
+  const kept = sources.filter(s => EMAIL_RE.test(s.value) || s.kind === 'exposed-domain-option');
+  return {location: location.href, title: document.title, readyState: document.readyState, emails, exposed_domains, evidence: kept.slice(0, 200)};
 })()
 """
 result = {"service": SERVICE, "url": URL, "status": "started", "emails": [], "domains_from_emails": [], "exposed_domains": [], "evidence": [], "notes": [], "exclude_recommendation": None}
